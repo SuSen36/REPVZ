@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Properties version="1.0" language="en" country="US" lookandfeel="NORMAL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="">
+<String id="LOCALE">English_United States</String>
+
+<!-- Framework Strings -->
+	<String id="DIALOG_BUTTON_YES">YES</String>
+	<String id="DIALOG_BUTTON_NO">NO</String>
+	<String id="DIALOG_BUTTON_OK">OK</String>
+	<String id="DIALOG_BUTTON_CANCEL">CANCEL</String>
+
+	<String id="UNEXPECTED_ERROR">An unexpected error has occured!  Pressing 'Send Report will send us helpful debugging information that may help us resolve this issue in the future.&cr;&cr;You can also contact us directly at feedback@popcap.com.</String>
+
+	<String id="PLEASE_HELP">Please help us out by providing as much information as you can about this crash. Is this the first time it happened? Have you used other PopCap Deluxe games successfully before? Have you upgraded your drivers or any software recently that may be interfering with this program?</String>
+
+	<String id="FAILED_CONNECT_POPCAP">Failed to connect to PopCap servers.  Please check your Internet connection.&cr;If you are on a dial-up connection, you may have to manually connect to your ISP.</String>
+
+	<String id="HARDWARE_ACCEL_SWITCHED_ON">3D acceleration was switched on during this session.&cr;If this resulted in slower performance or other display problems,&cr;it should be switched off.&cr;&cr;Would you like to keep 3D acceleration switched on?</String>
+
+	<String id="HARDWARE_ACCEL_CONFIRMATION">3D Acceleration Confirmation</String>
+
+	<String id="HARDWARE_ACCEL_NOT_WORKING">3D acceleration may not have been working correctly during this session.&cr;If you noticed graphics problems, you may want to turn off 3D acceleration.&cr;Would you like to keep 3D acceleration switched on?</String>
+
+	<String id="FATAL_ERROR">FATAL ERROR</String>
+
+	<String id="PLEASE_SET_COLOR_DEPTH">Please set your desktop color depth to 16 bit.</String>
+
+	<String id="FAILED_INIT_DIRECTDRAW">Failed to initialize DirectDraw:&nbsp;</String>
+
+	<String id="UNABLE_OPEN_PROPERTIES">Unable to open properties file&nbsp;</String>
+
+	<String id="PROPERTIES_SIG_FAILED">Signature check failed on&nbsp;</String>
+
+	<String id="INVALID_COMMANDLINE_PARAM">Invalid command line parameter:</String> 
+
+	<String id="APP_REQUIRES_DIRECTX">This application requires DirectX to run.  You can get DirectX at http://www.microsoft.com/directx</String>
+	<String id="YOU_NEED_DIRECTX">You need DirectX</String>
+	
+<String id="Home Lawn Security">Home Lawn Security</String>
+<String id="Complete Adventure Mode.">Complete Adventure Mode.</String>
+<String id="Nobel Peas Prize">Nobel Peas Prize</String> 
+<String id="Get the golden sunflower trophy.">Get the golden sunflower trophy.</String>
+<String id="Better Off Dead">Better Off Dead</String>
+<String id="Get to a streak of 10 in I, Zombie Endless">Get to a streak of 10 in I, Zombie Endless</String>
+<String id="China Shop">China Shop</String>
+<String id="Get to a streak of 15 in Vasebreaker Endless">Get to a streak of 15 in Vasebreaker Endless</String>
+<String id="SPUDOW!">SPUDOW!</String>
+<String id="Blow up a zombie using a Potato Mine.">Blow up a zombie using a Potato Mine.</String>
+<String id="Explodonator">Explodonator</String>
+<String id="Take out 10 full-sized zombies with a single Cherry Bomb.">Take out 10 full-sized zombies with a single Cherry Bomb.</String>
+<String id="Morticulturalist">Morticulturalist</String>
+<String id="Collect all 49 plants (including plants from Crazy Dave's shop).">Collect all 49 plants (including plants from Crazy Dave's shop).</String>
+<String id="Don't Pea in the Pool">Don't Pea in the Pool</String> 
+<String id="Complete a daytime pool level without using pea shooters of any kind.">Complete a daytime pool level without using pea shooters of any kind.</String>
+<String id="Roll Some Heads">Roll Some Heads</String>
+<String id="Bowl over 5 zombies with a single Wall-Nut.">Bowl over 5 zombies with a single Wall-Nut.</String>
+<String id="Grounded">Grounded</String> 
+<String id="Defeat a normal roof level without using any catapult plants.">Defeat a normal roof level without using any catapult plants.</String>
+<String id="Zombologist">Zombologist</String> 
+<String id="Discover the Yeti zombie.">Discover the Yeti zombie.</String>
+<String id="Penny Pincher">Penny Pincher</String> 
+<String id="Pick up 30 coins in a row on a single level without letting any disappear.">Pick up 30 coins in a row on a single level without letting any disappear.</String>
+<String id="Sunny Days">Sunny Days</String>
+<String id="Get 8000 sun during a single level.">Get 8000 sun during a single level.</String>
+<String id="Popcorn Party">Popcorn Party</String>
+<String id="Defeat 2 Gargantuars with Corn Cob missiles in a single level.">Defeat 2 Gargantuars with Corn Cob missiles in a single level.</String>
+<String id="Good Morning">Good Morning</String>
+<String id="Complete a daytime level by planting only Mushrooms and Coffee Beans.">Complete a daytime level by planting only Mushrooms and Coffee Beans.</String>
+<String id="No Fungus Among Us">No Fungus Among Us</String> 
+<String id="Complete a nighttime level without planting any Mushrooms.">Complete a nighttime level without planting any Mushrooms.</String>
+<String id="Beyond the Grave">Beyond the Grave</String>
+<String id="Beat all 20 mini games.">Beat all 20 mini games.</String>
+<String id="Immortal">Immortal</String> 
+<String id="Survive 20 waves of pure zombie ferocity.">Survive 20 waves of pure zombie ferocity.</String>
+<String id="Towering Wisdom">Towering Wisdom</String> 
+<String id="Grow the Tree of Wisdom to 100 feet.">Grow the Tree of Wisdom to 100 feet.</String>
+<String id="Mustache Mode">Mustache Mode</String>
+<String id="Enable Mustache Mode">Enable Mustache Mode</String>
+<String id="%s Achievement!">%s Achievement!</String>
+<String id="%s Earned!">%s Earned!</String>
+<String id="ACHIEVEMENTS">ACHIEVEMENTS</String>
+<String id="Delete?">Delete?</String>
+
+</Properties>
