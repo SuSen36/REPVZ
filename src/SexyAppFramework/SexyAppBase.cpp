@@ -4545,21 +4545,31 @@ bool SexyAppBase::UpdateApp()
 
 int SexyAppBase::InitGLInterface()
 {
-	PreGLInterfaceInitHook();
-	DeleteNativeImageData();
-	int aResult = mGLInterface->Init(mIsPhysWindowed);
-	DemoSyncRefreshRate();
-	if (aResult)
-	{
-		mScreenBounds.mX = ( mWidth - mGLInterface->mWidth ) / 2;
-		mScreenBounds.mY = ( mHeight - mGLInterface->mHeight ) / 2;
-		mScreenBounds.mWidth = mGLInterface->mWidth;
-		mScreenBounds.mHeight = mGLInterface->mHeight;
-		mWidgetManager->Resize(mScreenBounds, mGLInterface->mPresentationRect);
-		PostGLInterfaceInitHook();
-	}
-	return aResult;
+    PreGLInterfaceInitHook(); // 调用初始化挂钩函数
+
+    DeleteNativeImageData(); // 删除之前的本地图像数据
+
+    // 初始化 GL 接口，并检查窗口模式设置
+    int aResult = mGLInterface->Init(mIsPhysWindowed);
+
+    DemoSyncRefreshRate(); // 同步刷新率
+
+    if (aResult) // 检查初始化是否成功
+    {
+        // 计算屏幕边界
+        mScreenBounds.mX = (mWidth - mGLInterface->mWidth) / 2;
+        mScreenBounds.mY = (mHeight - mGLInterface->mHeight) / 2;
+        mScreenBounds.mWidth = mGLInterface->mWidth;
+        mScreenBounds.mHeight = mGLInterface->mHeight;
+
+        // 调整小部件管理器的大小以适应屏幕边界
+        mWidgetManager->Resize(mScreenBounds, mGLInterface->mPresentationRect);
+
+        PostGLInterfaceInitHook(); // 调用初始化后钩子函数
+    }
+    return aResult; // 返回初始化结果
 }
+
 
 void SexyAppBase::PreTerminate()
 {

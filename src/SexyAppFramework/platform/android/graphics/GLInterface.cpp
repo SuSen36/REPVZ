@@ -4,8 +4,6 @@
 #ifdef _WIN32
 #include "SexyAppFramework/glad/glad.h"
 #elif defined(ANDROID)
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
 #include "SexyAppFramework/glad/glad.h"
 #endif
 
@@ -1249,37 +1247,46 @@ GLImage* GLInterface::GetScreenImage()
 
 void GLInterface::UpdateViewport()
 {
-	// Restrict to 4:3
-	// https://bumbershootsoft.wordpress.com/2018/11/29/forcing-an-aspect-ratio-in-3d-with-opengl/
+    // 获取窗口的 drawable 大小，适合 Android 的设置
+    int width, height;
 
-	int width, viewport_width;
-	int height, viewport_height;
-	int viewport_x = 0;
-	int viewport_y = 0;
+    // 使用 SDL 获取当前窗口的大小
+    SDL_GetWindowSize((SDL_Window*)mApp->mWindow, &width, &height);
 
-	SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
+    // 清除颜色缓冲
+    glClear(GL_COLOR_BUFFER_BIT);
+    Flush();
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
+    // 计算视口以维持 4:3 纵横比
+    int viewport_width = width;
+    int viewport_height = height;
+    int viewport_x = 0;
+    int viewport_y = 0;
 
-	viewport_width = width;
-	viewport_height = height;
-	if (width * 3 > height * 4)
-	{
-		viewport_width = height * 4 / 3;
-		viewport_x = (width - viewport_width) / 2;
-	}
-	else if (width * 3 < height * 4)
-	{
-		viewport_height = width * 3 / 4;
-		viewport_y = (height - viewport_height) / 2;
-	}
-	glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
-	mPresentationRect = Rect( viewport_x, viewport_y, viewport_width, viewport_height );
+    // 根据宽高比调整视口
+    if (width * 3 > height * 4)
+    {
+        viewport_width = height * 4 / 3; // 宽度根据高度计算
+        viewport_x = (width - viewport_width) / 2; // 水平居中
+    }
+    else if (width * 3 < height * 4)
+    {
+        viewport_height = width * 3 / 4; // 高度根据宽度计算
+        viewport_y = (height - viewport_height) / 2; // 垂直居中
+    }
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
+    // 设置 OpenGL 视口
+    glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+
+    // 更新界面矩形区域
+    mPresentationRect = Rect(viewport_x, viewport_y, viewport_width, viewport_height);
+
+    // 再次清除颜色缓冲
+    glClear(GL_COLOR_BUFFER_BIT);
+    Flush();
 }
+
+
 
 int GLInterface::Init(bool IsWindowed)
 {
@@ -1294,10 +1301,11 @@ int GLInterface::Init(bool IsWindowed)
 			return -1;
 		}
 #elif defined(ANDROID)
-		if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
+
+		if (!gladLoadGLLoader((GLADloadproc)(SDL_GL_GetProcAddress)))
 		{
 			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1; // ���ش���״̬
+			return -1;
 		}
 #endif
 	}
@@ -1319,7 +1327,7 @@ int GLInterface::Init(bool IsWindowed)
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, mWidth-1, mHeight-1, 0, -10, 10);
+//	glOrtho(0, mWidth-1, mHeight-1, 0, -10, 10);
 
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);

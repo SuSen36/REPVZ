@@ -1295,7 +1295,7 @@ int GLInterface::Init(bool IsWindowed)
 		if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
 		{
 			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1; // ���ش���״̬
+			return -1;
 		}
 #endif
 	}
