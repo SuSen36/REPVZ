@@ -9,7 +9,7 @@
 #include "SexyAppFramework/misc/Ratio.h"
 #include "SexyAppFramework/misc/SexyMatrix.h"
 
-#include <GLES2/gl2.h>  // 对应 OpenGL ES 2.0
+#include "SexyAppFramework/glad/glad.h"
 
 namespace Sexy
 {

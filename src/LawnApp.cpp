@@ -73,6 +73,7 @@ bool LawnHasUsedCheatKeys()
 //0x44EAA0
 LawnApp::LawnApp()
 {
+    gLawnApp = this;
 	mBoard = nullptr;
 	mGameSelector = nullptr;
 	mChallengeScreen = nullptr;

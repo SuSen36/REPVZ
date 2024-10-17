@@ -21,6 +21,7 @@ file(GLOB SOURCES
 		src/SexyAppFramework/glad/*.c
 		src/SexyAppFramework/imagelib/png/*.c
 		src/SexyAppFramework/imagelib/jpeg/*.c
+		src/SexyAppFramework/glm/*.hpp
 )
 
 # these files are included and must not be built in the project
@@ -34,7 +35,7 @@ set(LOW_MEMORY OFF)
 if(ANDROID)
 	list(APPEND SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/graphics/Window.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/pc/graphics/GLInterface.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/graphics/GLInterface.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/Input.cpp
 	)
 	list(APPEND PLAT_INCLUDES

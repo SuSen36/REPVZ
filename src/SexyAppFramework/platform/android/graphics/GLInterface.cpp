@@ -1,25 +1,19 @@
-#include <SDL.h>
+#include <EGL/egl.h>    // EGL library
+#include <EGL/eglext.h> // EGL extensions
+#include "SexyAppFramework/glm/glm.hpp"
+#include "SexyAppFramework/glm/ext.hpp"
 
-
-#ifdef _WIN32
-#include "SexyAppFramework/glad/glad.h"
-#elif defined(ANDROID)
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-#include "SexyAppFramework/glad/glad.h"
-#endif
-
-#include "../graphics/GLInterface.h"
-
+#include <GLES2/gl2.h> // 确保包含适合 Android 的 OpenGL ES 头文件
+#include <vector>
 #include <iostream>
 
+#include "graphics/GLInterface.h"
 #include "SexyAppFramework/graphics/GLImage.h"
 #include "SexyAppFramework/SexyAppBase.h"
 #include "SexyAppFramework/misc/AutoCrit.h"
 #include "SexyAppFramework/misc/CritSect.h"
 #include "SexyAppFramework/graphics/Graphics.h"
 #include "SexyAppFramework/graphics/MemoryImage.h"
-
 
 #define MAX_VERTICES 16384
 #define GetColorFromTriVertex(theVertex, theColor) (theVertex.color?theVertex.color:theColor)
@@ -35,9 +29,14 @@ static bool gTextureSizeMustBePow2;
 static const int MAX_TEXTURE_SIZE = 1024;
 static bool gLinearFilter = false;
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static GLVertex* gVertices;
 static int gNumVertices;
 static GLenum gVertexMode;
+static GLuint gProgram;
+static GLuint gVao, gVbo;
+static GLint gUfViewMtx, gUfProjMtx, gUfTexture, gUfUseTexture;
 
 static void GfxBegin(GLenum vertexMode)
 {
@@ -49,12 +48,9 @@ static void GfxEnd()
 {
 	if (gVertexMode == (GLenum)-1) return;
 
-	glVertexPointer(3, GL_FLOAT, sizeof(GLVertex), (char*)gVertices);
-	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(GLVertex), (char*)gVertices + sizeof(float)*3);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(GLVertex), (char*)gVertices + sizeof(float)*3 + sizeof(uint32_t));
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glBindVertexArray(gVao);
+	glBindBuffer(GL_ARRAY_BUFFER, gVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLVertex) * gNumVertices, gVertices, GL_DYNAMIC_DRAW);
 
 	glDrawArrays(gVertexMode, 0, gNumVertices);
 
@@ -126,7 +122,145 @@ static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int 
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+static const char *TEXTURED_SHADER =
+        R"(
+#ifdef FRAGMENT
+precision mediump float;
+#endif
 
+varying vec4 v_color;
+varying vec2 v_uv;
+
+#ifdef VERTEX
+
+uniform mat4 view;
+uniform mat4 projection;
+
+attribute vec3 position;
+attribute vec4 color;
+attribute vec2 uv;
+
+void main()
+{
+    v_color = color;
+    v_uv = uv;
+
+    gl_Position = projection * view * vec4(position, 1.0);
+}
+
+#endif
+
+#ifdef FRAGMENT
+
+uniform sampler2D TextureSamp;
+uniform int UseTexture;
+
+void main()
+{
+    if (UseTexture == 1)
+        gl_FragColor = texture2D(TextureSamp, v_uv) * v_color;
+    else
+        gl_FragColor = v_color;
+}
+
+#endif
+)";
+
+static GLuint shaderCompile(const char *shaderStr, uint32_t shaderStrLen, GLenum shaderType)
+{
+    const GLchar *shaderDefine = (shaderType == GL_VERTEX_SHADER)
+                                 ? "#define VERTEX\n"
+                                 : "#define FRAGMENT\n";
+
+    // 对于 OpenGL ES 2.0，没有版本声明
+    const GLchar *shaderStrings[2] = {shaderDefine, shaderStr};
+    GLint shaderStringLengths[2] = {(GLint)strlen(shaderDefine), (GLint)shaderStrLen};
+
+    GLuint shader = glCreateShader(shaderType);
+    glShaderSource(shader, 2, shaderStrings, shaderStringLengths);
+    glCompileShader(shader);
+
+    GLint isCompiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+    if (!isCompiled)
+    {
+        GLint maxLength;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+        char *log = (char*)malloc(maxLength);
+        glGetShaderInfoLog(shader, maxLength, &maxLength, log);
+
+        printf("Error in shader: %s\n", log);
+        free(log);  // 释放 memory
+        glDeleteShader(shader); // 确保清理着色器
+        exit(1);
+    }
+
+    return shader;
+}
+
+
+static GLuint shaderLoad(const char *shaderContents)
+{
+    // 编译顶点着色器
+    GLuint vert = shaderCompile(shaderContents, strlen(shaderContents), GL_VERTEX_SHADER);
+    if (vert == 0) {
+        std::cerr << "Vertex shader compilation failed." << std::endl;
+        return 0; // 返回 0 以指示出错
+    }
+
+    // 编译片段着色器
+    GLuint frag = shaderCompile(shaderContents, strlen(shaderContents), GL_FRAGMENT_SHADER);
+    if (frag == 0) {
+        std::cerr << "Fragment shader compilation failed." << std::endl;
+        glDeleteShader(vert); // 清理已创建的顶点着色器
+        return 0; // 返回 0 以指示出错
+    }
+
+    // 创建程序并附加着色器
+    GLuint ref = glCreateProgram();
+    glAttachShader(ref, vert);
+    glAttachShader(ref, frag);
+
+    // 绑定属性位置
+    const char *attribs[] = {"position", "color", "uv"};
+    for (int i = 0; i < 3; i++)
+        glBindAttribLocation(ref, i, attribs[i]);
+
+    // 链接程序
+    glLinkProgram(ref);
+
+    // 检查链接错误
+    GLint linkSuccess;
+    glGetProgramiv(ref, GL_LINK_STATUS, &linkSuccess);
+    if (linkSuccess == GL_FALSE) {
+        GLint infoLogLength;
+        glGetProgramiv(ref, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength);
+        glGetProgramInfoLog(ref, infoLogLength, nullptr, infoLog.data());
+
+        std::cerr << "Shader program linking failed: " << infoLog.data() << std::endl;
+
+        // 清理着色器和程序
+        glDeleteShader(vert);
+        glDeleteShader(frag);
+        glDeleteProgram(ref);
+        return 0; // 返回 0 以指示出错
+    }
+
+    // 分离并删除着色器
+    glDetachShader(ref, vert);
+    glDetachShader(ref, frag);
+    glDeleteShader(vert);
+    glDeleteShader(frag);
+
+    return ref; // 返回成功创建的程序 ID
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, int theWidth, int theHeight, int theDestPitch, int theDestHeight, bool rightPad, bool bottomPad, bool create)
 {
 	uint32_t *aDest = new uint32_t[theDestPitch * theDestHeight];
@@ -792,6 +926,8 @@ void TextureData::Blt(float theX, float theY, const Rect& theSrcRect, const Colo
 		return;
 
 	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(gUfUseTexture, 1);
 
 	while(srcY < srcBottom)
 	{
@@ -984,6 +1120,8 @@ void TextureData::BltTransformed(const SexyMatrix3 &theTrans, const Rect& theSrc
 		return;
 
 	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(gUfUseTexture, 1);
 
 	while(srcY < srcBottom)
 	{
@@ -1066,7 +1204,9 @@ void TextureData::BltTriangles(const TriVertex theVertices[][3], int theNumTrian
 	if ((mMaxTotalU <= 1.0) && (mMaxTotalV <= 1.0))
 	{
 		glEnable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, mTextures[0].mTexture);
+		glUniform1i(gUfUseTexture, 1);
 
 		GfxBegin(GL_TRIANGLES);
 		GfxAddVertices(theVertices, theNumTriangles, theColor, tx, ty, mMaxTotalU, mMaxTotalV);
@@ -1168,10 +1308,13 @@ GLInterface::GLInterface(SexyAppBase* theApp)
 
 	mPresentationRect = Rect( 0, 0, mWidth, mHeight );
 
+	/*
 	SDL_DisplayMode aMode;
-	SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex((SDL_Window*)mApp->mWindow), &aMode);
+	SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(mApp->mSDLWindow), &aMode);
 	mRefreshRate = aMode.refresh_rate;
 	if (!mRefreshRate) mRefreshRate = 60;
+	*/
+	mRefreshRate = 60;
 	mMillisecondsPerFrame = 1000/mRefreshRate;
 
 	mScreenImage = 0;
@@ -1252,18 +1395,12 @@ void GLInterface::UpdateViewport()
 	// Restrict to 4:3
 	// https://bumbershootsoft.wordpress.com/2018/11/29/forcing-an-aspect-ratio-in-3d-with-opengl/
 
-	int width, viewport_width;
-	int height, viewport_height;
 	int viewport_x = 0;
 	int viewport_y = 0;
-
-	SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
-
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
-
-	viewport_width = width;
-	viewport_height = height;
+	int width = 1280;
+	int height = 720;
+	int viewport_width = width;
+	int viewport_height = height;
 	if (width * 3 > height * 4)
 	{
 		viewport_width = height * 4 / 3;
@@ -1283,69 +1420,91 @@ void GLInterface::UpdateViewport()
 
 int GLInterface::Init(bool IsWindowed)
 {
-	static bool inited = false;
-	if (!inited)
-	{
-		inited = true;
-#ifdef _WIN32
-		if (!gladLoadGLLoader((GLADloadproc)wglGetProcAddress))
-		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1;
-		}
-#elif defined(ANDROID)
-		if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
-		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1; // ���ش���״̬
-		}
-#endif
-	}
-	int aMaxSize;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
+    static bool inited = false;
+    if (!inited)
+    {
+        inited = true;
 
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+        // 加载 OpenGL 相关函数
+        if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
+        {
+            return -1;
+        }
 
-	gTextureSizeMustBePow2 = false;
-	gMinTextureWidth = 8;
-	gMinTextureHeight = 8;
-	gMaxTextureWidth = aMaxSize;
-	gMaxTextureHeight = aMaxSize;
-	gSupportedPixelFormats = PixelFormat_A8R8G8B8 | PixelFormat_A4R4G4B4 | PixelFormat_R5G6B5 | PixelFormat_Palette8;
-	gLinearFilter = false;
+        // 加载着色器程序
+        gProgram = shaderLoad(TEXTURED_SHADER);
+        gUfViewMtx = glGetUniformLocation(gProgram, "view");
+        gUfProjMtx = glGetUniformLocation(gProgram, "projection");
+        gUfTexture = glGetUniformLocation(gProgram, "TextureSamp");
+        gUfUseTexture = glGetUniformLocation(gProgram, "UseTexture");
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, mWidth-1, mHeight-1, 0, -10, 10);
+        // 创建 VAO 和 VBO
+        glGenVertexArrays(1, &gVao);
+        glGenBuffers(1, &gVbo);
 
-	glEnable(GL_BLEND);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DITHER);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+        glBindVertexArray(gVao);
+        glBindBuffer(GL_ARRAY_BUFFER, gVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLVertex) * MAX_VERTICES, nullptr, GL_DYNAMIC_DRAW);
 
-	mRGBBits = 32;
+        // 设置顶点属性指针
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), nullptr);
+        glEnableVertexAttribArray(0);
 
-	mRedBits = 8;
-	mGreenBits = 8;
-	mBlueBits = 8;
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(GLVertex), (void*)(sizeof(float)*3));
+        glEnableVertexAttribArray(1);
 
-	mRedShift = 0;
-	mGreenShift = 8;
-	mBlueShift = 16;
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)(sizeof(float)*3 + sizeof(uint32_t)));
+        glEnableVertexAttribArray(2);
+    }
 
-	mRedMask = (0xFFU << mRedShift);
-	mGreenMask = (0xFFU << mGreenShift);
-	mBlueMask = (0xFFU << mBlueShift);
+    // 查询最大纹理大小
+    int aMaxSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
 
-	glClear(GL_COLOR_BUFFER_BIT); //
-	SetVideoOnlyDraw(false);
+    // 清空颜色缓冲区
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-	return 1;
+    // 设置纹理相关的全局参数
+    gTextureSizeMustBePow2 = false;
+    gMinTextureWidth = 8;
+    gMinTextureHeight = 8;
+    gMaxTextureWidth = aMaxSize;
+    gMaxTextureHeight = aMaxSize;
+    gSupportedPixelFormats = PixelFormat_A8R8G8B8 | PixelFormat_A4R4G4B4 | PixelFormat_R5G6B5 | PixelFormat_Palette8;
+    gLinearFilter = false;
+
+    // 使用着色器程序并设置矩阵
+    glUseProgram(gProgram);
+    glm::mat4 viewMtx{1.0f};
+    auto projMtx = glm::ortho<float>(0, mWidth - 1, mHeight - 1, 0, -10, 10);
+    glUniformMatrix4fv(gUfViewMtx, 1, GL_FALSE, glm::value_ptr(viewMtx));
+    glUniformMatrix4fv(gUfProjMtx, 1, GL_FALSE, glm::value_ptr(projMtx));
+    glUniform1i(gUfTexture, 0);
+
+    // 启用混合以支持透明度
+    glEnable(GL_BLEND);
+    glDisable(GL_DITHER);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    // 色彩设置
+    mRGBBits = 32;
+    mRedBits = 8;
+    mGreenBits = 8;
+    mBlueBits = 8;
+    mRedShift = 0;
+    mGreenShift = 8;
+    mBlueShift = 16;
+    mRedMask = (0xFFU << mRedShift);
+    mGreenMask = (0xFFU << mGreenShift);
+    mBlueMask = (0xFFU << mBlueShift);
+
+    SetVideoOnlyDraw(false);
+
+    return 1;
 }
+
 
 bool GLInterface::Redraw(Rect* theClipRect)
 {
@@ -1382,8 +1541,7 @@ bool GLInterface::PreDraw()
 
 void GLInterface::Flush()
 {
-	gNumVertices = 0;
-	SDL_GL_SwapWindow((SDL_Window*)mApp->mWindow);
+	eglSwapBuffers(mApp->mWindow, mApp->mSurface);
 }
 
 bool GLInterface::CreateImageTexture(MemoryImage *theImage)
@@ -1433,9 +1591,10 @@ bool GLInterface::RecoverBits(MemoryImage* theImage)
 			int aHeight = std::min(theImage->mHeight-offy, aPiece->mHeight);
 
 			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, aPiece->mTexture);
 
-			glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, theImage->GetBits());
+			//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, theImage->GetBits());
 
 			/*
 			switch (aData->mPixelFormat)
@@ -1616,6 +1775,7 @@ void GLInterface::DrawLine(double theStartX, double theStartY, double theEndX, d
 	}
 
 	glDisable(GL_TEXTURE_2D);
+	glUniform1i(gUfUseTexture, 0);
 
 	GLVertex aVertex[3] = {
 		{ {x1},{y1},{0},{theColor.ToInt()},{0},{0} },
@@ -1663,6 +1823,7 @@ void GLInterface::FillRect(const Rect& theRect, const Color& theColor, int theDr
 	}
 
 	glDisable(GL_TEXTURE_2D);
+	glUniform1i(gUfUseTexture, 0);
 
 	GfxBegin(GL_TRIANGLE_STRIP);
 	GfxAddVertices(aVertex, 4);
@@ -1682,6 +1843,7 @@ void GLInterface::DrawTriangle(const TriVertex &p1, const TriVertex &p2, const T
 	unsigned int col3 = GetColorFromTriVertex(p1, aColor);
 
 	glDisable(GL_TEXTURE_2D);
+	glUniform1i(gUfUseTexture, 0);
 
 	GLVertex aVertex[3] = {
 		{ {p1.x}, {p1.y}, {0}, {col1}, {0},{0} },
@@ -1749,6 +1911,7 @@ void GLInterface::FillPoly(const Point theVertices[], int theNumVertices, const 
 	unsigned int aColor = (theColor.mRed << 0) | (theColor.mGreen << 8) | (theColor.mBlue << 16) | (theColor.mAlpha << 24);
 
 	glDisable(GL_TEXTURE_2D);
+	glUniform1i(gUfUseTexture, 0);
 
 	VertexList aList;
 	for (int i=0; i<theNumVertices; i++)

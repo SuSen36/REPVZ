@@ -17,7 +17,7 @@
 #elifdef __3DS__
 #include <3ds.h>
 #endif
-
+#include <iostream>
 #include "SexyAppBase.h"
 //#include "../SexyAppFramework/misc/SEHCatcher.h"
 #include "SexyAppFramework/widget/WidgetManager.h"
@@ -4545,21 +4545,44 @@ bool SexyAppBase::UpdateApp()
 
 int SexyAppBase::InitGLInterface()
 {
-	PreGLInterfaceInitHook();
-	DeleteNativeImageData();
-	int aResult = mGLInterface->Init(mIsPhysWindowed);
-	DemoSyncRefreshRate();
-	if (aResult)
-	{
-		mScreenBounds.mX = ( mWidth - mGLInterface->mWidth ) / 2;
-		mScreenBounds.mY = ( mHeight - mGLInterface->mHeight ) / 2;
-		mScreenBounds.mWidth = mGLInterface->mWidth;
-		mScreenBounds.mHeight = mGLInterface->mHeight;
-		mWidgetManager->Resize(mScreenBounds, mGLInterface->mPresentationRect);
-		PostGLInterfaceInitHook();
-	}
-	return aResult;
+    // 预初始化钩子
+    PreGLInterfaceInitHook();
+
+    // 删除之前的图像数据
+    DeleteNativeImageData();
+
+    // 确保GLInterface已正确创建
+    if (mGLInterface == nullptr)
+    {
+        std::cerr << "mGLInterface is not initialized." << std::endl;
+        return -1; // 返回错误代码，表示初始化失败
+    }
+
+    // 调用GLInterface的初始化
+    int aResult = mGLInterface->Init(mIsPhysWindowed);
+    if (aResult < 0)
+    {
+        std::cerr << "Failed to initialize GLInterface." << std::endl;
+        return aResult; // 返回GLInterface初始化错误码
+    }
+
+    DemoSyncRefreshRate(); // 刷新率同步
+
+    // 更新屏幕边界
+    mScreenBounds.mX = (mWidth - mGLInterface->mWidth) / 2;
+    mScreenBounds.mY = (mHeight - mGLInterface->mHeight) / 2;
+    mScreenBounds.mWidth = mGLInterface->mWidth;
+    mScreenBounds.mHeight = mGLInterface->mHeight;
+
+    // 调整小部件管理器的大小
+    mWidgetManager->Resize(mScreenBounds, mGLInterface->mPresentationRect);
+
+    // 后初始化钩子
+    PostGLInterfaceInitHook();
+
+    return aResult; // 返回初始化结果
 }
+
 
 void SexyAppBase::PreTerminate()
 {

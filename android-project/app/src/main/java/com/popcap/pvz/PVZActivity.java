@@ -31,17 +31,19 @@ public class PVZActivity extends SDLActivity {
     private void copyAssetsToExternalStorage() {
         AssetManager assetManager = getAssets();
         String[] files;
+
         try {
             files = assetManager.list(""); // 列出根目录下的文件
-            if (files != null && files.length > 0) {
-                // 创建数据文件夹
-                createDataFolder();
 
+            if (files != null && files.length > 0) {
+                String dataDirPath = getExternalFilesDir(null) + "/AssetsFolder";
+                createDataFolder(dataDirPath);
+
+                int fileCount = files.length; // 统计文件数量
                 for (String filename : files) {
-                    // 使用递归方式复制文件和目录
-                    copyAssetFile(assetManager, filename, "AssetsFolder/" + filename);
+                    copyAssetFile(assetManager, filename, dataDirPath + "/" + filename);
                 }
-                Toast.makeText(this, "所有文件复制完成！", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "所有文件复制完成！共 " + fileCount + " 个文件。", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "没有可供复制的文件。", Toast.LENGTH_SHORT).show();
             }
@@ -51,14 +53,12 @@ public class PVZActivity extends SDLActivity {
         }
     }
 
-    private void createDataFolder() {
-        File dataDir = new File(getExternalFilesDir(null), "AssetsFolder");
-        if (!dataDir.exists()) {
-            if (dataDir.mkdirs()) {
-                Toast.makeText(this, "数据文件夹创建成功！", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "数据文件夹创建失败！", Toast.LENGTH_SHORT).show();
-            }
+    private void createDataFolder(String dataDirPath) {
+        File dataDir = new File(dataDirPath);
+        if (!dataDir.exists() && dataDir.mkdirs()) {
+            Toast.makeText(this, "数据文件夹创建成功！", Toast.LENGTH_SHORT).show();
+        } else if (!dataDir.exists()) {
+            Toast.makeText(this, "数据文件夹创建失败！", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -67,9 +67,9 @@ public class PVZActivity extends SDLActivity {
             // 检查是否是目录
             if (Objects.requireNonNull(assetManager.list(filename)).length > 0) { // 检查是否是文件夹
                 // 创建目标目录
-                File dir = new File(getExternalFilesDir(null), destPath);
+                File dir = new File(destPath);
                 if (!dir.exists()) {
-                    dir.mkdirs();
+                    dir.mkdirs(); // 确保目录存在
                 }
 
                 // 递归遍历子目录
@@ -81,30 +81,23 @@ public class PVZActivity extends SDLActivity {
             }
 
             // 在复制文件之前检查目标文件是否已存在
-            File outFile = new File(getExternalFilesDir(null), destPath);
+            File outFile = new File(destPath);
             if (outFile.exists()) {
-                Toast.makeText(this, "文件已存在，跳过复制: " + filename, Toast.LENGTH_SHORT).show();
                 return; // 跳过该文件的复制
             }
 
-            // 打开 assets 中的文件
-            InputStream in = assetManager.open(filename);
-            FileOutputStream out = new FileOutputStream(outFile); // 使用目标路径
-
             // 复制文件
-            byte[] buffer = new byte[1024];
-            int read;
-            Toast.makeText(this, "正在复制文件: " + filename, Toast.LENGTH_SHORT).show(); // 增加提示
+            try (InputStream in = assetManager.open(filename);
+                 FileOutputStream out = new FileOutputStream(outFile)) {
+                // 复制文件
+                byte[] buffer = new byte[1024];
+                int read;
 
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
             }
-            out.flush();
 
-            // 关闭流
-            out.close();
-            in.close();
-            Toast.makeText(this, "成功复制文件: " + filename, Toast.LENGTH_SHORT).show(); // 复制成功提示
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "复制文件 " + filename + " 时出错！", Toast.LENGTH_SHORT).show();
