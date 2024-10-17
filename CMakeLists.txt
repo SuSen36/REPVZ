@@ -162,7 +162,7 @@ if (WIN32)
 		target_link_options(re-plants-vs-zombies PRIVATE -mwindows)
 	endif()
 elseif (ANDROID)  # 增加安卓平台的支持
-	target_link_libraries(re-plants-vs-zombies log EGL GLESv2)  # 链接需要的库
+	target_link_libraries(re-plants-vs-zombies log EGL)  # 链接需要的库
 	target_compile_definitions(re-plants-vs-zombies PRIVATE ANDROID)  # 定义ANDROID宏
 else()
 	target_link_libraries(re-plants-vs-zombies GL)
