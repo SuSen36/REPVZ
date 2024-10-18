@@ -9,7 +9,13 @@
 #include "SexyAppFramework/misc/Ratio.h"
 #include "SexyAppFramework/misc/SexyMatrix.h"
 
-#include "SexyAppFramework/glad/glad.h"
+#ifdef WINDOWS
+#include <SDL.h>
+#include <SDL_opengl.h>  // 包含 SDL 的 OpenGL 相关头文件
+#elif ANDROID
+#include <SDL.h>
+#include <SDL_opengl.h>  // 包含 SDL 的 OpenGL 相关头文件
+#endif
 
 namespace Sexy
 {

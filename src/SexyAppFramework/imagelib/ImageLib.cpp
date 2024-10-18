@@ -60,158 +60,102 @@ static void png_pak_read_data(png_structp png_ptr, png_bytep data, png_size_t le
 	}
 }
 
-Image* GetPNGImage(const std::string& theFileName)
-{
-	png_structp png_ptr;
-	png_infop info_ptr;
-	//unsigned int sig_read = 0;
-	png_uint_32 width, height;
-	//int bit_depth, color_type, interlace_type;
-	PFILE *fp;
+Image* GetPNGImage(const std::string& theFileName) {
+    // 打开文件
+    PFILE *fp = p_fopen(theFileName.c_str(), "rb");
+    if (!fp) return nullptr;
 
-	if ((fp = p_fopen(theFileName.c_str(), "rb")) == NULL)
-		return NULL;
+    // 创建 PNG 读取结构
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (!png_ptr) {
+        p_fclose(fp);
+        return nullptr;
+    }
 
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-	  NULL, NULL, NULL);
-	png_set_read_fn(png_ptr, (png_voidp)fp, png_pak_read_data);
+    // 创建信息结构
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_read_struct(&png_ptr, nullptr, nullptr);
+        p_fclose(fp);
+        return nullptr;
+    }
 
-	if (png_ptr == NULL)
-	{
-		p_fclose(fp);
-		return NULL;
-	}
+    // 错误处理
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        p_fclose(fp);
+        return nullptr;
+    }
 
-	/* Allocate/initialize the memory for image information.  REQUIRED. */
-	info_ptr = png_create_info_struct(png_ptr);
-	if (info_ptr == NULL)
-	{
-		p_fclose(fp);
-		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
-		return NULL;
-	}
+    // 设置读取函数
+    png_set_read_fn(png_ptr, (png_voidp)fp, png_pak_read_data);
 
-   /* Set error handling if you are using the setjmp/longjmp method (this is
-    * the normal method of doing things with libpng).  REQUIRED unless you
-    * set up your own error handlers in the png_create_read_struct() earlier.
-    */
-	if (setjmp(png_jmpbuf(png_ptr)))
-	{
-		/* Free all of the memory associated with the png_ptr and info_ptr */
-		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
-		p_fclose(fp);
-		/* If we get here, we had a problem reading the file */
-		return NULL;
-	}
+    // 读取 PNG 信息
+    png_read_info(png_ptr, info_ptr);
 
-	//png_init_io(png_ptr, fp);
+    png_uint_32 width, height;
+    png_get_IHDR(png_ptr, info_ptr, &width, &height, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-	//png_ptr->io_ptr = (png_voidp)fp;
+    // 设置 PNG 扩展
+    png_set_expand(png_ptr);
+    png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
+    png_set_palette_to_rgb(png_ptr);
+    png_set_gray_to_rgb(png_ptr);
+    png_set_bgr(png_ptr);
 
-	png_read_info(png_ptr, info_ptr);
-	png_get_IHDR(png_ptr, info_ptr, &width, &height, NULL, NULL,
-       NULL, NULL, NULL);
-
-	/* Add filler (or alpha) byte (before/after each RGB triplet) */
-	png_set_expand(png_ptr);
-	png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
-	//png_set_gray_1_2_4_to_8(png_ptr);
-	png_set_palette_to_rgb(png_ptr);
-	png_set_gray_to_rgb(png_ptr);
-	png_set_bgr(png_ptr);
-
-//	int aNumBytes = png_get_rowbytes(png_ptr, info_ptr) * height / 4;
+    // 分配内存并读取图像
+    uint32_t* aBits = new uint32_t[width * height];
     png_bytep row_pointers[height];
-	uint32_t* aBits = new uint32_t[width*height];
-    for (uint i = 0; i < height; i++) {
-        row_pointers[i] = (png_bytep)(aBits + i*width);
+    for (uint32_t i = 0; i < height; i++) {
+        row_pointers[i] = (png_bytep)(aBits + i * width);
     }
     png_read_image(png_ptr, row_pointers);
-    /*
-	unsigned long* anAddr = aBits;
-	for (unsigned int i = 0; i < height; i++)
-	{
-		png_read_rows(png_ptr, (png_bytepp) &anAddr, NULL, 1);
-		anAddr += width;
-	}*/
+    png_read_end(png_ptr, info_ptr);
 
-	/* read rest of file, and get additional chunks in info_ptr - REQUIRED */
-	png_read_end(png_ptr, info_ptr);
+    // 清理和关闭文件
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+    p_fclose(fp);
 
-	/* clean up after the read, and free any memory allocated - REQUIRED */
-	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+    // 创建并返回图像对象
+    Image* anImage = new Image();
+    anImage->mWidth = width;
+    anImage->mHeight = height;
+    anImage->mBits = aBits;
 
-	/* close the file */
-	p_fclose(fp);
-
-	Image* anImage = new Image();
-	anImage->mWidth = width;
-	anImage->mHeight = height;
-	anImage->mBits = aBits;
-
-	return anImage;
+    return anImage;
 }
 
-Image* GetTGAImage(const std::string& theFileName)
-{
-	PFILE* aTGAFile = p_fopen(theFileName.c_str(), "rb");
-	if (aTGAFile == NULL)
-		return NULL;
 
-	BYTE aHeaderIDLen;
-	p_fread(&aHeaderIDLen, sizeof(BYTE), 1, aTGAFile);
+Image* GetTGAImage(const std::string& theFileName) {
+    PFILE* aTGAFile = p_fopen(theFileName.c_str(), "rb");
+    if (!aTGAFile) return nullptr;
 
-	BYTE aColorMapType;
-	p_fread(&aColorMapType, sizeof(BYTE), 1, aTGAFile);
-	
-	BYTE anImageType;
-	p_fread(&anImageType, sizeof(BYTE), 1, aTGAFile);
+    // 读取TGA头信息
+    BYTE aHeader[18]; // TGA头部固定长度为18字节
+    p_fread(aHeader, sizeof(BYTE), 18, aTGAFile);
 
-	WORD aFirstEntryIdx;
-	p_fread(&aFirstEntryIdx, sizeof(WORD), 1, aTGAFile);
+    // 提取重要信息
+    WORD anImageWidth = *((WORD*)&aHeader[12]);
+    WORD anImageHeight = *((WORD*)&aHeader[14]);
+    BYTE aBitCount = aHeader[16];
+    BYTE anImageDescriptor = aHeader[17];
 
-	WORD aColorMapLen;
-	p_fread(&aColorMapLen, sizeof(WORD), 1, aTGAFile);
+    // 检查图像格式
+    if (aBitCount != 32 || (anImageDescriptor != (8 | (1 << 5)))) {
+        p_fclose(aTGAFile);
+        return nullptr;
+    }
 
-	BYTE aColorMapEntrySize;
-	p_fread(&aColorMapEntrySize, sizeof(BYTE), 1, aTGAFile);	
+    // 创建图像对象并读取像素数据
+    Image* anImage = new Image();
+    anImage->mWidth = anImageWidth;
+    anImage->mHeight = anImageHeight;
+    anImage->mBits = new uint32_t[anImageWidth * anImageHeight];
 
-	WORD anXOrigin;
-	p_fread(&anXOrigin, sizeof(WORD), 1, aTGAFile);
+    p_fread(anImage->mBits, sizeof(uint32_t), anImage->mWidth * anImage->mHeight, aTGAFile);
+    p_fclose(aTGAFile);
 
-	WORD aYOrigin;
-	p_fread(&aYOrigin, sizeof(WORD), 1, aTGAFile);
-
-	WORD anImageWidth;
-	p_fread(&anImageWidth, sizeof(WORD), 1, aTGAFile);	
-
-	WORD anImageHeight;
-	p_fread(&anImageHeight, sizeof(WORD), 1, aTGAFile);	
-
-	BYTE aBitCount = 32;
-	p_fread(&aBitCount, sizeof(BYTE), 1, aTGAFile);	
-
-	BYTE anImageDescriptor = 8 | (1<<5);
-	p_fread(&anImageDescriptor, sizeof(BYTE), 1, aTGAFile);
-
-	if ((aBitCount != 32) ||
-		(anImageDescriptor != (8 | (1<<5))))
-	{
-		p_fclose(aTGAFile);
-		return NULL;
-	}
-
-	Image* anImage = new Image();
-
-	anImage->mWidth = anImageWidth;
-	anImage->mHeight = anImageHeight;
-	anImage->mBits = new uint32_t[anImageWidth*anImageHeight];
-
-	p_fread(anImage->mBits, 4, anImage->mWidth*anImage->mHeight, aTGAFile);
-
-	p_fclose(aTGAFile);
-
-	return anImage;
+    return anImage;
 }
 
 int ReadBlobBlock(PFILE* fp, char* data)
@@ -965,7 +909,7 @@ bool ImageLib::WriteTGAImage(const std::string& theFileName, Image* theImage)
 
 	BYTE aColorMapType = 0;
 	fwrite(&aColorMapType, sizeof(BYTE), 1, aTGAFile);
-	
+
 	BYTE anImageType = 2;
 	fwrite(&anImageType, sizeof(BYTE), 1, aTGAFile);
 
@@ -976,7 +920,7 @@ bool ImageLib::WriteTGAImage(const std::string& theFileName, Image* theImage)
 	fwrite(&aColorMapLen, sizeof(WORD), 1, aTGAFile);
 
 	BYTE aColorMapEntrySize = 0;
-	fwrite(&aColorMapEntrySize, sizeof(BYTE), 1, aTGAFile);	
+	fwrite(&aColorMapEntrySize, sizeof(BYTE), 1, aTGAFile);
 
 	WORD anXOrigin = 0;
 	fwrite(&anXOrigin, sizeof(WORD), 1, aTGAFile);
@@ -985,13 +929,13 @@ bool ImageLib::WriteTGAImage(const std::string& theFileName, Image* theImage)
 	fwrite(&aYOrigin, sizeof(WORD), 1, aTGAFile);
 
 	WORD anImageWidth = theImage->mWidth;
-	fwrite(&anImageWidth, sizeof(WORD), 1, aTGAFile);	
+	fwrite(&anImageWidth, sizeof(WORD), 1, aTGAFile);
 
 	WORD anImageHeight = theImage->mHeight;
-	fwrite(&anImageHeight, sizeof(WORD), 1, aTGAFile);	
+	fwrite(&anImageHeight, sizeof(WORD), 1, aTGAFile);
 
 	BYTE aBitCount = 32;
-	fwrite(&aBitCount, sizeof(BYTE), 1, aTGAFile);	
+	fwrite(&aBitCount, sizeof(BYTE), 1, aTGAFile);
 
 	BYTE anImageDescriptor = 8 | (1<<5);
 	fwrite(&anImageDescriptor, sizeof(BYTE), 1, aTGAFile);
@@ -1055,7 +999,7 @@ bool ImageLib::WriteBMPImage(const std::string& theFileName, Image* theImage)
 
 	aFileHeader.bfType = ('M'<<8) | 'B';
 	aFileHeader.bfSize = sizeof(aFileHeader) + sizeof(aHeader) + aNumBytes;
-	aFileHeader.bfOffBits = sizeof(aHeader); 
+	aFileHeader.bfOffBits = sizeof(aHeader);
 
 	aHeader.biSize = sizeof(aHeader);
 	aHeader.biWidth = theImage->mWidth;
@@ -1076,7 +1020,7 @@ bool ImageLib::WriteBMPImage(const std::string& theFileName, Image* theImage)
 	return true;
 }
 
-////////////////////////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////////////////////
 // JPEG Pak Reader
 
 typedef struct {
@@ -1315,7 +1259,7 @@ Image* ImageLib::GetImage(const std::string& theFilename, bool lookForAlphaImage
 
 
 	// Compose alpha channel with image
-	if (anAlphaImage != NULL) 
+	if (anAlphaImage != NULL)
 	{
 		if (anImage != NULL)
 		{

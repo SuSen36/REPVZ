@@ -1320,7 +1320,7 @@ bool DefinitionCompileFile(const SexyString theXMLFilePath, const SexyString& th
 //0x4447F0 : (void* def, *defMap, string& xmlFilePath)  //esp -= 0xC
 bool DefinitionCompileAndLoad(const SexyString& theXMLFilePath, DefMap* theDefMap, void* theDefinition)
 {
-#ifdef _DEBUG  // 内测版执行的内容
+    //TODO DedinitionCompileAndLoad
 
     TodHesitationTrace(__S("predef"));
     SexyString aCompiledFilePath = DefinitionGetCompiledFilePathFromXMLFilePath(theXMLFilePath);
@@ -1339,16 +1339,6 @@ bool DefinitionCompileAndLoad(const SexyString& theXMLFilePath, DefMap* theDefMa
         return aResult;
     }
 
-#else  // 原版执行的内容
-
-    SexyString aCompiledFilePath = DefinitionGetCompiledFilePathFromXMLFilePath(theXMLFilePath);
-    if (DefinitionReadCompiledFile(aCompiledFilePath, theDefMap, theDefinition))
-        return true;
-
-    TodErrorMessageBox(StrFormat(__S("missing resource %s"), aCompiledFilePath.c_str()).c_str(), __S("Error"));
-    exit(0);
-    
-#endif
 }
 
 //0x4448E0

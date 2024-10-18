@@ -1,15 +1,15 @@
 #include <SDL.h>
+#include "SexyAppFramework/glad/glad.h"
 #ifdef _WIN32
-#include "SexyAppFramework/glad/glad.h"
+
 #elif defined(ANDROID)
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-#include "SexyAppFramework/glad/glad.h"
+#include <SDL_egl.h>
 #endif
 
 #include "../graphics/GLInterface.h"
 
 #include <iostream>
+
 
 #include "SexyAppFramework/graphics/GLImage.h"
 #include "SexyAppFramework/SexyAppBase.h"
@@ -1292,7 +1292,7 @@ int GLInterface::Init(bool IsWindowed)
 			return -1;
 		}
 #elif defined(ANDROID)
-		if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
+		if (!gladLoadGLES1Loader((GLADloadproc)eglGetProcAddress))
 		{
 			std::cerr << "Failed to initialize GLAD" << std::endl;
 			return -1;
@@ -1317,8 +1317,11 @@ int GLInterface::Init(bool IsWindowed)
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, mWidth-1, mHeight-1, 0, -10, 10);
-
+#ifdef _WIN32
+    glOrtho(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
+#elif defined(ANDROID)
+    glOrthof(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
+#endif
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DITHER);
@@ -1339,7 +1342,7 @@ int GLInterface::Init(bool IsWindowed)
 	mGreenMask = (0xFFU << mGreenShift);
 	mBlueMask = (0xFFU << mBlueShift);
 
-	glClear(GL_COLOR_BUFFER_BIT); //
+	glClear(GL_COLOR_BUFFER_BIT);
 	SetVideoOnlyDraw(false);
 
 	return 1;

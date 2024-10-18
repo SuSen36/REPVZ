@@ -35,7 +35,7 @@ set(LOW_MEMORY OFF)
 if(ANDROID)
 	list(APPEND SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/graphics/Window.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/graphics/GLInterface.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/pc/graphics/GLInterface.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/Input.cpp
 	)
 	list(APPEND PLAT_INCLUDES
@@ -52,7 +52,7 @@ else()
 	)
 endif()
 
-option(CONSOLE "Show console on Windows" ON)
+option(CONSOLE "Show console on Windows" OFF)
 
 set(SDL_STATIC OFF CACHE BOOL "Build static library of SDL" FORCE)
 set(SDL_SHARED ON CACHE BOOL "Build shared library of SDL" FORCE)
@@ -68,7 +68,6 @@ add_subdirectory(Libs/SDL)
 
 set(JPEG_STATIC ON CACHE BOOL "Build static library of JPEG" FORCE)
 set(JPEG_SHARED OFF CACHE BOOL "Build shared library of JPEG" FORCE)
-add_subdirectory(src/SexyAppFramework/imagelib/jpeg)
 add_subdirectory(Libs/zlib)
 include(FetchContent)
 
@@ -162,7 +161,7 @@ if (WIN32)
 		target_link_options(re-plants-vs-zombies PRIVATE -mwindows)
 	endif()
 elseif (ANDROID)  # 增加安卓平台的支持
-	target_link_libraries(re-plants-vs-zombies log EGL)  # 链接需要的库
+	target_link_libraries(re-plants-vs-zombies log EGL GLESv1_CM)  # 链接需要的库
 	target_compile_definitions(re-plants-vs-zombies PRIVATE ANDROID)  # 定义ANDROID宏
 else()
 	target_link_libraries(re-plants-vs-zombies GL)
