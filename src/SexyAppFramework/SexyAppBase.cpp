@@ -4568,9 +4568,9 @@ int SexyAppBase::InitGLInterface()
 
     DemoSyncRefreshRate(); // 刷新率同步
 
-    // 更新屏幕边界
     mScreenBounds.mX = (mWidth - mGLInterface->mWidth) / 2;
     mScreenBounds.mY = (mHeight - mGLInterface->mHeight) / 2;
+
     mScreenBounds.mWidth = mGLInterface->mWidth;
     mScreenBounds.mHeight = mGLInterface->mHeight;
 

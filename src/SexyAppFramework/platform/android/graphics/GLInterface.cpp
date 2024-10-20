@@ -1305,105 +1305,110 @@ GLImage* GLInterface::GetScreenImage()
 
 void GLInterface::UpdateViewport()
 {
-	// Restrict to 4:3
-	// https://bumbershootsoft.wordpress.com/2018/11/29/forcing-an-aspect-ratio-in-3d-with-opengl/
+    // 将视口限制为16:9的比例
+    int width, viewport_width;
+    int height, viewport_height;
+    int viewport_x = 0;
+    int viewport_y = 0;
 
-	int width, viewport_width;
-	int height, viewport_height;
-	int viewport_x = 0;
-	int viewport_y = 0;
+    SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
 
-	SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
+    glClear(GL_COLOR_BUFFER_BIT);
+    Flush();
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
+    viewport_width = width;
+    viewport_height = height;
 
-	viewport_width = width;
-	viewport_height = height;
-	if (width * 3 > height * 4)
-	{
-		viewport_width = height * 4 / 3;
-		viewport_x = (width - viewport_width) / 2;
-	}
-	else if (width * 3 < height * 4)
-	{
-		viewport_height = width * 3 / 4;
-		viewport_y = (height - viewport_height) / 2;
-	}
-	glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
-	mPresentationRect = Rect( viewport_x, viewport_y, viewport_width, viewport_height );
+    // 进行横屏适配
+    if (width * 9 > height * 16)
+    {
+        viewport_width = height * 16 / 9; // 修改为横屏比例
+        viewport_x = (width - viewport_width) / 2;
+    }
+    else if (width * 9 < height * 16)
+    {
+        viewport_height = width * 9 / 16; // 修改为横屏比例
+        viewport_y = (height - viewport_height) / 2;
+    }
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
+    glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+    mPresentationRect = Rect(viewport_x, viewport_y, viewport_width, viewport_height);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    Flush();
 }
 
 int GLInterface::Init(bool IsWindowed)
 {
-	static bool inited = false;
-	if (!inited)
-	{
-		inited = true;
+    static bool inited = false;
+    if (!inited)
+    {
+        inited = true;
 #ifdef _WIN32
-		if (!gladLoadGLLoader((GLADloadproc)wglGetProcAddress))
-		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1;
-		}
+        if (!gladLoadGLLoader((GLADloadproc)wglGetProcAddress))
+        {
+            std::cerr << "Failed to initialize GLAD" << std::endl;
+            return -1;
+        }
 #elif defined(ANDROID)
-		if (!gladLoadGLES1Loader((GLADloadproc)eglGetProcAddress))
-		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1;
-		}
+        if (!gladLoadGLES1Loader((GLADloadproc)eglGetProcAddress))
+        {
+            std::cerr << "Failed to initialize GLAD" << std::endl;
+            return -1;
+        }
 #endif
-	}
-	int aMaxSize;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
+    }
 
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+    int aMaxSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
 
-	gTextureSizeMustBePow2 = false;
-	gMinTextureWidth = 8;
-	gMinTextureHeight = 8;
-	gMaxTextureWidth = aMaxSize;
-	gMaxTextureHeight = aMaxSize;
-	gSupportedPixelFormats = PixelFormat_A8R8G8B8 | PixelFormat_A4R4G4B4 | PixelFormat_R5G6B5 | PixelFormat_Palette8;
-	gLinearFilter = false;
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+    gTextureSizeMustBePow2 = false;
+    gMinTextureWidth = 8;
+    gMinTextureHeight = 8;
+    gMaxTextureWidth = aMaxSize;
+    gMaxTextureHeight = aMaxSize;
+    gSupportedPixelFormats = PixelFormat_A8R8G8B8 | PixelFormat_A4R4G4B4 | PixelFormat_R5G6B5 | PixelFormat_Palette8;
+    gLinearFilter = false;
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // 横屏投影设置
 #ifdef _WIN32
     glOrtho(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
 #elif defined(ANDROID)
     glOrthof(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
 #endif
-	glEnable(GL_BLEND);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DITHER);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
 
-	mRGBBits = 32;
+    glEnable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DITHER);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
-	mRedBits = 8;
-	mGreenBits = 8;
-	mBlueBits = 8;
+    mRGBBits = 32;
 
-	mRedShift = 0;
-	mGreenShift = 8;
-	mBlueShift = 16;
+    mRedBits = 8;
+    mGreenBits = 8;
+    mBlueBits = 8;
 
-	mRedMask = (0xFFU << mRedShift);
-	mGreenMask = (0xFFU << mGreenShift);
-	mBlueMask = (0xFFU << mBlueShift);
+    mRedShift = 0;
+    mGreenShift = 8;
+    mBlueShift = 16;
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	SetVideoOnlyDraw(false);
+    mRedMask = (0xFFU << mRedShift);
+    mGreenMask = (0xFFU << mGreenShift);
+    mBlueMask = (0xFFU << mBlueShift);
 
-	return 1;
+    glClear(GL_COLOR_BUFFER_BIT);
+    SetVideoOnlyDraw(false);
+
+    return 1;
 }
 
 bool GLInterface::Redraw(Rect* theClipRect)

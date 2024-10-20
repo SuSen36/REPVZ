@@ -51,31 +51,31 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 
             case SDL_FINGERDOWN:
             {
-                int x = static_cast<int>(event.tfinger.x * mScreenBounds.mWidth); // ʹ����Ļ���
-                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mHeight); // ʹ����Ļ�߶�
+                int x = static_cast<int>(event.tfinger.x * (mScreenBounds.mHeight*7/3)); // 使用屏幕高度
+                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mWidth);  // 使用屏幕宽度
                 mWidgetManager->RemapMouse(x, y);
 
                 mLastUserInputTick = mLastTimerTime;
-                mMouseIn = true; // ����������ʱ������ mouseIn Ϊ true
-                mWidgetManager->MouseDown(x, y, 1); // 1 Ϊ�������
+                mMouseIn = true; // 用户输入时将 mouseIn 设置为 true
+                mWidgetManager->MouseDown(x, y, 1); // 1 为鼠标按下
                 break;
             }
 
             case SDL_FINGERUP:
             {
-                int x = static_cast<int>(event.tfinger.x * mScreenBounds.mWidth);
-                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mHeight);
+                int x = static_cast<int>(event.tfinger.x * (mScreenBounds.mHeight*7/3)); // 使用屏幕高度
+                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mWidth);  // 使用屏幕宽度
                 mWidgetManager->RemapMouse(x, y);
 
                 mLastUserInputTick = mLastTimerTime;
-                mWidgetManager->MouseUp(x, y, 1); // 1 Ϊ����ɿ�
+                mWidgetManager->MouseUp(x, y, 1); // 1 为鼠标抬起
                 break;
             }
 
             case SDL_FINGERMOTION:
             {
-                int x = static_cast<int>(event.tfinger.x * mScreenBounds.mWidth);
-                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mHeight);
+                int x = static_cast<int>(event.tfinger.x * (mScreenBounds.mHeight*7/3)); // 使用屏幕高度
+                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mWidth);  // 使用屏幕宽度
                 mWidgetManager->RemapMouse(x, y);
 
                 mLastUserInputTick = mLastTimerTime;
@@ -103,4 +103,5 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 
     return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 }
+
 

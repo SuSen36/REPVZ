@@ -20,8 +20,8 @@ void SexyAppBase::MakeWindow()
         {
             return;
         }
-
-        // 设置 OpenGL ES 2.0 属性
+        SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+        // 设置 OpenGL ES 1.0 属性
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -30,7 +30,7 @@ void SexyAppBase::MakeWindow()
         mWindow = (void*)SDL_CreateWindow(
             SexyStringToStringFast(mTitle).c_str(),
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            mWidth, mHeight,
+            mHeight, mWidth,
             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | (!mIsWindowed ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
         );
 

@@ -1,5 +1,6 @@
 package com.popcap.pvz;
 
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ public class PVZActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); // 强制为横屏
         // 直接复制资产，不请求权限
         copyAssetsToExternalStorage();
     }
@@ -66,7 +68,6 @@ public class PVZActivity extends SDLActivity {
         try {
             // 检查是否是目录
             if (Objects.requireNonNull(assetManager.list(filename)).length > 0) { // 检查是否是文件夹
-                // 创建目标目录
                 File dir = new File(destPath);
                 if (!dir.exists()) {
                     dir.mkdirs(); // 确保目录存在
@@ -89,10 +90,8 @@ public class PVZActivity extends SDLActivity {
             // 复制文件
             try (InputStream in = assetManager.open(filename);
                  FileOutputStream out = new FileOutputStream(outFile)) {
-                // 复制文件
                 byte[] buffer = new byte[1024];
                 int read;
-
                 while ((read = in.read(buffer)) != -1) {
                     out.write(buffer, 0, read);
                 }

@@ -1,13 +1,10 @@
 #include "SexyApp.h"
 
-//#include "..\Crypt\RegKey.h"
-//#include "../SexyAppFramework/misc/SEHCatcher.h"
-//#include "InternetManager.h"
-#include <time.h>
+
+#include <ctime>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fstream>
-//#include "BetaSupport.h"
 
 using namespace Sexy;
 
@@ -489,15 +486,13 @@ bool SexyApp::CheckSignature(const Buffer& theBuffer, const std::string& theFile
 
 void SexyApp::PreTerminate()
 {
-#ifdef ZYLOM
-	ZylomShowAd();
-#else
+
 	//if ((!mSkipAd) && 
 	//	((((!mIsRegistered) || (mInternetManager->HasNewAds())) && ((Rand()%2) == 0))))
 	//{
 	//	mInternetManager->TryShowAd();
 	//}
-#endif
+
 }
 
 void SexyApp::OpenUpdateURL()
@@ -590,10 +585,6 @@ void SexyApp::InitPropertiesHook()
 	//mInternetManager->Init();
 	mBetaSupport = nullptr;//new BetaSupport(this);
 
-#ifdef ZYLOM
-	LoadProperties();
-	ZylomGS_StandAlone_Init(mZylomGameId, (char*) GetString("BUG_REPORT_TITLE").c_str(), (char*) GetString("BUG_REPORT_BODY").c_str());
-#endif
 }
 
 void SexyApp::Init()
