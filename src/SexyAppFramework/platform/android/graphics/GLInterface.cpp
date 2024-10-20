@@ -1,13 +1,15 @@
 #include <SDL.h>
-
-#include <EGL/egl.h>
 #include "SexyAppFramework/glad/glad.h"
+#ifdef _WIN32
+
+#elif defined(ANDROID)
+#include <SDL_egl.h>
+#endif
 
 #include "../graphics/GLInterface.h"
 
 #include <iostream>
-#include <SexyAppFramework/glm/gtc/type_ptr.hpp>
-#include "SexyAppFramework/glm/glm.hpp"
+
 
 #include "SexyAppFramework/graphics/GLImage.h"
 #include "SexyAppFramework/SexyAppBase.h"
@@ -122,128 +124,186 @@ static void GfxAddVertices(const TriVertex arr[][3], int arrCount, unsigned int 
 	}
 }
 
-
 static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, int theWidth, int theHeight, int theDestPitch, int theDestHeight, bool rightPad, bool bottomPad, bool create)
 {
-	uint32_t *aDest = new uint32_t[theDestPitch * theDestHeight];
+    uint32_t *aDest = new uint32_t[theDestPitch * theDestHeight];
 
-	if (theImage->mColorTable == NULL)
-	{
-		uint32_t *srcRow = (uint32_t*)theImage->GetBits() + offy * theImage->GetWidth() + offx;
-		uint32_t *dstRow = aDest;
+    if (theImage->mColorTable == NULL)
+    {
+        // 处理没有调色板的情况
+        uint32_t *srcRow = (uint32_t*)theImage->GetBits() + offy * theImage->GetWidth() + offx;
+        uint32_t *dstRow = aDest;
 
-		for(int y=0; y<theHeight; y++)
-		{
-			uint32_t *src = srcRow;
-			uint32_t *dst = dstRow;
-			for(int x=0; x<theWidth; x++)
-				*dst++ = *src++;
+        for (int y = 0; y < theHeight; y++)
+        {
+            uint32_t *src = srcRow;
+            uint32_t *dst = dstRow;
+            for (int x = 0; x < theWidth; x++)
+            {
+                uint32_t color = *src++;
 
-			if (rightPad)
-				*dst = *(dst-1);
+                // 分离 RGBA 组件
+                uint8_t a = (color >> 24) & 0xFF;
+                uint8_t r = (color >> 16) & 0xFF;
+                uint8_t g = (color >> 8) & 0xFF;
+                uint8_t b = color & 0xFF;
 
-			srcRow += theImage->GetWidth();
-			dstRow += theDestPitch;
-		}
-	}
-	else // palette
-	{
-		uint8_t *srcRow = (uint8_t*)theImage->mColorIndices + offy * theImage->GetWidth() + offx;
-		uint32_t *dstRow = aDest;
-		uint32_t *palette = (uint32_t*)theImage->mColorTable;
+                *dst++ = (b << 16) | (g << 8) | (r) | (a << 24);
+            }
 
-		for(int y=0; y<theHeight; y++)
-		{
-			uint8_t *src = srcRow;
-			uint32_t *dst = dstRow;
-			for(int x=0; x<theWidth; x++)
-				*dst++ = palette[*src++];
+            // 右填充（如果需要）
+            if (rightPad)
+                *dst = *(dst - 1);
 
-			if (rightPad)
-				*dst = *(dst-1);
+            // 更新行指针
+            srcRow += theImage->GetWidth();
+            dstRow += theDestPitch;
+        }
+    }
+    else
+    {
+        // 处理有调色板的情况
+        uint8_t *srcRow = (uint8_t*)theImage->mColorIndices + offy * theImage->GetWidth() + offx;
+        uint32_t *dstRow = aDest;
+        uint32_t *palette = (uint32_t*)theImage->mColorTable;
 
-			srcRow += theImage->GetWidth();
-			dstRow += theDestPitch;
-		}
-	}
+        for (int y = 0; y < theHeight; y++)
+        {
+            uint8_t *src = srcRow;
+            uint32_t *dst = dstRow;
+            for (int x = 0; x < theWidth; x++)
+            {
+                uint32_t color = palette[*src++];
 
-	if (bottomPad)
-	{
-		uint32_t *dstrow = aDest + (theDestPitch*theHeight);
-		memcpy(dstrow, dstrow-(theDestPitch*4), (theDestPitch*4));
-	}
+                // 分离 RGBA 组件
+                uint8_t a = (color >> 24) & 0xFF;
+                uint8_t r = (color >> 16) & 0xFF;
+                uint8_t g = (color >> 8) & 0xFF;
+                uint8_t b = color & 0xFF;
 
-	if (create)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, theDestPitch, theDestHeight, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, aDest);
-	else
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, theDestPitch, theDestHeight, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, aDest);
+                *dst++ = (b << 16) | (g << 8) | (r) | (a << 24);
+            }
 
-	delete[] aDest;
+            // 右填充（如果需要）
+            if (rightPad)
+                *dst = *(dst - 1);
+
+            // 更新行指针
+            srcRow += theImage->GetWidth();
+            dstRow += theDestPitch;
+        }
+    }
+
+    // 处理底部填充（如果需要）
+    if (bottomPad)
+    {
+        uint32_t *dstrow = aDest + (theDestPitch * theHeight);
+        memcpy(dstrow, dstrow - (theDestPitch * 4), (theDestPitch * 4));
+    }
+
+    // 上传纹理数据
+    if (create)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, theDestPitch, theDestHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, aDest);
+    }
+    else
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, theDestPitch, theDestHeight, GL_RGBA, GL_UNSIGNED_BYTE, aDest);
+    }
+
+    // 释放内存
+    delete[] aDest;
 }
+
 
 static void CopyImageToTexture4444(MemoryImage *theImage, int offx, int offy, int theWidth, int theHeight, int theDestPitch, int theDestHeight, bool rightPad, bool bottomPad, bool create)
 {
-	uint16_t *aDest = new uint16_t[theDestPitch * theDestHeight];
+    uint16_t *aDest = new uint16_t[theDestPitch * theDestHeight];
 
-	if (theImage->mColorTable == NULL)
-	{
-		uint32_t *srcRow = (uint32_t*)theImage->GetBits() + offy * theImage->GetWidth() + offx;
-		uint16_t *dstRow = aDest;
+    if (theImage->mColorTable == NULL)
+    {
+        // 处理没有调色板的 RGBA 数据
+        uint32_t *srcRow = (uint32_t*)theImage->GetBits() + offy * theImage->GetWidth() + offx;
+        uint16_t *dstRow = aDest;
 
-		for(int y=0; y<theHeight; y++)
-		{
-			uint32_t *src = srcRow;
-			uint16_t *dst = dstRow;
-			for(int x=0; x<theWidth; x++)
-			{
-				uint32_t aPixel = *src++;
-				*dst++ = ((aPixel>>16)&0xF000) | ((aPixel>>12)&0x0F00) | ((aPixel>>8)&0x00F0) | ((aPixel>>4)&0x000F);
-			}
+        for (int y = 0; y < theHeight; y++)
+        {
+            uint32_t *src = srcRow;
+            uint16_t *dst = dstRow;
+            for (int x = 0; x < theWidth; x++)
+            {
+                uint32_t aPixel = *src++;
 
-			if (rightPad)
-				*dst = *(dst-1);
+                // 提取 RGBA 组件
+                uint8_t r = (aPixel >> 24) & 0xFF;
+                uint8_t g = (aPixel >> 16) & 0xFF;
+                uint8_t b = (aPixel >> 8) & 0xFF;
+                uint8_t a = aPixel & 0xFF;
 
-			srcRow += theImage->GetWidth();
-			dstRow += theDestPitch;
-		}
-	}
-	else // palette
-	{
-		uint8_t *srcRow = (uint8_t*)theImage->mColorIndices + offy * theImage->GetWidth() + offx;
-		uint16_t *dstRow = aDest;
-		uint32_t *palette = (uint32_t*)theImage->mColorTable;
+                // 转换每个通道为 4 位并组合成 4-4-4-4 格式
+                *dst++ = ((r >> 4) & 0x0F) << 12 | ((g >> 4) & 0x0F) << 8 | ((b >> 4) & 0x0F) << 4 | ((a >> 4) & 0x0F);
+            }
 
-		for(int y=0; y<theHeight; y++)
-		{
-			uint8_t *src = srcRow;
-			uint16_t *dst = dstRow;
-			for(int x=0; x<theWidth; x++)
-			{
-				uint32_t aPixel = palette[*src++];
-				*dst++ = ((aPixel>>16)&0xF000) | ((aPixel>>12)&0x0F00) | ((aPixel>>8)&0x00F0) | ((aPixel>>4)&0x000F);
-			}
+            if (rightPad)
+                *dst = *(dst - 1); // 右填充
 
-			if (rightPad)
-				*dst = *(dst-1);
+            srcRow += theImage->GetWidth();
+            dstRow += theDestPitch;
+        }
+    }
+    else // 使用调色板
+    {
+        uint8_t *srcRow = (uint8_t*)theImage->mColorIndices + offy * theImage->GetWidth() + offx;
+        uint16_t *dstRow = aDest;
+        uint32_t *palette = (uint32_t*)theImage->mColorTable;
 
-			srcRow += theImage->GetWidth();
-			dstRow += theDestPitch;
-		}
-	}
+        for (int y = 0; y < theHeight; y++)
+        {
+            uint8_t *src = srcRow;
+            uint16_t *dst = dstRow;
+            for (int x = 0; x < theWidth; x++)
+            {
+                uint32_t aPixel = palette[*src++];
 
-	if (bottomPad)
-	{
-		uint16_t *dstrow = aDest + (theDestPitch*theHeight);
-		memcpy(dstrow, dstrow-(theDestPitch*2), (theDestPitch*2));
-	}
+                // 提取 RGBA 组件
+                uint8_t r = (aPixel >> 24) & 0xFF;
+                uint8_t g = (aPixel >> 16) & 0xFF;
+                uint8_t b = (aPixel >> 8) & 0xFF;
+                uint8_t a = aPixel & 0xFF;
 
-	if (create)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, theDestPitch, theDestHeight, 0, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, aDest);
-	else
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, theDestPitch, theDestHeight, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, aDest);
+                // 转换每个通道为 4 位并组合成 4-4-4-4 格式
+                *dst++ = ((r >> 4) & 0x0F) << 12 | ((g >> 4) & 0x0F) << 8 | ((b >> 4) & 0x0F) << 4 | ((a >> 4) & 0x0F);
+            }
 
-	delete[] aDest;
+            if (rightPad)
+                *dst = *(dst - 1); // 右填充
+
+            srcRow += theImage->GetWidth();
+            dstRow += theDestPitch;
+        }
+    }
+
+    // 处理底部填充
+    if (bottomPad)
+    {
+        uint16_t *dstrow = aDest + (theDestPitch * theHeight);
+        memcpy(dstrow, dstrow - (theDestPitch * 2), (theDestPitch * 2));
+    }
+
+    // 上传到 OpenGL
+    if (create)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, theDestPitch, theDestHeight, 0, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, aDest);
+    }
+    else
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, theDestPitch, theDestHeight, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, aDest);
+    }
+
+    // 释放内存
+    delete[] aDest;
 }
+
 
 static void CopyImageToTexture565(MemoryImage *theImage, int offx, int offy, int theWidth, int theHeight, int theDestPitch, int theDestHeight, bool rightPad, bool bottomPad, bool create)
 {
@@ -1290,7 +1350,7 @@ int GLInterface::Init(bool IsWindowed)
 			return -1;
 		}
 #elif defined(ANDROID)
-		if (!gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
+		if (!gladLoadGLES1Loader((GLADloadproc)eglGetProcAddress))
 		{
 			std::cerr << "Failed to initialize GLAD" << std::endl;
 			return -1;
@@ -1300,7 +1360,7 @@ int GLInterface::Init(bool IsWindowed)
 	int aMaxSize;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
 
-	glClearColor(1, 0, 0, 1);
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	gTextureSizeMustBePow2 = false;
@@ -1314,10 +1374,12 @@ int GLInterface::Init(bool IsWindowed)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(mWidth), static_cast<float>(mHeight), 0.0f);
-    glLoadIdentity();
-    //glOrtho(0, mWidth-1, mHeight-1, 0, -10, 10);
-
+	glLoadIdentity();
+#ifdef _WIN32
+    glOrtho(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
+#elif defined(ANDROID)
+    glOrthof(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
+#endif
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DITHER);
@@ -1338,7 +1400,7 @@ int GLInterface::Init(bool IsWindowed)
 	mGreenMask = (0xFFU << mGreenShift);
 	mBlueMask = (0xFFU << mBlueShift);
 
-	glClear(GL_COLOR_BUFFER_BIT); //
+	glClear(GL_COLOR_BUFFER_BIT);
 	SetVideoOnlyDraw(false);
 
 	return 1;

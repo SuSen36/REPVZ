@@ -11,10 +11,10 @@
 
 #ifdef WINDOWS
 #include <SDL.h>
-#include <SDL_opengl.h>  // 包含 SDL 的 OpenGL 相关头文件
+#include <SDL_opengl.h>
 #elif ANDROID
 #include <SDL.h>
-#include <SDL_opengl.h>  // 包含 SDL 的 OpenGL 相关头文件
+#include <GLES/gl.h>
 #endif
 
 namespace Sexy
