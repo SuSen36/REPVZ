@@ -187,8 +187,13 @@ SexyAppBase::SexyAppBase()
 	mTitle = __S("SexyApp");
 	mShutdown = false;
 	mExitToTop = false;
-	mWidth = 640;
-	mHeight = 480;
+#ifdef ANDROID
+	mWidth = 480;
+	mHeight = 640;
+#else
+    mWidth = 640;
+    mHeight = 480;
+#endif
 	mFullscreenBits = 16;
 	mIsWindowed = true;
 	mIsPhysWindowed = true;
@@ -4568,9 +4573,9 @@ int SexyAppBase::InitGLInterface()
 
     DemoSyncRefreshRate(); // 刷新率同步
 
-    // 更新屏幕边界
     mScreenBounds.mX = (mWidth - mGLInterface->mWidth) / 2;
     mScreenBounds.mY = (mHeight - mGLInterface->mHeight) / 2;
+
     mScreenBounds.mWidth = mGLInterface->mWidth;
     mScreenBounds.mHeight = mGLInterface->mHeight;
 

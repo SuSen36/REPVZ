@@ -334,9 +334,6 @@ public:
 	StringStringVectorMap	mStringVectorProperties;
 	ResourceManager*		mResourceManager;
 
-#ifdef ZYLOM
-	uint					mZylomGameId;
-#endif
 
 	LONG					mOldWndProc;
 

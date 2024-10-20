@@ -130,7 +130,7 @@ static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, in
 
     if (theImage->mColorTable == NULL)
     {
-        // ¥¶¿Ì√ª”–µ˜…´∞Âµƒ«Èøˆ
+        // ÔøΩÔøΩÔøΩÔøΩ√ªÔøΩ–µÔøΩ…´ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
         uint32_t *srcRow = (uint32_t*)theImage->GetBits() + offy * theImage->GetWidth() + offx;
         uint32_t *dstRow = aDest;
 
@@ -142,7 +142,7 @@ static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, in
             {
                 uint32_t color = *src++;
 
-                // ∑÷¿Î RGBA ◊Èº˛
+                // ÔøΩÔøΩÔøΩÔøΩ RGBA ÔøΩÔøΩÔøΩ
                 uint8_t a = (color >> 24) & 0xFF;
                 uint8_t r = (color >> 16) & 0xFF;
                 uint8_t g = (color >> 8) & 0xFF;
@@ -151,18 +151,18 @@ static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, in
                 *dst++ = (b << 16) | (g << 8) | (r) | (a << 24);
             }
 
-            // ”“ÃÓ≥‰£®»Áπ˚–Ë“™£©
+            // ÔøΩÔøΩÔøΩÔøΩ‰£®ÔøΩÔøΩÔøΩÔøΩÔøΩ“™ÔøΩÔøΩ
             if (rightPad)
                 *dst = *(dst - 1);
 
-            // ∏¸–¬––÷∏’Î
+            // ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ÷∏ÔøΩÔøΩ
             srcRow += theImage->GetWidth();
             dstRow += theDestPitch;
         }
     }
     else
     {
-        // ¥¶¿Ì”–µ˜…´∞Âµƒ«Èøˆ
+        // ÔøΩÔøΩÔøΩÔøΩÔøΩ–µÔøΩ…´ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
         uint8_t *srcRow = (uint8_t*)theImage->mColorIndices + offy * theImage->GetWidth() + offx;
         uint32_t *dstRow = aDest;
         uint32_t *palette = (uint32_t*)theImage->mColorTable;
@@ -175,7 +175,7 @@ static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, in
             {
                 uint32_t color = palette[*src++];
 
-                // ∑÷¿Î RGBA ◊Èº˛
+                // ÔøΩÔøΩÔøΩÔøΩ RGBA ÔøΩÔøΩÔøΩ
                 uint8_t a = (color >> 24) & 0xFF;
                 uint8_t r = (color >> 16) & 0xFF;
                 uint8_t g = (color >> 8) & 0xFF;
@@ -184,24 +184,24 @@ static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, in
                 *dst++ = (b << 16) | (g << 8) | (r) | (a << 24);
             }
 
-            // ”“ÃÓ≥‰£®»Áπ˚–Ë“™£©
+            // ÔøΩÔøΩÔøΩÔøΩ‰£®ÔøΩÔøΩÔøΩÔøΩÔøΩ“™ÔøΩÔøΩ
             if (rightPad)
                 *dst = *(dst - 1);
 
-            // ∏¸–¬––÷∏’Î
+            // ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ÷∏ÔøΩÔøΩ
             srcRow += theImage->GetWidth();
             dstRow += theDestPitch;
         }
     }
 
-    // ¥¶¿Ìµ◊≤øÃÓ≥‰£®»Áπ˚–Ë“™£©
+    // ÔøΩÔøΩÔøΩÔøΩ◊≤ÔøΩÔøΩÔøΩ‰£®ÔøΩÔøΩÔøΩÔøΩÔøΩ“™ÔøΩÔøΩ
     if (bottomPad)
     {
         uint32_t *dstrow = aDest + (theDestPitch * theHeight);
         memcpy(dstrow, dstrow - (theDestPitch * 4), (theDestPitch * 4));
     }
 
-    // …œ¥´Œ∆¿Ì ˝æ›
+    // ÔøΩœ¥ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
     if (create)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, theDestPitch, theDestHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, aDest);
@@ -211,7 +211,7 @@ static void CopyImageToTexture8888(MemoryImage *theImage, int offx, int offy, in
         glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, theDestPitch, theDestHeight, GL_RGBA, GL_UNSIGNED_BYTE, aDest);
     }
 
-    //  Õ∑≈ƒ⁄¥Ê
+    // ÔøΩÕ∑ÔøΩÔøΩ⁄¥ÔøΩ
     delete[] aDest;
 }
 
@@ -222,7 +222,7 @@ static void CopyImageToTexture4444(MemoryImage *theImage, int offx, int offy, in
 
     if (theImage->mColorTable == NULL)
     {
-        // ¥¶¿Ì√ª”–µ˜…´∞Âµƒ RGBA  ˝æ›
+        // ÔøΩÔøΩÔøΩÔøΩ√ªÔøΩ–µÔøΩ…´ÔøΩÔøΩÔøΩ RGBA ÔøΩÔøΩÔøΩÔøΩ
         uint32_t *srcRow = (uint32_t*)theImage->GetBits() + offy * theImage->GetWidth() + offx;
         uint16_t *dstRow = aDest;
 
@@ -234,24 +234,24 @@ static void CopyImageToTexture4444(MemoryImage *theImage, int offx, int offy, in
             {
                 uint32_t aPixel = *src++;
 
-                // Ã·»° RGBA ◊Èº˛
+                // ÔøΩÔøΩ»° RGBA ÔøΩÔøΩÔøΩ
                 uint8_t r = (aPixel >> 24) & 0xFF;
                 uint8_t g = (aPixel >> 16) & 0xFF;
                 uint8_t b = (aPixel >> 8) & 0xFF;
                 uint8_t a = aPixel & 0xFF;
 
-                // ◊™ªª√ø∏ˆÕ®µ¿Œ™ 4 Œª≤¢◊È∫œ≥… 4-4-4-4 ∏Ò Ω
+                // ◊™ÔøΩÔøΩ√øÔøΩÔøΩÕ®ÔøΩÔøΩŒ™ 4 ŒªÔøΩÔøΩÔøΩÔøΩœ≥ÔøΩ 4-4-4-4 ÔøΩÔøΩ Ω
                 *dst++ = ((r >> 4) & 0x0F) << 12 | ((g >> 4) & 0x0F) << 8 | ((b >> 4) & 0x0F) << 4 | ((a >> 4) & 0x0F);
             }
 
             if (rightPad)
-                *dst = *(dst - 1); // ”“ÃÓ≥‰
+                *dst = *(dst - 1); // ÔøΩÔøΩÔøΩÔøΩÔøΩ
 
             srcRow += theImage->GetWidth();
             dstRow += theDestPitch;
         }
     }
-    else //  π”√µ˜…´∞Â
+    else //  πÔøΩ√µÔøΩ…´ÔøΩÔøΩ
     {
         uint8_t *srcRow = (uint8_t*)theImage->mColorIndices + offy * theImage->GetWidth() + offx;
         uint16_t *dstRow = aDest;
@@ -265,32 +265,32 @@ static void CopyImageToTexture4444(MemoryImage *theImage, int offx, int offy, in
             {
                 uint32_t aPixel = palette[*src++];
 
-                // Ã·»° RGBA ◊Èº˛
+                // ÔøΩÔøΩ»° RGBA ÔøΩÔøΩÔøΩ
                 uint8_t r = (aPixel >> 24) & 0xFF;
                 uint8_t g = (aPixel >> 16) & 0xFF;
                 uint8_t b = (aPixel >> 8) & 0xFF;
                 uint8_t a = aPixel & 0xFF;
 
-                // ◊™ªª√ø∏ˆÕ®µ¿Œ™ 4 Œª≤¢◊È∫œ≥… 4-4-4-4 ∏Ò Ω
+                // ◊™ÔøΩÔøΩ√øÔøΩÔøΩÕ®ÔøΩÔøΩŒ™ 4 ŒªÔøΩÔøΩÔøΩÔøΩœ≥ÔøΩ 4-4-4-4 ÔøΩÔøΩ Ω
                 *dst++ = ((r >> 4) & 0x0F) << 12 | ((g >> 4) & 0x0F) << 8 | ((b >> 4) & 0x0F) << 4 | ((a >> 4) & 0x0F);
             }
 
             if (rightPad)
-                *dst = *(dst - 1); // ”“ÃÓ≥‰
+                *dst = *(dst - 1); // ÔøΩÔøΩÔøΩÔøΩÔøΩ
 
             srcRow += theImage->GetWidth();
             dstRow += theDestPitch;
         }
     }
 
-    // ¥¶¿Ìµ◊≤øÃÓ≥‰
+    // ÔøΩÔøΩÔøΩÔøΩ◊≤ÔøΩÔøΩÔøΩÔøΩ
     if (bottomPad)
     {
         uint16_t *dstrow = aDest + (theDestPitch * theHeight);
         memcpy(dstrow, dstrow - (theDestPitch * 2), (theDestPitch * 2));
     }
 
-    // …œ¥´µΩ OpenGL
+    // ÔøΩœ¥ÔøΩÔøΩÔøΩ OpenGL
     if (create)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, theDestPitch, theDestHeight, 0, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, aDest);
@@ -300,7 +300,7 @@ static void CopyImageToTexture4444(MemoryImage *theImage, int offx, int offy, in
         glTexSubImage2D(GL_TEXTURE_2D, 0, offx, offy, theDestPitch, theDestHeight, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, aDest);
     }
 
-    //  Õ∑≈ƒ⁄¥Ê
+    // ÔøΩÕ∑ÔøΩÔøΩ⁄¥ÔøΩ
     delete[] aDest;
 }
 
@@ -467,67 +467,76 @@ static bool IsPowerOf2(int theNum)
 ///////////////////////////////////////////////////////////////////////////////
 static void GetBestTextureDimensions(int &theWidth, int &theHeight, bool isEdge, bool usePow2, uint32_t theImageFlags)
 {
-//	theImageFlags = D3DImageFlag_MinimizeNumSubdivisions;
-	if (theImageFlags & D3DImageFlag_Use64By64Subdivisions)
-	{
-		theWidth = theHeight = 64;
-		return;
-	}
+    // Â§ÑÁêÜ 64x64 ÁªÜÂàÜÁöÑÂõæÂÉèÊ†áÂøó
+    if (theImageFlags & D3DImageFlag_Use64By64Subdivisions)
+    {
+        theWidth = theHeight = 64;
+        return;
+    }
 
-	static int aGoodTextureSize[MAX_TEXTURE_SIZE];
-	static bool haveInited = false;
-	if (!haveInited)
-	{
-		haveInited = true;
-		int i;
-		int aPow2 = 1;
-		for (i=0; i<MAX_TEXTURE_SIZE; i++)
-		{
-			if (i > aPow2)
-				aPow2 <<= 1;
+    static int aGoodTextureSize[MAX_TEXTURE_SIZE] = {0}; // Á°Æ‰øùÈùôÊÄÅÊï∞ÁªÑÂàùÂßãÂåñ
+    static bool haveInited = false;
 
-			int aGoodValue = aPow2;
-			if ((aGoodValue - i ) > 64)
-			{
-				aGoodValue >>= 1;
-				while (true)
-				{
-					int aLeftOver = i % aGoodValue;
-					if (aLeftOver<64 || IsPowerOf2(aLeftOver))
-						break;
+    // ÂàùÂßãÂåñ aGoodTextureSize Êï∞ÁªÑ
+    if (!haveInited)
+    {
+        haveInited = true;
+        int aPow2 = 1;
+        for (int i = 0; i < MAX_TEXTURE_SIZE; i++)
+        {
+            if (i > aPow2)
+                aPow2 <<= 1;
 
-					aGoodValue >>= 1;
-				}
-			}
-			aGoodTextureSize[i] = aGoodValue;
-		}
-	}
+            int aGoodValue = aPow2;
 
-	int aWidth = theWidth;
-	int aHeight = theHeight;
+            if ((aGoodValue - i) > 64)
+            {
+                aGoodValue >>= 1;
+                while (true)
+                {
+                    int aLeftOver = i % aGoodValue;
+                    if (aLeftOver < 64 || IsPowerOf2(aLeftOver))
+                        break;
 
-	if (usePow2)
-	{
-		if (isEdge || (theImageFlags & D3DImageFlag_MinimizeNumSubdivisions))
-		{
-			aWidth = aWidth >= gMaxTextureWidth ? gMaxTextureWidth : GetClosestPowerOf2Above(aWidth);
-			aHeight = aHeight >= gMaxTextureHeight ? gMaxTextureHeight : GetClosestPowerOf2Above(aHeight);
-		}
-		else
-		{
-			aWidth = aWidth >= gMaxTextureWidth ? gMaxTextureWidth : aGoodTextureSize[aWidth];
-			aHeight = aHeight >= gMaxTextureHeight ? gMaxTextureHeight : aGoodTextureSize[aHeight];
-		}
-	}
+                    aGoodValue >>= 1;
+                }
+            }
 
-	if (aWidth < gMinTextureWidth)
-		aWidth = gMinTextureWidth;
+            aGoodTextureSize[i] = aGoodValue;
+        }
+    }
 
-	if (aHeight < gMinTextureHeight)
-		aHeight = gMinTextureHeight;
+    // Ê£ÄÊü•ËæìÂÖ• width Âíå height ÁöÑÊúâÊïàÊÄßÔºåÂú®ËæπÁïåÂÜÖ
+    if (theWidth < 0 || theWidth >= MAX_TEXTURE_SIZE || theHeight < 0 || theHeight >= MAX_TEXTURE_SIZE)
+    {
+        theWidth = gMinTextureWidth; // ËÆæÁΩÆ‰∏∫ÊúÄÂ∞èÂÄº
+        theHeight = gMinTextureHeight; // ËÆæÁΩÆ‰∏∫ÊúÄÂ∞èÂÄº
+        return;
+    }
 
-	theWidth = aWidth;
-	theHeight = aHeight;
+    int aWidth = theWidth;
+    int aHeight = theHeight;
+
+    if (usePow2)
+    {
+        if (isEdge || (theImageFlags & D3DImageFlag_MinimizeNumSubdivisions))
+        {
+            aWidth = std::min(gMaxTextureWidth, GetClosestPowerOf2Above(aWidth));
+            aHeight = std::min(gMaxTextureHeight, GetClosestPowerOf2Above(aHeight));
+        }
+        else
+        {
+            aWidth = std::min(gMaxTextureWidth, aGoodTextureSize[aWidth]);
+            aHeight = std::min(gMaxTextureHeight, aGoodTextureSize[aHeight]);
+        }
+    }
+
+    // Á°Æ‰øùÂÆΩÂ∫¶ÂíåÈ´òÂ∫¶‰∏çÂ∞è‰∫éÊúÄÂ∞èÂÄº
+    aWidth = std::max(gMinTextureWidth, aWidth);
+    aHeight = std::max(gMinTextureHeight, aHeight);
+
+    theWidth = aWidth;
+    theHeight = aHeight;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1305,105 +1314,110 @@ GLImage* GLInterface::GetScreenImage()
 
 void GLInterface::UpdateViewport()
 {
-	// Restrict to 4:3
-	// https://bumbershootsoft.wordpress.com/2018/11/29/forcing-an-aspect-ratio-in-3d-with-opengl/
+    // ÔøΩÔøΩÔøΩ”øÔøΩÔøΩÔøΩÔøΩÔøΩŒ™16:9ÔøΩƒ±ÔøΩÔøΩÔøΩ
+    int width, viewport_width;
+    int height, viewport_height;
+    int viewport_x = 0;
+    int viewport_y = 0;
 
-	int width, viewport_width;
-	int height, viewport_height;
-	int viewport_x = 0;
-	int viewport_y = 0;
+    SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
 
-	SDL_GL_GetDrawableSize((SDL_Window*)mApp->mWindow, &width, &height);
+    glClear(GL_COLOR_BUFFER_BIT);
+    Flush();
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
+    viewport_width = width;
+    viewport_height = height;
 
-	viewport_width = width;
-	viewport_height = height;
-	if (width * 3 > height * 4)
-	{
-		viewport_width = height * 4 / 3;
-		viewport_x = (width - viewport_width) / 2;
-	}
-	else if (width * 3 < height * 4)
-	{
-		viewport_height = width * 3 / 4;
-		viewport_y = (height - viewport_height) / 2;
-	}
-	glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
-	mPresentationRect = Rect( viewport_x, viewport_y, viewport_width, viewport_height );
+    // ÔøΩÔøΩÔøΩ–∫ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
+    if (width * 9 > height * 16)
+    {
+        viewport_width = height * 16 / 9; // ÔøΩﬁ∏ÔøΩŒ™ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
+        viewport_x = (width - viewport_width) / 2;
+    }
+    else if (width * 9 < height * 16)
+    {
+        viewport_height = width * 9 / 16; // ÔøΩﬁ∏ÔøΩŒ™ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
+        viewport_y = (height - viewport_height) / 2;
+    }
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	Flush();
+    glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+    mPresentationRect = Rect(viewport_x, viewport_y, viewport_width, viewport_height);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    Flush();
 }
 
 int GLInterface::Init(bool IsWindowed)
 {
-	static bool inited = false;
-	if (!inited)
-	{
-		inited = true;
+    static bool inited = false;
+    if (!inited)
+    {
+        inited = true;
 #ifdef _WIN32
-		if (!gladLoadGLLoader((GLADloadproc)wglGetProcAddress))
-		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1;
-		}
+        if (!gladLoadGLLoader((GLADloadproc)wglGetProcAddress))
+        {
+            std::cerr << "Failed to initialize GLAD" << std::endl;
+            return -1;
+        }
 #elif defined(ANDROID)
-		if (!gladLoadGLES1Loader((GLADloadproc)eglGetProcAddress))
-		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
-			return -1;
-		}
+        if (!gladLoadGLES1Loader((GLADloadproc)eglGetProcAddress))
+        {
+            std::cerr << "Failed to initialize GLAD" << std::endl;
+            return -1;
+        }
 #endif
-	}
-	int aMaxSize;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
+    }
 
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+    int aMaxSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &aMaxSize);
 
-	gTextureSizeMustBePow2 = false;
-	gMinTextureWidth = 8;
-	gMinTextureHeight = 8;
-	gMaxTextureWidth = aMaxSize;
-	gMaxTextureHeight = aMaxSize;
-	gSupportedPixelFormats = PixelFormat_A8R8G8B8 | PixelFormat_A4R4G4B4 | PixelFormat_R5G6B5 | PixelFormat_Palette8;
-	gLinearFilter = false;
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+    gTextureSizeMustBePow2 = false;
+    gMinTextureWidth = 8;
+    gMinTextureHeight = 8;
+    gMaxTextureWidth = aMaxSize;
+    gMaxTextureHeight = aMaxSize;
+    gSupportedPixelFormats = PixelFormat_A8R8G8B8 | PixelFormat_A4R4G4B4 | PixelFormat_R5G6B5 | PixelFormat_Palette8;
+    gLinearFilter = false;
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // ÔøΩÔøΩÔøΩÔøΩÕ∂”∞ÔøΩÔøΩÔøΩÔøΩ
 #ifdef _WIN32
     glOrtho(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
 #elif defined(ANDROID)
     glOrthof(0.0f, static_cast<GLfloat>(mWidth) - 1.0f, static_cast<GLfloat>(mHeight) - 1.0f, 0.0f, -10.0f, 10.0f);
 #endif
-	glEnable(GL_BLEND);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DITHER);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
 
-	mRGBBits = 32;
+    glEnable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DITHER);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
-	mRedBits = 8;
-	mGreenBits = 8;
-	mBlueBits = 8;
+    mRGBBits = 32;
 
-	mRedShift = 0;
-	mGreenShift = 8;
-	mBlueShift = 16;
+    mRedBits = 8;
+    mGreenBits = 8;
+    mBlueBits = 8;
 
-	mRedMask = (0xFFU << mRedShift);
-	mGreenMask = (0xFFU << mGreenShift);
-	mBlueMask = (0xFFU << mBlueShift);
+    mRedShift = 0;
+    mGreenShift = 8;
+    mBlueShift = 16;
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	SetVideoOnlyDraw(false);
+    mRedMask = (0xFFU << mRedShift);
+    mGreenMask = (0xFFU << mGreenShift);
+    mBlueMask = (0xFFU << mBlueShift);
 
-	return 1;
+    glClear(GL_COLOR_BUFFER_BIT);
+    SetVideoOnlyDraw(false);
+
+    return 1;
 }
 
 bool GLInterface::Redraw(Rect* theClipRect)

@@ -20,8 +20,9 @@ void SexyAppBase::MakeWindow()
         {
             return;
         }
-
-        // 设置 OpenGL ES 2.0 属性
+        SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
+        SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
+        // 设置 OpenGL ES 1.0 属性
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);

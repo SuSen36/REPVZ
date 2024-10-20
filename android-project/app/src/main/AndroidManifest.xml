@@ -52,7 +52,9 @@
             android:windowSoftInputMode="adjustResize"
             android:preferMinimalPostProcessing="true"
             android:exported="true"
-            tools:targetApi="r">
+            android:screenOrientation="landscape"
+            tools:targetApi="r"
+            tools:ignore="DiscouragedApi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -1,8 +1,8 @@
 #ifndef __CURSORWIDGET_H__
 #define __CURSORWIDGET_H__
 
-#include "Widget.h"
-#include "Point.h"
+#include "SexyAppFramework/widget/Widget.h"
+#include "SexyAppFramework/misc/Point.h"
 
 namespace Sexy
 {
