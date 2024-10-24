@@ -25,7 +25,6 @@
 #ifdef _WIN32
 #define NOMINMAX 1
 #include <windows.h>
-#include <shellapi.h>
 #include <mmsystem.h>
 #else
 
@@ -55,24 +54,24 @@ typedef WCHAR TCHAR;
 typedef WCHAR* LPWSTR;
 typedef TCHAR* LPTSTR;
 
-typedef void* HWND;         // 所有平台上都使用 void* 替代 HWND
-
+typedef void* HWND; // 所有平台上都使用 void* 替代 HWND
 
 typedef struct tagRECT {
-	LONG left;
-	LONG top;
-	LONG right;
-	LONG bottom;
+    LONG left;
+    LONG top;
+    LONG right;
+    LONG bottom;
 } RECT, *PRECT, *NPRECT, *LPRECT;
 
 typedef struct _GUID {
-	unsigned long  Data1;
-	unsigned short Data2;
-	unsigned short Data3;
-	unsigned char  Data4[8];
+    uint32_t Data1;
+    uint16_t Data2;
+    uint16_t Data3;
+    uint8_t  Data4[8];
 } GUID;
 
-#endif
+#endif // _WIN32
+
 
 #include "../SexyAppFramework/misc/ModVal.h"
 

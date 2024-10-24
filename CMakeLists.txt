@@ -21,6 +21,7 @@ file(GLOB SOURCES
 		src/SexyAppFramework/glad/*.c
 		src/SexyAppFramework/imagelib/png/*.c
 		src/SexyAppFramework/imagelib/jpeg/*.c
+		src/SexyAppFramework/zlib/*.c
 )
 
 # these files are included and must not be built in the project
@@ -64,10 +65,6 @@ set(USE_PXTONE OFF CACHE BOOL "SDL pxtone" FORCE)
 
 add_subdirectory(Libs/SDL)
 
-
-set(JPEG_STATIC ON CACHE BOOL "Build static library of JPEG" FORCE)
-set(JPEG_SHARED OFF CACHE BOOL "Build shared library of JPEG" FORCE)
-add_subdirectory(Libs/zlib)
 include(FetchContent)
 
 if (WIN32)
@@ -143,21 +140,22 @@ target_include_directories(re-plants-vs-zombies PRIVATE
 	${PLAT_INCLUDES}
 	${bass_SOURCE_DIR}/${BASS_INCLUDE}
 )
+
 if (BUILD_DEBUG)
-    target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
+	target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
 else()
-    target_compile_definitions(re-plants-vs-zombies PRIVATE NDEBUG)
+	target_compile_definitions(re-plants-vs-zombies PRIVATE NDEBUG)
 endif()
 
 if (LOW_MEMORY)
 	target_compile_definitions(re-plants-vs-zombies PRIVATE LOW_MEMORY)
 endif()
 
-target_link_libraries(re-plants-vs-zombies zlibstatic SDL2::SDL2 bass)
+target_link_libraries(re-plants-vs-zombies SDL2::SDL2 bass)
 
 if (WIN32)
 	target_link_options(re-plants-vs-zombies PRIVATE -static -static-libgcc -static-libstdc++)
-	target_link_libraries(re-plants-vs-zombies opengl32 ws2_32 ddraw dinput8 dxguid dxerr8 user32 gdi32 winmm imm32)
+	target_link_libraries(re-plants-vs-zombies opengl32 ws2_32 ddraw dinput8 dxguid dxerr8 user32 gdi32 winmm imm32 shlwapi)
 	target_compile_definitions(re-plants-vs-zombies PRIVATE WINDOWS)
 
 	if(NOT CONSOLE)

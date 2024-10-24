@@ -18,7 +18,6 @@ public class PVZActivity extends SDLActivity {
     static {
         System.loadLibrary("SDL2");
         System.loadLibrary("bass");
-        System.loadLibrary("z");
         System.loadLibrary("re-plants-vs-zombies");
     }
 
@@ -45,7 +44,7 @@ public class PVZActivity extends SDLActivity {
                 for (String filename : files) {
                     copyAssetFile(assetManager, filename, dataDirPath + "/" + filename);
                 }
-                Toast.makeText(this, "所有文件复制完成！共 " + fileCount + " 个文件。", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "所有文件复制完成！共 " + fileCount + " 个文件夹。", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "没有可供复制的文件。", Toast.LENGTH_SHORT).show();
             }

@@ -467,14 +467,21 @@ static bool IsPowerOf2(int theNum)
 ///////////////////////////////////////////////////////////////////////////////
 static void GetBestTextureDimensions(int &theWidth, int &theHeight, bool isEdge, bool usePow2, uint32_t theImageFlags)
 {
-    // 处理 64x64 细分的图像标志
+    // 检查输入的宽度和高度是否合法
+    if (theWidth <= 0 || theHeight <= 0)
+    {
+        theWidth = gMinTextureWidth; // 设置为最小宽度
+        theHeight = gMinTextureHeight; // 设置为最小高度
+        return;
+    }
+
     if (theImageFlags & D3DImageFlag_Use64By64Subdivisions)
     {
         theWidth = theHeight = 64;
         return;
     }
 
-    static int aGoodTextureSize[MAX_TEXTURE_SIZE] = {0}; // 确保静态数组初始化
+    static int aGoodTextureSize[MAX_TEXTURE_SIZE];
     static bool haveInited = false;
 
     // 初始化 aGoodTextureSize 数组
@@ -489,6 +496,7 @@ static void GetBestTextureDimensions(int &theWidth, int &theHeight, bool isEdge,
 
             int aGoodValue = aPow2;
 
+            // 确保在进行运算前 aGoodValue 不会造成问题
             if ((aGoodValue - i) > 64)
             {
                 aGoodValue >>= 1;
@@ -499,45 +507,63 @@ static void GetBestTextureDimensions(int &theWidth, int &theHeight, bool isEdge,
                         break;
 
                     aGoodValue >>= 1;
+
+                    // 防止 aGoodValue 变为 0，避免死循环
+                    if (aGoodValue <= 0)
+                        break;
                 }
             }
-
             aGoodTextureSize[i] = aGoodValue;
         }
-    }
-
-    // 检查输入 width 和 height 的有效性，在边界内
-    if (theWidth < 0 || theWidth >= MAX_TEXTURE_SIZE || theHeight < 0 || theHeight >= MAX_TEXTURE_SIZE)
-    {
-        theWidth = gMinTextureWidth; // 设置为最小值
-        theHeight = gMinTextureHeight; // 设置为最小值
-        return;
     }
 
     int aWidth = theWidth;
     int aHeight = theHeight;
 
+    // 处理纹理大小
     if (usePow2)
     {
         if (isEdge || (theImageFlags & D3DImageFlag_MinimizeNumSubdivisions))
         {
-            aWidth = std::min(gMaxTextureWidth, GetClosestPowerOf2Above(aWidth));
-            aHeight = std::min(gMaxTextureHeight, GetClosestPowerOf2Above(aHeight));
+            // 确保 gMaxTextureWidth 和 gMaxTextureHeight 是合法的正数
+            if (gMaxTextureWidth > 0 && gMaxTextureHeight > 0)
+            {
+                aWidth = (aWidth >= gMaxTextureWidth) ? gMaxTextureWidth : GetClosestPowerOf2Above(aWidth);
+                aHeight = (aHeight >= gMaxTextureHeight) ? gMaxTextureHeight : GetClosestPowerOf2Above(aHeight);
+            }
+            else
+            {
+                aWidth = std::max(aWidth, gMinTextureWidth);
+                aHeight = std::max(aHeight, gMinTextureHeight);
+            }
         }
         else
         {
-            aWidth = std::min(gMaxTextureWidth, aGoodTextureSize[aWidth]);
-            aHeight = std::min(gMaxTextureHeight, aGoodTextureSize[aHeight]);
+            // 确保 aWidth 和 aHeight 没有越界的情况
+            if (aWidth < MAX_TEXTURE_SIZE && aHeight < MAX_TEXTURE_SIZE)
+            {
+                aWidth = (aWidth >= gMaxTextureWidth) ? gMaxTextureWidth : aGoodTextureSize[aWidth];
+                aHeight = (aHeight >= gMaxTextureHeight) ? gMaxTextureHeight : aGoodTextureSize[aHeight];
+            }
+            else
+            {
+                aWidth = std::max(aWidth, gMinTextureWidth);
+                aHeight = std::max(aHeight, gMinTextureHeight);
+            }
         }
     }
 
-    // 确保宽度和高度不小于最小值
-    aWidth = std::max(gMinTextureWidth, aWidth);
-    aHeight = std::max(gMinTextureHeight, aHeight);
+    // 保证最终宽高不小于最小值
+    if (aWidth < gMinTextureWidth)
+        aWidth = gMinTextureWidth;
+
+    if (aHeight < gMinTextureHeight)
+        aHeight = gMinTextureHeight;
 
     theWidth = aWidth;
     theHeight = aHeight;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
