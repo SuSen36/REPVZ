@@ -127,7 +127,7 @@ void GridItem::DrawIZombieBrain(Graphics* g)
     {
         g->SetDrawMode(Graphics::DRAWMODE_ADDITIVE);
         g->SetColorizeImages(true);
-        g->SetColor(Color(255, 255, 255, ClampInt(mTransparentCounter * 3, 0, 255)));
+        g->SetColor(Color(255, 255, 255, std::clamp(mTransparentCounter * 3, 0, 255)));
         g->DrawImageF(IMAGE_BRAIN, mPosX, mPosY);
         g->SetDrawMode(Graphics::DRAWMODE_NORMAL);
         g->SetColorizeImages(false);

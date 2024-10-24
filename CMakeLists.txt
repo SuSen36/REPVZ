@@ -143,7 +143,11 @@ target_include_directories(re-plants-vs-zombies PRIVATE
 	${PLAT_INCLUDES}
 	${bass_SOURCE_DIR}/${BASS_INCLUDE}
 )
-target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
+if (BUILD_DEBUG)
+    target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
+else()
+    target_compile_definitions(re-plants-vs-zombies PRIVATE NDEBUG)
+endif()
 
 if (LOW_MEMORY)
 	target_compile_definitions(re-plants-vs-zombies PRIVATE LOW_MEMORY)
@@ -153,7 +157,7 @@ target_link_libraries(re-plants-vs-zombies zlibstatic SDL2::SDL2 bass)
 
 if (WIN32)
 	target_link_options(re-plants-vs-zombies PRIVATE -static -static-libgcc -static-libstdc++)
-	target_link_libraries(re-plants-vs-zombies opengl32 ws2_32 ddraw dinput8 dxguid dxerr8 user32 gdi32 winmm imm32 shlwapi)
+	target_link_libraries(re-plants-vs-zombies opengl32 ws2_32 ddraw dinput8 dxguid dxerr8 user32 gdi32 winmm imm32)
 	target_compile_definitions(re-plants-vs-zombies PRIVATE WINDOWS)
 
 	if(NOT CONSOLE)

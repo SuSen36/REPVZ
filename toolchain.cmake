@@ -5,3 +5,4 @@ set(CMAKE_C_COMPILER "${CHOST}-clang")
 set(CMAKE_CXX_COMPILER   "${CHOST}-clang++")
 set(CMAKE_RC_COMPILER "${CHOST}-windres")
 set(CMAKE_FIND_ROOT_PATH "/usr/${CHOST}")
+

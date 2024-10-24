@@ -2088,7 +2088,7 @@ void LawnApp::PlayFoleyPitch(FoleyType theFoleyType, float thePitch)
 //0x453670
 SexyString LawnApp::GetStageString(int theLevel)
 {
-	int aArea = ClampInt((theLevel - 1) / LEVELS_PER_AREA + 1, 1, ADVENTURE_AREAS + 1);
+	int aArea = std::clamp((theLevel - 1) / LEVELS_PER_AREA + 1, 1, ADVENTURE_AREAS + 1);
 	int aSub = theLevel - (aArea - 1) * LEVELS_PER_AREA;
 	return StrFormat("%d-%d", aArea, aSub);
 }

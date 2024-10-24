@@ -2731,7 +2731,7 @@ void Plant::UpdateReanimColor()
     }
     else if (mEatenFlashCountdown > 0)
     {
-        int aGrayness = ClampInt(mEatenFlashCountdown * 3, 0, mImitaterType == SeedType::SEED_IMITATER ? 128 : 255);
+        int aGrayness = std::clamp(mEatenFlashCountdown * 3, 0, mImitaterType == SeedType::SEED_IMITATER ? 128 : 255);
         aBodyReanim->mExtraAdditiveColor = Color(aGrayness, aGrayness, aGrayness);
         aBodyReanim->mEnableExtraAdditiveDraw = true;
     }
@@ -4148,7 +4148,7 @@ void Plant::Draw(Graphics* g)
             {
                 g->SetDrawMode(Graphics::DRAWMODE_ADDITIVE);
                 g->SetColorizeImages(true);
-                g->SetColor(Color(255, 255, 255, ClampInt(mEatenFlashCountdown * 3, 0, 255)));
+                g->SetColor(Color(255, 255, 255, std::clamp(mEatenFlashCountdown * 3, 0, 255)));
                 TodDrawImageCelF(g, aPlantImage, aOffsetX, aOffsetY, aImageIndex, 0);
                 g->SetDrawMode(Graphics::DRAWMODE_NORMAL);
                 g->SetColorizeImages(false);

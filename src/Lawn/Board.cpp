@@ -613,7 +613,7 @@ void Board::PickZombieWaves()
 		}
 		else
 		{
-			mNumWaves = gZombieWaves[ClampInt(mLevel - 1, 0, 49)];
+			mNumWaves = gZombieWaves[std::clamp(mLevel - 1, 0, 49)];
 			if (!mApp->IsFirstTimeAdventureMode() && !mApp->IsMiniBossLevel())
 			{
 				mNumWaves = mNumWaves < 10 ? 20 : mNumWaves + 10;
@@ -1857,7 +1857,7 @@ void Board::UpdateLevelEndSequence()
 			if (aSoundInstance)
 			{
 				aSoundInstance->Play(false, true);
-				float aPitch = ClampFloat(6 - CountUntriggerLawnMowers(), 0.0f, 6.0f);
+				float aPitch = std::clamp(6.0f - CountUntriggerLawnMowers(), 0.0f, 6.0f);
 				aSoundInstance->AdjustPitch(aPitch);
 			}
 			aLawnMower->Die();
@@ -2461,7 +2461,7 @@ bool Board::CanZombieSpawnOnLevel(ZombieType theZombieType, int theLevel)
 	}
 
 	TOD_ASSERT(gZombieAllowedLevels[theZombieType].mZombieType == theZombieType);
-	return gZombieAllowedLevels[theZombieType].mAllowedOnLevel[ClampInt(theLevel - 1, 0, 49)];
+	return gZombieAllowedLevels[theZombieType].mAllowedOnLevel[std::clamp(theLevel - 1, 0, 49)];
 }
 
 //0x40D6F0
@@ -5633,7 +5633,7 @@ void Board::UpdateIce()
 				}
 			}
 
-			int anAlpha = ClampInt(mIceTimer[aRow] / 10, 0, 255);
+			int anAlpha = std::clamp(mIceTimer[aRow] / 10, 0, 255);
 			aParticleIce->OverrideColor(nullptr, Color(255, 255, 255, anAlpha));
 		}
 	}
@@ -5698,7 +5698,7 @@ void Board::UpdateProgressMeter()
 		}
 
 		// 计算当前应当的进度条长度，并将长度的范围限定在 [1, 150] 之间
-		int aLength = ClampInt(aCurrentWaveLength + FloatRoundToInt((aNextWaveLength - aCurrentWaveLength) * aFraction), 1, 150);
+		int aLength = std::clamp(aCurrentWaveLength + FloatRoundToInt((aNextWaveLength - aCurrentWaveLength) * aFraction), 1, 150);
 		// 取得当前实际与理论的进度条长度之差
 		int aDelta = aLength - mProgressMeterWidth;
 		// 当差值不超过一波的长度时，每 20cs 调整一次长度；否则，每 5cs 调整一次长度
@@ -6062,7 +6062,7 @@ void Board::DrawIce(Graphics* g, int theGridY)
 	int aPosY = GridToPixelY(8, theGridY) + 20;
 	int aHeight = Sexy::IMAGE_ICE->GetHeight();
 	int aWidth = Sexy::IMAGE_ICE->GetWidth();
-	int anAlpha = ClampInt(255 * mIceTimer[theGridY] / 10, 0, 255);
+	int anAlpha = std::clamp(255 * mIceTimer[theGridY] / 10, 0, 255);
 	if (anAlpha < 255)
 	{
 		g->SetColorizeImages(true);
@@ -6802,13 +6802,13 @@ void Board::DrawProgressMeter(Graphics* g)
 	}
 	else if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_SLOT_MACHINE)
 	{
-		int aSunMoney = ClampInt(mSunMoney, 0, 2000);
+		int aSunMoney = std::clamp(mSunMoney, 0, 2000);
 		SexyString aMatchStr = StrFormat(__S("%d/%d %s"), aSunMoney, 2000, TodStringTranslate(__S("[SUN]")).c_str());
 		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
 	}
 	else if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
 	{
-		int aSunMoney = ClampInt(mSunMoney, 0, 1000);
+		int aSunMoney = std::clamp(mSunMoney, 0, 1000);
 		SexyString aMatchStr = StrFormat(__S("%d/%d %s"), aSunMoney, 1000, TodStringTranslate(__S("[SUN]")).c_str());
 		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
 	}
@@ -7515,7 +7515,7 @@ void Board::DrawUICoinBank(Graphics* g)
 	}
 
 	g->SetColorizeImages(true);
-	int anAlpha = ClampInt(255 * mCoinBankFadeCount / 15, 0, 255);
+	int anAlpha = std::clamp(255 * mCoinBankFadeCount / 15, 0, 255);
 	g->SetColor(Color(255, 255, 255, anAlpha));
 	g->DrawImage(Sexy::IMAGE_COINBANK, aPosX, aPosY);
 
@@ -9145,7 +9145,7 @@ int Board::PixelToGridX(int theX, int theY)
 	if (theX < LAWN_XMIN)
 		return -1;
 
-	return ClampInt((theX - LAWN_XMIN) / 80, 0, MAX_GRID_SIZE_X - 1);
+	return std::clamp((theX - LAWN_XMIN) / 80, 0, MAX_GRID_SIZE_X - 1);
 }
 
 //0x41C530
@@ -9178,15 +9178,15 @@ int Board::PixelToGridY(int theX, int theY)
 		{
 			theY -= (4 - aGridX) * 20;
 		}
-		return ClampInt((theY - LAWN_YMIN) / 85, 0, MAX_GRID_SIZE_Y - 2);
+		return std::clamp((theY - LAWN_YMIN) / 85, 0, MAX_GRID_SIZE_Y - 2);
 	}
 	else if (StageHasPool())
 	{
-		return ClampInt((theY - LAWN_YMIN) / 85, 0, MAX_GRID_SIZE_Y - 1);
+		return std::clamp((theY - LAWN_YMIN) / 85, 0, MAX_GRID_SIZE_Y - 1);
 	}
 	else
 	{
-		return ClampInt((theY - LAWN_YMIN) / 100, 0, MAX_GRID_SIZE_Y - 2);
+		return std::clamp((theY - LAWN_YMIN) / 100, 0, MAX_GRID_SIZE_Y - 2);
 	}
 }
 

@@ -893,7 +893,7 @@ void Challenge::BeghouledScore(int theGridX, int theGridY, int theNumPlants, int
 		{
 			aNumSuns += 2;
 		}
-		aNumSuns = ClampInt(aNumSuns, 1, 5);
+		aNumSuns = std::clamp(aNumSuns, 1, 5);
 
 		for (int i = 0; i < aNumSuns; i++)
 		{
@@ -2013,7 +2013,7 @@ void Challenge::UpdateStormyNight()
 // GOTY @Patoke: 0x426320
 void Challenge::UpdateSlotMachine()
 {
-	int aSunMoney = ClampInt(mBoard->mSunMoney, 0, 2000);
+	int aSunMoney = std::clamp(mBoard->mSunMoney, 0, 2000);
 	if (aSunMoney >= SLOT_MACHINE_WINNING_SCORE - 100)
 	{
 		mBoard->DisplayAdvice(__S("[ADVICE_ALMOST_THERE]"), MESSAGE_STYLE_HINT_FAST, ADVICE_ALMOST_THERE);
@@ -2828,7 +2828,7 @@ void Challenge::WhackAZombieSpawning()
 	if (--mChallengeStateCounter == 0)
 	{
 		// 根据当前波数计算当前处于的阶段
-		int aPhase = ClampInt((mBoard->mCurrentWave - 1) * 6 / 12, 0, 5);
+		int aPhase = std::clamp((mBoard->mCurrentWave - 1) * 6 / 12, 0, 5);
 		// 在不同阶段下出现路障、铁桶僵尸及出现二、三只僵尸的权重
 		const int aDoubleChance[6] = { 0, 30, 10, 10, 15, 18 };
 		const int aTripleChance[6] = { 0, 0, 0, 0, 10, 13 };
@@ -3043,7 +3043,7 @@ void Challenge::DrawStormFlash(Graphics* g, int theTime, int theMaxAmount)
 	MTRand aDrawRand = MTRand(mBoard->mMainCounter / 6);
 	int aDarkness = TodAnimateCurve(150, 0, theTime, 255 - theMaxAmount, 255, CURVE_LINEAR) + aDrawRand.NextNoAssert((unsigned long)64) - 32;
 	// 设置暴风雨阴暗的颜色
-	g->SetColor(Color(0, 0, 0, ClampInt(aDarkness, 0, 255)));
+	g->SetColor(Color(0, 0, 0, std::clamp(aDarkness, 0, 255)));
 	// 绘制暴风雨阴暗的主色
 	g->FillRect(-1000, -1000, 2800, 2600);
 
@@ -3751,7 +3751,7 @@ void Challenge::ZombiquariumUpdate()
 		mBoard->DisplayAdvice(aMsg, MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_ZOMBIQUARIUM_COLLECT_SUN);
 	}
 
-	int aScore = ClampInt(mBoard->mSunMoney, 0, ZOMBIQUARIUM_WINNING_SCORE);
+	int aScore = std::clamp(mBoard->mSunMoney, 0, ZOMBIQUARIUM_WINNING_SCORE);
 	mBoard->mProgressMeterWidth = TodAnimateCurve(0, ZOMBIQUARIUM_WINNING_SCORE, aScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
 	if (aScore >= ZOMBIQUARIUM_WINNING_SCORE - 100)
 	{
@@ -4090,7 +4090,7 @@ void Challenge::ScaryPotterPopulate()
 			break;
 		case GAMEMODE_SCARY_POTTER_ENDLESS:
 		{
-			int aNumExtraGargantuars = ClampInt(mSurvivalStage / 10, 0, 8);
+			int aNumExtraGargantuars = std::clamp(mSurvivalStage / 10, 0, 8);
 			ScaryPotterDontPlaceInCol(0, aGridArray, aGridArrayCount);
 			ScaryPotterDontPlaceInCol(1, aGridArray, aGridArrayCount);
 			ScaryPotterPlacePot(SCARYPOT_SEED, ZOMBIE_INVALID, SEED_LEFTPEATER, 6, aGridArray, aGridArrayCount);
@@ -4689,7 +4689,7 @@ void Challenge::IZombieInitLevel()
 
 		int aFormationHit = RandRangeInt(0, 4);
 
-		int aPuffshroomCount = RandRangeInt(ClampInt(2 + mSurvivalStage / 3, 2, 4), ClampInt(3 + mSurvivalStage / 2, 2, 6));
+		int aPuffshroomCount = RandRangeInt(std::clamp(2 + mSurvivalStage / 3, 2, 4), std::clamp(3 + mSurvivalStage / 2, 2, 6));
 		if (mSurvivalStage == 0)
 		{
 			aPuffshroomCount = 0;
@@ -4700,7 +4700,7 @@ void Challenge::IZombieInitLevel()
 		}
 		else if (mSurvivalStage >= 10)
 		{
-			aPuffshroomCount = RandRangeInt(ClampInt(2 + mSurvivalStage / 3, 2, 5), ClampInt(3 + mSurvivalStage / 2, 2, 7));
+			aPuffshroomCount = RandRangeInt(std::clamp(2 + mSurvivalStage / 3, 2, 5), std::clamp(3 + mSurvivalStage / 2, 2, 7));
 		}
 		int aSunflowerCount = 8 - aPuffshroomCount;
 		IZombiePlacePlants(SEED_SUNFLOWER, aSunflowerCount, -1);
@@ -5430,7 +5430,7 @@ void Challenge::TreeOfWisdomInit()
 	aReanimTree->SetTruncateDisappearingFrames(nullptr, false);
 	mReanimChallenge = mApp->ReanimationGetID(aReanimTree);
 
-	int aTreeSize = ClampInt(TreeOfWisdomGetSize(), 1, 50);
+	int aTreeSize = std::clamp(TreeOfWisdomGetSize(), 1, 50);
 	aReanimTree->PlayReanim(StrFormat("anim_grow%d", aTreeSize).c_str(), REANIM_PLAY_ONCE_AND_HOLD, 0, 18.0f);
 	if (aTreeSize == 0 && mApp->mPlayerInfo->mPurchases[STORE_ITEM_TREE_FOOD] < PURCHASE_COUNT_OFFSET)
 	{
@@ -5472,7 +5472,7 @@ void Challenge::TreeOfWisdomGrow()
 {
 	mApp->mPlayerInfo->mChallengeRecords[mApp->GetCurrentChallengeIndex()]++;
 	int aTreeSize = TreeOfWisdomGetSize();
-	mApp->ReanimationGet(mReanimChallenge)->PlayReanim(StrFormat("anim_grow%d", ClampInt(aTreeSize, 1, 51)).c_str(), REANIM_PLAY_ONCE_AND_HOLD, 0, 8.0f);
+	mApp->ReanimationGet(mReanimChallenge)->PlayReanim(StrFormat("anim_grow%d", std::clamp(aTreeSize, 1, 51)).c_str(), REANIM_PLAY_ONCE_AND_HOLD, 0, 8.0f);
 	mApp->PlayFoley(FOLEY_PLANTGROW);
 
 	if (aTreeSize > 1)
@@ -5561,7 +5561,7 @@ void Challenge::TreeOfWisdomGiveWisdom()
 	}
 	else
 	{
-		mTreeOfWisdomTalkIndex = ClampInt(aTreeSize - 1, 1, 49);
+		mTreeOfWisdomTalkIndex = std::clamp(aTreeSize - 1, 1, 49);
 	}
 }
 
@@ -5583,7 +5583,7 @@ void Challenge::TreeOfWisdomSayRepeat()
 	}
 	else
 	{
-		mTreeOfWisdomTalkIndex = RandRangeInt(2, ClampInt(aTreeSize, 3, 49));
+		mTreeOfWisdomTalkIndex = RandRangeInt(2, std::clamp(aTreeSize, 3, 49));
 	}
 
 	mChallengeStateCounter = 600;

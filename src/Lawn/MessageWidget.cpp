@@ -247,7 +247,7 @@ void MessageWidget::DrawReanimatedText(Graphics* g, _Font* theFont, const Color&
 		ReanimatorTransform aTransform;
 		aTextReanim->GetCurrentTransform(2, &aTransform);
 
-		int anAlpha = ClampInt(FloatRoundToInt(theColor.mAlpha * aTransform.mAlpha), 0, 255);
+		int anAlpha = std::clamp(FloatRoundToInt(theColor.mAlpha * aTransform.mAlpha), 0, 255);
 		if (anAlpha <= 0)
 		{
 			break;  // 文本动画完全透明时，直接返回
@@ -418,7 +418,7 @@ void MessageWidget::Draw(Graphics* g)
 		}
 		if (aFadeOut)
 		{
-			aColor.mAlpha = ClampInt(mDuration * 15, 0, 255);
+			aColor.mAlpha = std::clamp(mDuration * 15, 0, 255);
 			aOutlineColor.mAlpha = aColor.mAlpha;
 		}
 

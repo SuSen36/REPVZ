@@ -586,7 +586,7 @@ void CutScene::PlaceStreetZombies()
 		{
 			int aZombieNumInWave = aZombieTypeCount[(int)aZombieType];
 			int aZombiePreviewNum = aZombieNumInWave * aPreviewCapacity / aTotalZombieCount;
-			aZombiePreviewNum = ClampInt(aZombiePreviewNum, 1, aZombieNumInWave);
+			aZombiePreviewNum = std::clamp(aZombiePreviewNum, 1, aZombieNumInWave);
 			for (int i = 0; i < aZombiePreviewNum; i++)
 			{
 				FindAndPlaceZombie(aZombieType, aZombieGrid);

@@ -401,7 +401,7 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
 
 bool Coin::IsMoney(CoinType theType)
 {
-    // Õâ¸öº¯ÊýÔ­±¾ÊÇÍêÈ«Ã»ÓÐµÄ£¬µ«ÊÇÓÉÓÚÔÚ Board ÖÐÉæ¼°µ½£¬²¢ÇÒ¸Ð¾õÄÜÔÚÐèÒªÌí¼ÓÐÂÇ®±ÒÖÖÀàµÄÊ±ºòÌá¹©·½±ã£¬ËùÒÔ¾ÍÁôÏÂÀ´ÁË
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«Ã»ï¿½ÐµÄ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Board ï¿½ï¿½ï¿½æ¼°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¸Ð¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Ç®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½á¹©ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½Ô¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     return theType == CoinType::COIN_SILVER || theType == CoinType::COIN_GOLD || theType == CoinType::COIN_DIAMOND;
 }
 
@@ -692,7 +692,7 @@ void Coin::UpdateCollected()
             {
                 if (mType == CoinType::COIN_PRESENT_MINIGAMES)
                 {
-                    // ×¢£º´Ë´¦µÄ theMessageStyle ²ÎÊý£¬Ô­°æÖÐÎª MESSAGE_STYLE_HINT_TALL_UNLOCKMESSAGE£¬ÄÚ²â°æÖÐÎª MESSAGE_STYLE_HINT_TALL_8SECONDS
+                    // ×¢ï¿½ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ theMessageStyle ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½Îª MESSAGE_STYLE_HINT_TALL_UNLOCKMESSAGEï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½Îª MESSAGE_STYLE_HINT_TALL_8SECONDS
                     mBoard->DisplayAdvice(__S("[UNLOCKED_MINIGAMES]"), MessageStyle::MESSAGE_STYLE_HINT_TALL_UNLOCKMESSAGE, AdviceType::ADVICE_UNLOCKED_MODE);
                 }
                 else if (mType == CoinType::COIN_PRESENT_PUZZLE_MODE)
@@ -722,7 +722,7 @@ void Coin::UpdateCollected()
             ScoreCoin();
         }
 
-        mScale = ClampFloat(mCollectionDistance * 0.05f, 0.5f, 1.0f);
+        mScale = std::clamp(static_cast<float >(mCollectionDistance * 0.05f), 0.5f, 1.0f);
         mScale *= GetSunScale();
     }
 }
@@ -765,7 +765,7 @@ void Coin::Update()
 
         if ((!mHitGround || mIsBeingCollected) && (mType == CoinType::COIN_SILVER || mType == CoinType::COIN_GOLD))
         {
-            AttachmentOverrideColor(mAttachmentID, Color(0, 0, 0, 0));  // ÔË¶¯ÖÐµÄ½ð±ÒºÍÒø±ÒÊ¹ÓÃÌùÍ¼£¬¹ÊÒÔ´Ë·¨Òþ²Ø¸½¼þµÄ¶¯»­
+            AttachmentOverrideColor(mAttachmentID, Color(0, 0, 0, 0));  // ï¿½Ë¶ï¿½ï¿½ÐµÄ½ï¿½Òºï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½Ô´Ë·ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½Ä¶ï¿½ï¿½ï¿½
         }
     }
 }
@@ -775,7 +775,7 @@ Color Coin::GetColor()
 {
     if ((IsSun() || IsMoney()) && mIsBeingCollected)
     {
-        float aAlpha = ClampFloat(mCollectionDistance * 0.035f, 0.35f, 1.0f) * 255.0f;
+        float aAlpha = std::clamp(static_cast<float >(mCollectionDistance * 0.035f), 0.35f, 1.0f) * 255.0f;
         return Color(255, 255, 255, aAlpha);
     }
 

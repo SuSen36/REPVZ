@@ -98,7 +98,7 @@ Trail::Trail()
 //0x51BB30
 void Trail::AddPoint(float x, float y)
 {
-	int aMaxPoints = ClampInt(mDefinition->mMaxPoints, 2, 20);
+	int aMaxPoints = std::clamp(mDefinition->mMaxPoints, 2, 20);
 
 	if (mNumTrailPoints > 0)
 	{
@@ -217,8 +217,8 @@ void Trail::Draw(Graphics* g)
 		float aAlphaOverLengthNext = FloatTrackEvaluate(mDefinition->mAlphaOverLength, aUNext, mTrailInterp[(int)TrailTracks::TRACK_ALPHA_OVER_LENGTH]);
 		float aAlphaOverTimeCur = FloatTrackEvaluate(mDefinition->mAlphaOverTime, aTimeValue, mTrailInterp[(int)TrailTracks::TRACK_ALPHA_OVER_TIME]);
 		float aAlphaOverTimeNext = FloatTrackEvaluate(mDefinition->mAlphaOverTime, aTimeValue, mTrailInterp[(int)TrailTracks::TRACK_ALPHA_OVER_TIME]);
-		int anAlphaCur = ClampInt(FloatRoundToInt(aAlphaOverLengthCur * aAlphaOverTimeCur * mColorOverride.mAlpha), 0, 255);
-		int anAlphaNext = ClampInt(FloatRoundToInt(aAlphaOverLengthNext * aAlphaOverTimeNext * mColorOverride.mAlpha), 0, 255);
+		int anAlphaCur = std::clamp(FloatRoundToInt(aAlphaOverLengthCur * aAlphaOverTimeCur * mColorOverride.mAlpha), 0, 255);
+		int anAlphaNext = std::clamp(FloatRoundToInt(aAlphaOverLengthNext * aAlphaOverTimeNext * mColorOverride.mAlpha), 0, 255);
 		Sexy::Color aColorCur = mColorOverride;
 		Sexy::Color aColorNext = mColorOverride;
 		aColorCur.mAlpha = anAlphaCur;

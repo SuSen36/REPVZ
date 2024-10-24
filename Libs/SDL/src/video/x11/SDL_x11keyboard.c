@@ -114,7 +114,7 @@ X11_KeyCodeToSym(_THIS, KeyCode keycode, unsigned char group)
                 if (group >= num_groups) {
                     group = 0;
                 }
-            } else if (action == XkbClampIntoRange) {
+            } else if (action == Xkbstd::clampoRange) {
                 group = num_groups - 1;
             } else {
                 group %= num_groups;

@@ -944,7 +944,7 @@ void SeedChooserScreen::ShowToolTip()
 					GetSeedPositionInChooser(aSeedType, aSeedX, aSeedY);
 				}
 
-				mToolTip->mX = ClampInt((SEED_PACKET_WIDTH - mToolTip->mWidth) / 2 + aSeedX, 0, BOARD_WIDTH - mToolTip->mWidth);
+				mToolTip->mX = std::clamp((SEED_PACKET_WIDTH - mToolTip->mWidth) / 2 + aSeedX, 0, BOARD_WIDTH - mToolTip->mWidth);
 				mToolTip->mY = aSeedY + 70;
 				mToolTip->mVisible = true;
 				mToolTipSeed = aSeedType;

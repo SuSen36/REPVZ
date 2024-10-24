@@ -86,7 +86,7 @@ bool CheatDialog::ApplyCheat()
 	if (sexysscanf(mLevelEditWidget->mString.c_str(), __S("c%d"), &aChallengeIndex) == 1 || 
 		sexysscanf(mLevelEditWidget->mString.c_str(), __S("C%d"), &aChallengeIndex) == 1)
 	{
-		mApp->mGameMode = (GameMode)ClampInt(aChallengeIndex, 0, NUM_CHALLENGE_MODES);
+		mApp->mGameMode = (GameMode)std::clamp(aChallengeIndex, 0, NUM_CHALLENGE_MODES);
 		return true;
 	}
 

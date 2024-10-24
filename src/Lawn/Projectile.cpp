@@ -149,7 +149,7 @@ Plant* Projectile::FindCollisionTargetPlant()
 				aPlant->mSeedType == SeedType::SEED_POTATOMINE ||
 				aPlant->mSeedType == SeedType::SEED_SPIKEWEED ||
 				aPlant->mSeedType == SeedType::SEED_SPIKEROCK ||
-				aPlant->mSeedType == SeedType::SEED_LILYPAD)  // ½©Ê¬Íã¶¹²»ÄÜ»÷ÖÐµÍ°«Ö²Îï
+				aPlant->mSeedType == SeedType::SEED_LILYPAD)  // ï¿½ï¿½Ê¬ï¿½ã¶¹ï¿½ï¿½ï¿½Ü»ï¿½ï¿½ÐµÍ°ï¿½Ö²ï¿½ï¿½
 				continue;
 		}
 
@@ -201,7 +201,7 @@ bool Projectile::PeaAboutToHitTorchwood()
 //0x46CD40
 Zombie* Projectile::FindCollisionTarget()
 {
-	if (PeaAboutToHitTorchwood())  // ¡°¿¨»ð¾æ¡±µÄÔ­Àí£¬Õâ¶Î´úÂëÔÚÁ½°æÄÚ²â°æÖÐ¾ù²»´æÔÚ
+	if (PeaAboutToHitTorchwood())  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¡±ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		return nullptr;
 
 	Rect aProjectileRect = GetProjectileRect();
@@ -746,7 +746,7 @@ void Projectile::UpdateMotion()
 #ifdef DO_FIX_BUGS
 	if (mProjectileType == ProjectileType::PROJECTILE_COBBIG)
 	{
-		aSlopeHeightChange = 0.0f;  // ÐÞ¸´¡°ÉÏ½çÖ®·ç¡±
+		aSlopeHeightChange = 0.0f;  // ï¿½Þ¸ï¿½ï¿½ï¿½ï¿½Ï½ï¿½Ö®ï¿½ç¡±
 	}
 #endif
 	if (mMotionType == ProjectileMotion::MOTION_FLOAT_OVER)
@@ -917,7 +917,7 @@ void Projectile::DoImpact(Zombie* theZombie)
 				aPosX -= 60.0f;
 			}
 
-			aPosY = ClampFloat(aPosY, 20.0f, 100.0f);
+			aPosY = std::clamp(aPosY, 20.0f, 100.0f);
 			theZombie->AddAttachedParticle(aPosX, aPosY, aEffect);
 		}
 		else
@@ -1147,7 +1147,7 @@ void Projectile::DrawShadow(Graphics* g)
 
 	if (mMotionType == ProjectileMotion::MOTION_LOBBED)
 	{
-		float aHeight = ClampFloat(-mPosZ, 0.0f, 200.0f);
+		float aHeight = std::clamp(-mPosZ, 0.0f, 200.0f);
 		aScale *= 200.0f / (aHeight + 200.0f);
 	}
 
