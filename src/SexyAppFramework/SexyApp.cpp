@@ -1,10 +1,13 @@
 #include "SexyApp.h"
 
-
-#include <ctime>
+//#include "..\Crypt\RegKey.h"
+//#include "../SexyAppFramework/misc/SEHCatcher.h"
+//#include "InternetManager.h"
+#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fstream>
+//#include "BetaSupport.h"
 
 using namespace Sexy;
 
@@ -486,22 +489,22 @@ bool SexyApp::CheckSignature(const Buffer& theBuffer, const std::string& theFile
 
 void SexyApp::PreTerminate()
 {
-
+#ifdef ZYLOM
+	ZylomShowAd();
+#else
 	//if ((!mSkipAd) && 
 	//	((((!mIsRegistered) || (mInternetManager->HasNewAds())) && ((Rand()%2) == 0))))
 	//{
 	//	mInternetManager->TryShowAd();
 	//}
-
+#endif
 }
 
 void SexyApp::OpenUpdateURL()
 {
-#ifdef ZYLOM
-	ZylomGS_StandAlone_ShowUpdatePage();
-#else
+
 	//OpenURL(mInternetManager->GetUpdateURL(), true);	
-#endif
+
 	Shutdown();
 }
 
@@ -585,6 +588,7 @@ void SexyApp::InitPropertiesHook()
 	//mInternetManager->Init();
 	mBetaSupport = nullptr;//new BetaSupport(this);
 
+
 }
 
 void SexyApp::Init()
@@ -633,16 +637,3 @@ void SexyApp::UpdateFrames()
 	//mInternetManager->Update();
 }
 
-#ifdef ZYLOM
-
-bool SexyApp::ZylomUpdateCheckNeeded()
-{
-	return ZylomGS_StandAlone_UpdateCheckNeeded();
-}
-
-void SexyApp::ZylomShowAd()
-{
-	ZylomGS_StandAlone_ShowAd(mIsRegistered);
-}
-
-#endif

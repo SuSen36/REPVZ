@@ -519,9 +519,15 @@ void GameSelector::SyncProfile(bool theShowLoading)
 	if (mApp->mPlayerInfo)
 		mLevel = mApp->mPlayerInfo->GetLevel();
 	mShowStartButton = true;
-	mMinigamesLocked = true;
+#ifdef _DEBUG
+	mMinigamesLocked = false;
+	mPuzzleLocked = false;
+	mSurvivalLocked = false;
+#else
+    mMinigamesLocked = true;
 	mPuzzleLocked = true;
 	mSurvivalLocked = true;
+#endif
 	if (mApp->mPlayerInfo && !mApp->IsIceDemo())
 	{
 		if (mLevel >= 2)

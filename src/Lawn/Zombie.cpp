@@ -1199,7 +1199,7 @@ void Zombie::BungeeLiftTarget()
     if (aPlant == nullptr)
         return;
 
-#ifdef DO_FIX_BUGS
+
     Zombie* aZombie = nullptr;
     while (mBoard->IterateZombies(aZombie))
     {
@@ -1208,7 +1208,7 @@ void Zombie::BungeeLiftTarget()
             aZombie->mTargetPlantID = PlantID::PLANTID_NULL;  // 修复类似于 IZ 蹦极刷阳光的 Bug
         }
     }
-#endif
+
 
     aPlant->mOnBungeeState = PlantOnBungeeState::RISING_WITH_BUNGEE;
     mApp->PlayFoley(FoleyType::FOLEY_FLOOP);
@@ -1397,7 +1397,7 @@ void Zombie::UpdateZombiePogo()
         aHeight = 170.0f;
     }
     mAltitude = TodAnimateCurveFloat(POGO_BOUNCE_TIME, 0, mPhaseCounter, 9.0f, aHeight + 9.0f, TodCurves::CURVE_BOUNCE_SLOW_MIDDLE);
-    mFrame = std::clamp(static_cast<int>(3 - mAltitude / 3), 0, 3);
+    mFrame = std::clamp(3 - static_cast<int>(mAltitude / 3), 0, 3);
 
     if (mPhaseCounter == 7)
     {
@@ -2045,7 +2045,7 @@ void Zombie::UpdateZombieGargantuar()
         Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
         if (aBodyReanim->ShouldTriggerTimedEvent(0.64f))
         {
-#ifdef DO_FIX_BUGS
+
             if (mMindControlled)  // 魅惑巨人砸僵尸
             {
                 Zombie* aZombie = FindZombieTarget();
@@ -2094,45 +2094,6 @@ void Zombie::UpdateZombieGargantuar()
                     }
                 }
             }
-#else
-            Plant* aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_CHEW);
-            if (aPlant)
-            {
-                if (aPlant->mSeedType == SeedType::SEED_SPIKEROCK)
-                {
-                    TakeDamage(20, 32U);
-                    aPlant->SpikeRockTakeDamage();
-                    if (aPlant->mPlantHealth <= 0)
-                    {
-                        SquishAllInSquare(aPlant->mPlantCol, aPlant->mRow, ZombieAttackType::ATTACKTYPE_CHEW);
-                    }
-                }
-                else
-                {
-                    SquishAllInSquare(aPlant->mPlantCol, aPlant->mRow, ZombieAttackType::ATTACKTYPE_CHEW);
-                }
-            }
-
-            if (mApp->IsScaryPotterLevel())
-            {
-                int aGridX = mBoard->PixelToGridX(mPosX, mPosY);
-                GridItem* aScaryPot = mBoard->GetScaryPotAt(aGridX, mRow);
-                if (aScaryPot)
-                {
-                    mBoard->mChallenge->ScaryPotterOpenPot(aScaryPot);
-                }
-            }
-
-            if (mApp->IsIZombieLevel())
-            {
-                GridItem* aBrain = mBoard->mChallenge->IZombieGetBrainTarget(this);
-                if (aBrain)
-                {
-                    mBoard->mChallenge->IZombieSquishBrain(aBrain);
-                }
-            }
-#endif
-
             mApp->PlayFoley(FoleyType::FOLEY_THUMP);
             mBoard->ShakeBoard(0, 3);
         }
@@ -5081,7 +5042,7 @@ void Zombie::DrawZombiePart(Graphics* g, Image* theImage, int theFrame, int theR
     float aDrawHeight = aCelHeight;
     if (theDrawPos.mClipHeight > CLIP_HEIGHT_LIMIT)
     {
-        aDrawHeight = std::clamp(static_cast<float >(aCelHeight) - theDrawPos.mClipHeight, 0.0f, static_cast<float >(aCelHeight));
+        aDrawHeight = std::clamp(static_cast<float>(aCelHeight) - theDrawPos.mClipHeight, 0.0f, static_cast<float>(aCelHeight));
     }
 
     int anAlpha = 255;
@@ -6722,7 +6683,9 @@ void Zombie::StartEating()
     {
         if (mZombieType != ZombieType::ZOMBIE_SNORKEL)
         {
-            PlayZombieReanim("anim_eat", ReanimLoopType::REANIM_LOOP, 20, 0.0f);
+            //PlayZombieReanim("anim_dance", ReanimLoopType::REANIM_LOOP, 20, 0.0f);
+
+            PlayZombieReanim("anim_eat", ReanimLoopType::REANIM_LOOP, 0.0f, 0.0f);
         }
 
         if (mShieldType == ShieldType::SHIELDTYPE_DOOR)
@@ -8888,14 +8851,11 @@ void Zombie::DetachShield()
         }
         else if (mShieldType == ShieldType::SHIELDTYPE_LADDER)
         {
-#ifdef DO_FIX_BUGS
+
             if (mHasArm)  // 修复扶梯僵尸搭梯后断臂重生的 Bug
             {
                 ReanimShowPrefix("Zombie_outerarm", RENDER_GROUP_NORMAL);
             }
-#else
-            ReanimShowPrefix("Zombie_outerarm", RENDER_GROUP_NORMAL);
-#endif
             mZombiePhase = ZombiePhase::PHASE_ZOMBIE_NORMAL;
             if (mIsEating)
             {

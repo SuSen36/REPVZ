@@ -2,8 +2,6 @@ plugins {
     id 'com.android.application'
 }
 
-def buildWithCMake = project.hasProperty('BUILD_WITH_CMAKE');
-
 android {
     namespace "com.popcap.pvz"
     compileSdk 33
@@ -19,7 +17,6 @@ android {
                 abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64' // 确保各个ABI都是字符串，不要用逗号连接
             }
             cmake {
-                version '3.5.0' // <- 指定 CMake 版本为 3.5
                 arguments "-DANDROID_PLATFORM=android-19", "-DANDROID_STL=c++_static"
                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'

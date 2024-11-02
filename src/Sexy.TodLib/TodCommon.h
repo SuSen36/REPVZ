@@ -1,5 +1,5 @@
 #pragma once
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <cfloat>
 #include "../Lawn/LawnCommon.h"
@@ -131,17 +131,16 @@ bool					TodAppCloseRequest();
 //====================================================================================================//
 /*inline*/ int			RandRangeInt(int theMin, int theMax);
 /*inline*/ float		RandRangeFloat(float theMin, float theMax);
-inline float			Distance2D(float x1, float y1, float x2, float y2)			{ return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)); }
-inline float			FloatLerp(float theStart, float theEnd, float theFactor)	{ return theStart + theFactor * (theEnd - theStart); }
-inline int				FloatRoundToInt(float theFloatValue)						{ return theFloatValue > 0 ? theFloatValue + 0.5f : theFloatValue - 0.5f; }
-inline bool				FloatApproxEqual(float theFloatVal1, float theFloatVal2)	{ return fabs(theFloatVal1 - theFloatVal2) < FLT_EPSILON; }
-
+inline float			Distance2D(float x1, float y1, float x2, float y2)			               { return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)); }
+inline float			FloatLerp(float theStart, float theEnd, float theFactor)	               { return theStart + theFactor * (theEnd - theStart); }
+inline int				FloatRoundToInt(float theFloatValue)						               { return theFloatValue > 0 ? theFloatValue + 0.5f : theFloatValue - 0.5f; }
+inline bool FloatApproxEqual(float a, float b, float epsilon = std::numeric_limits<float>::epsilon()){if (std::isnan(a) || std::isnan(b)) return false;if (a == b) return true;return std::fabs(a - b) < epsilon;}
 Color					GetFlashingColor(int theCounter, int theFlashTime);
 /*inline*/ int			ColorComponentMultiply(int theColor1, int theColor2);
 Color					ColorsMultiply(const Color& theColor1, const Color& theColor2);
 Color					ColorAdd(const Color& theColor1, const Color& theColor2);
 
-inline void				SetBit(uint& theNum, int theIdx, bool theValue = true)		{ if (theValue) theNum |= 1 << theIdx; else theNum &= ~(1 << theIdx); }
-inline bool				TestBit(uint theNum, int theIdx)							{ return theNum & (1 << theIdx); }
+inline void				SetBit(uint& theNum, int theIdx, bool theValue = true)		               { if (theValue) theNum |= 1 << theIdx; else theNum &= ~(1 << theIdx); }
+inline bool				TestBit(uint theNum, int theIdx)							               { return theNum & (1 << theIdx); }
 //#define SetBit(num, idx, val) { if (val) (num) |= 1 << (idx); else (num) &= ~(1 << (idx)); }
 //#define TestBit(num, idx) ((num) & (1 - (idx)))

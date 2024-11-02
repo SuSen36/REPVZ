@@ -49,40 +49,64 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
                 }
                 break;
 
-            case SDL_FINGERDOWN:
+            case SDL_MOUSEMOTION:
             {
-                int x = static_cast<int>(event.tfinger.x * (mScreenBounds.mHeight*7/3)); // 使用屏幕高度
-                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mWidth);  // 使用屏幕宽度
+                if (!mMouseIn)
+                    mMouseIn = true;
+
+                int x = event.motion.x;
+                int y = event.motion.y;
                 mWidgetManager->RemapMouse(x, y);
 
                 mLastUserInputTick = mLastTimerTime;
-                mMouseIn = true; // 用户输入时将 mouseIn 设置为 true
-                mWidgetManager->MouseDown(x, y, 1); // 1 为鼠标按下
-                break;
-            }
 
-            case SDL_FINGERUP:
-            {
-                int x = static_cast<int>(event.tfinger.x * (mScreenBounds.mHeight*7/3)); // 使用屏幕高度
-                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mWidth);  // 使用屏幕宽度
-                mWidgetManager->RemapMouse(x, y);
-
-                mLastUserInputTick = mLastTimerTime;
-                mWidgetManager->MouseUp(x, y, 1); // 1 为鼠标抬起
-                break;
-            }
-
-            case SDL_FINGERMOTION:
-            {
-                int x = static_cast<int>(event.tfinger.x * (mScreenBounds.mHeight*7/3)); // 使用屏幕高度
-                int y = static_cast<int>(event.tfinger.y * mScreenBounds.mWidth);  // 使用屏幕宽度
-                mWidgetManager->RemapMouse(x, y);
-
-                mLastUserInputTick = mLastTimerTime;
                 mWidgetManager->MouseMove(x, y);
                 break;
             }
 
+            case SDL_MOUSEBUTTONDOWN:
+            {
+                if (!mMouseIn)
+                    mMouseIn = true;
+
+                int x = event.button.x;
+                int y = event.button.y;
+                mWidgetManager->RemapMouse(x, y);
+
+                mLastUserInputTick = mLastTimerTime;
+
+                mWidgetManager->MouseMove(x, y);
+                int btn =
+                        (event.button.button == SDL_BUTTON_LEFT) ? 1 :
+                        (event.button.button == SDL_BUTTON_RIGHT) ? -1 :
+                        3;
+                if (event.button.clicks == 2)
+                    btn = (event.button.button == SDL_BUTTON_LEFT) ? 2 : -2;
+
+                mWidgetManager->MouseDown(x, y, btn);
+                break;
+            }
+
+            case SDL_MOUSEBUTTONUP:
+            {
+                if (!mMouseIn)
+                    mMouseIn = true;
+
+                int x = event.button.x;
+                int y = event.button.y;
+                mWidgetManager->RemapMouse(x, y);
+
+                mLastUserInputTick = mLastTimerTime;
+
+                mWidgetManager->MouseMove(x, y);
+                int btn =
+                        (event.button.button == SDL_BUTTON_LEFT) ? 1 :
+                        (event.button.button == SDL_BUTTON_RIGHT) ? -1 :
+                        3;
+
+                mWidgetManager->MouseUp(x, y, btn);
+                break;
+            }
             case SDL_KEYDOWN:
                 mLastUserInputTick = mLastTimerTime;
                 mWidgetManager->KeyDown((KeyCode)event.key.keysym.sym);

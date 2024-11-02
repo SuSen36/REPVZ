@@ -308,7 +308,7 @@ bool ResourceManager::ParseImageResource(XMLElement &theElement)
 	aRes->mAlphaColor = 0xFFFFFF;
 	anItr = theElement.mAttributes.find(__S("alphacolor"));
 	if (anItr != theElement.mAttributes.end())
-		sexysscanf(anItr->second.c_str(),__S("%lx"),&aRes->mAlphaColor);
+		sexysscanf(anItr->second.c_str(),__S("%x"),&aRes->mAlphaColor);
 
 	anItr = theElement.mAttributes.find(__S("variant"));
 	if (anItr != theElement.mAttributes.end())
@@ -1221,6 +1221,7 @@ void ResourceManager::SetAllowMissingProgramImages(bool allow)
 ///////////////////////////////////////////////////////////////////////////////
 bool ResourceManager::ReplaceImage(const std::string &theId, Image *theImage)
 {
+
 	ResMap::iterator anItr = mImageMap.find(theId);
 	if (anItr != mImageMap.end())
 	{

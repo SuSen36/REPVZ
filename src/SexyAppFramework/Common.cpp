@@ -951,11 +951,9 @@ std::string Sexy::vformat(const char* fmt, va_list argPtr)
     int attemptedSize = bufSize - 1;
 
 	int numChars = 0;
-#ifdef _WIN32
-	numChars = _vsnprintf(stackBuffer, attemptedSize, fmt, argPtr);
-#else
+
 	numChars = vsnprintf(stackBuffer, attemptedSize, fmt, argPtr);
-#endif
+
 
 	//cout << "NumChars: " << numChars << endl;
 
@@ -977,11 +975,8 @@ std::string Sexy::vformat(const char* fmt, va_list argPtr)
         // Try a bigger size
         attemptedSize *= 2;
 		heapBuffer = (char*)realloc(heapBuffer, (attemptedSize + 1));
-#ifdef _WIN32
-		numChars = _vsnprintf(heapBuffer, attemptedSize, fmt, argPtr);
-#else
+
 		numChars = vsnprintf(heapBuffer, attemptedSize, fmt, argPtr);
-#endif
     }
 
 	heapBuffer[numChars] = 0;
@@ -1003,61 +998,58 @@ std::string Sexy::StrFormat(const char* fmt ...)
     return result;
 }
 
-std::wstring Sexy::vformat(const wchar_t* fmt, va_list argPtr) 
+
+#include <string>
+#include <vector>
+#include <cstdarg> // for va_list
+
+std::wstring Sexy::vformat(const wchar_t* fmt, va_list argPtr)
 {
-    // We draw the line at a 1MB string.
-    const int maxSize = 1000000;
+    const int maxSize = 1000000; // Maximum size for formatted string
+    const int bufSize = 161; // Stack buffer size
+    wchar_t stackBuffer[bufSize];
 
-    // If the string is less than 161 characters,
-    // allocate it on the stack because this saves
-    // the malloc/free time.
-    const int bufSize = 161;
-	wchar_t stackBuffer[bufSize];
+    // Attempt to format to stack buffer
+    int numChars = 0;
 
-    int attemptedSize = bufSize - 1;
+    numChars = vswprintf(stackBuffer, bufSize - 1, fmt, argPtr);
 
-	int numChars = 0;
-#ifdef _WIN32
-	numChars = _vsnwprintf(stackBuffer, attemptedSize, fmt, argPtr);
-#else
-	numChars = vswprintf(stackBuffer, attemptedSize, fmt, argPtr);
-#endif
 
-	//cout << "NumChars: " << numChars << endl;
-
-    if ((numChars >= 0) && (numChars <= attemptedSize)) 
-	{
-		// Needed for case of 160-character printf thing
-		stackBuffer[numChars] = '\0';
-
-        // Got it on the first try.
-		return std::wstring(stackBuffer);
+    // Check if the initial attempt was successful
+    if ((numChars >= 0) && (numChars <= bufSize - 1))
+    {
+        stackBuffer[numChars] = L'\0'; // Null-terminate the string
+        return std::wstring(stackBuffer); // Return the formatted string
     }
 
-    // Now use the heap.
-	wchar_t* heapBuffer = NULL;
+    // Now use a dynamic buffer if necessary
+    std::vector<wchar_t> heapBuffer;
+    int attemptedSize = bufSize; // Start with initial buffer size
 
-    while (((numChars == -1) || (numChars > attemptedSize)) && 
-		(attemptedSize < maxSize)) 
-	{
-        // Try a bigger size
+    // Loop to find the correct buffer size
+    while (((numChars == -1) || (numChars > attemptedSize - 1)) &&
+           (attemptedSize < maxSize))
+    {
         attemptedSize *= 2;
-		heapBuffer = (wchar_t*)realloc(heapBuffer, (attemptedSize + 1));
-#ifdef _WIN32
-		numChars = _vsnwprintf(heapBuffer, attemptedSize, fmt, argPtr);
-#else
-		numChars = vswprintf(heapBuffer, attemptedSize, fmt, argPtr);
-#endif
+        heapBuffer.resize(attemptedSize + 1); // Resize for new size
+
+
+        numChars = vswprintf(heapBuffer.data(), attemptedSize, fmt, argPtr);
+
     }
 
-	heapBuffer[numChars] = 0;
+    // If successful, null-terminate the buffer
+    if (numChars > 0)
+    {
+        heapBuffer[numChars] = L'\0'; // Null-terminate the buffer
+        return std::wstring(heapBuffer.data()); // Create wstring from buffer
+    }
 
-	std::wstring result = std::wstring(heapBuffer);
-
-    free(heapBuffer);
-
-    return result;
+    // In case of failure, return an empty wstring
+    return std::wstring();
 }
+
+
 
 //overloaded StrFormat: should only be used by the xml strings
 std::wstring Sexy::StrFormat(const wchar_t* fmt ...)

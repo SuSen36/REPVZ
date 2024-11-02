@@ -334,7 +334,6 @@ public:
 	StringStringVectorMap	mStringVectorProperties;
 	ResourceManager*		mResourceManager;
 
-
 	LONG					mOldWndProc;
 
 protected:	

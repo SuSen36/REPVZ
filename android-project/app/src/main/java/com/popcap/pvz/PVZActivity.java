@@ -8,10 +8,10 @@ import android.widget.Toast;
 import org.libsdl.app.SDLActivity;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
+import java.io.OutputStream;
+import java.nio.file.Files;
 
 public class PVZActivity extends SDLActivity {
 
@@ -66,14 +66,15 @@ public class PVZActivity extends SDLActivity {
     private void copyAssetFile(AssetManager assetManager, String filename, String destPath) {
         try {
             // 检查是否是目录
-            if (Objects.requireNonNull(assetManager.list(filename)).length > 0) { // 检查是否是文件夹
+            String[] subFiles = assetManager.list(filename);
+            if (subFiles != null && subFiles.length > 0) {
+                // 确保目标目录存在
                 File dir = new File(destPath);
                 if (!dir.exists()) {
-                    dir.mkdirs(); // 确保目录存在
+                    dir.mkdirs(); // 创建目录
                 }
 
                 // 递归遍历子目录
-                String[] subFiles = assetManager.list(filename);
                 for (String subFile : subFiles) {
                     copyAssetFile(assetManager, filename + "/" + subFile, destPath + "/" + subFile);
                 }
@@ -86,19 +87,27 @@ public class PVZActivity extends SDLActivity {
                 return; // 跳过该文件的复制
             }
 
-            // 复制文件
+            // 使用 InputStream 和 OutputStream 进行文件复制
             try (InputStream in = assetManager.open(filename);
-                 FileOutputStream out = new FileOutputStream(outFile)) {
+                 OutputStream out = Files.newOutputStream(outFile.toPath())) {
+
                 byte[] buffer = new byte[1024];
                 int read;
                 while ((read = in.read(buffer)) != -1) {
                     out.write(buffer, 0, read);
                 }
+
+                // 复制成功后的进一步处理（如日志）可以在此处添加
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "复制文件 " + filename + " 时出错：" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "复制文件 " + filename + " 时出错！", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "访问文件 " + filename + " 时出错：" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 }

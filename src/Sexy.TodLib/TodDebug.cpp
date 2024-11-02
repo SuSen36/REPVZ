@@ -20,10 +20,8 @@ static char gDebugDataFolder[512];
 //0x514EA0
 void TodErrorMessageBox(const char* theMessage, const char* theTitle)
 {
-#ifdef __SWITCH__
-	ErrorApplicationConfig c;
-	errorApplicationCreate(&c, theTitle, theMessage);
-	errorApplicationShow(&c);
+#ifdef ANDROID
+	//TODO android ErrorMessageBox
 #else
 	throw std::runtime_error("Error Box\n--" + std::string(theTitle) + "--\n" + theMessage);
 #endif

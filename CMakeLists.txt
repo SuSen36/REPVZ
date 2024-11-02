@@ -30,13 +30,12 @@ list(REMOVE_ITEM SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Sexy.TodLib/TodDrawTriangleInc.cpp
 )
 
-set(LOW_MEMORY OFF)
 
 if(ANDROID)
 	list(APPEND SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/graphics/Window.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/graphics/GLInterface.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/pc/Input.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/Input.cpp
 	)
 	list(APPEND PLAT_INCLUDES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android
@@ -52,16 +51,9 @@ else()
 	)
 endif()
 
-option(CONSOLE "Show console on Windows" OFF)
 
 set(SDL_STATIC OFF CACHE BOOL "Build static library of SDL" FORCE)
 set(SDL_SHARED ON CACHE BOOL "Build shared library of SDL" FORCE)
-set(USE_MIDI OFF CACHE BOOL "SDL midi" FORCE)
-set(USE_MODPLUG OFF CACHE BOOL "SDL modplug" FORCE)
-set(USE_XMP OFF CACHE BOOL "SDL xmp" FORCE)
-set(USE_OPUS OFF CACHE BOOL "SDL opus" FORCE)
-set(USE_DRFLAC OFF CACHE BOOL "SDL flac" FORCE)
-set(USE_PXTONE OFF CACHE BOOL "SDL pxtone" FORCE)
 
 add_subdirectory(Libs/SDL)
 
@@ -136,33 +128,24 @@ endif ()
 target_include_directories(re-plants-vs-zombies PRIVATE
 	${PROJECT_SOURCE_DIR}/src
 	${PROJECT_SOURCE_DIR}/Libs/SDL/include
-	${PROJECT_SOURCE_DIR}/Libs/zlib
 	${PLAT_INCLUDES}
 	${bass_SOURCE_DIR}/${BASS_INCLUDE}
 )
+target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
 
-if (BUILD_DEBUG)
-	target_compile_definitions(re-plants-vs-zombies PRIVATE _DEBUG)
-else()
-	target_compile_definitions(re-plants-vs-zombies PRIVATE NDEBUG)
-endif()
-
-if (LOW_MEMORY)
-	target_compile_definitions(re-plants-vs-zombies PRIVATE LOW_MEMORY)
-endif()
 
 target_link_libraries(re-plants-vs-zombies SDL2::SDL2 bass)
 
 if (WIN32)
 	target_link_options(re-plants-vs-zombies PRIVATE -static -static-libgcc -static-libstdc++)
-	target_link_libraries(re-plants-vs-zombies opengl32 ws2_32 ddraw dinput8 dxguid dxerr8 user32 gdi32 winmm imm32 shlwapi)
+	target_link_libraries(re-plants-vs-zombies opengl32 ws2_32 ddraw dinput8 dxguid dxerr8 user32 gdi32 winmm imm32)
 	target_compile_definitions(re-plants-vs-zombies PRIVATE WINDOWS)
 
 	if(NOT CONSOLE)
 		target_link_options(re-plants-vs-zombies PRIVATE -mwindows)
 	endif()
 elseif (ANDROID)  # 增加安卓平台的支持
-	target_link_libraries(re-plants-vs-zombies log EGL GLESv1_CM)  # 链接需要的库
+    target_link_libraries(re-plants-vs-zombies android log EGL)  # 链接需要的库
 	target_compile_definitions(re-plants-vs-zombies PRIVATE ANDROID)  # 定义ANDROID宏
 else()
 	target_link_libraries(re-plants-vs-zombies GL)
@@ -171,21 +154,18 @@ endif()
 # 设置资源目录
 set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Resources)
 
+# Windows 平台处理
 if(WIN32)
-	# 获取资源目录
-	set(RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
+	# 获取资源目录下的所有资源文件
+	file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
 
-	# 使用 GLOB_RECURSE 获取资源文件
-	file(GLOB_RECURSE RESOURCES
-			"${RESOURCE_DIR}/*"
-	)
-
-	# 将资源文件拷贝到构建目录
 	foreach(RES_FILE ${RESOURCES})
 		# 获取文件的相对路径
 		file(RELATIVE_PATH RELATIVE_PATH "${RESOURCE_DIR}" "${RES_FILE}")
+
 		# 创建目标路径
 		set(TARGET_PATH "${CMAKE_CURRENT_BINARY_DIR}/${RELATIVE_PATH}")
+
 		# 创建目标文件的目录
 		get_filename_component(TARGET_DIR "${TARGET_PATH}" DIRECTORY)
 
@@ -193,10 +173,35 @@ if(WIN32)
 		add_custom_command(
 				TARGET re-plants-vs-zombies POST_BUILD
 				COMMAND ${CMAKE_COMMAND} -E make_directory "${TARGET_DIR}"
-				COMMAND ${CMAKE_COMMAND} -E copy
-				"${RES_FILE}"
-				"${TARGET_PATH}"
+				COMMAND ${CMAKE_COMMAND} -E copy "${RES_FILE}" "${TARGET_PATH}"
 				COMMENT "Copying resource file ${RELATIVE_PATH} to build directory"
+		)
+	endforeach()
+endif()
+
+# Android 平台处理
+if(ANDROID)
+	set(ANDROID_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android-project/app/src/main/assets")
+
+	# 获取资源目录下的所有资源文件
+	file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
+
+	foreach(RES_FILE ${RESOURCES})
+		# 获取文件的相对路径
+		file(RELATIVE_PATH RELATIVE_PATH "${RESOURCE_DIR}" "${RES_FILE}")
+
+		# 创建目标路径
+		set(TARGET_PATH "${ANDROID_ASSETS_DIR}/${RELATIVE_PATH}")
+
+		# 创建目标文件的目录
+		get_filename_component(TARGET_DIR "${TARGET_PATH}" DIRECTORY)
+
+		# 添加目标路径的命令
+		add_custom_command(
+				TARGET re-plants-vs-zombies POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E make_directory "${TARGET_DIR}"
+				COMMAND ${CMAKE_COMMAND} -E copy "${RES_FILE}" "${TARGET_PATH}"
+				COMMENT "Copying resource file ${RELATIVE_PATH} to assets directory"
 		)
 	endforeach()
 endif()

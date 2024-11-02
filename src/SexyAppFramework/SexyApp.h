@@ -38,9 +38,7 @@ public:
 	int						mTimesExecuted;
 	bool					mTimedOut;
 
-#ifdef ZYLOM
-	uint					mZylomGameId;
-#endif
+
 
 public:
 	virtual void			UpdateFrames();
@@ -76,10 +74,7 @@ public:
 	virtual std::string		GetGameSEHInfo();
 	virtual void			GetSEHWebParams(DefinesMap* theDefinesMap);
 
-#ifdef ZYLOM
-	bool					ZylomUpdateCheckNeeded();	
-	void					ZylomShowAd();
-#endif		
+
 };
 
 extern SexyApp* gSexyApp;
