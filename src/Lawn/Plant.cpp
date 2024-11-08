@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "Coin.h"
 #include "Plant.h"
 #include "Board.h"
@@ -5037,9 +5038,13 @@ void Plant::Die()
 
 PlantDefinition& GetPlantDefinition(SeedType theSeedType)
 {
+    if (theSeedType < 0 || theSeedType >= (int)SeedType::NUM_SEED_TYPES)
+    {
+        throw std::out_of_range("Invalid SeedType provided");
+    }
     TOD_ASSERT(gPlantDefs[theSeedType].mSeedType == theSeedType);
     TOD_ASSERT(theSeedType >= 0 && theSeedType < (int)SeedType::NUM_SEED_TYPES);
-    
+
     return gPlantDefs[theSeedType];
 }
 

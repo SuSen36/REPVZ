@@ -20,7 +20,24 @@
 
 //HINSTANCE Sexy::gHInstance;
 bool Sexy::gDebug = false;
+AAssetManager* Sexy::gAssetsManager = nullptr;
 static Sexy::MTRand gMTRand;
+
+#ifdef ANDROID
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_popcap_pvz_PVZActivity_initializeAssetManager(JNIEnv *env, jobject instance) {
+    jclass clazz = env->GetObjectClass(instance);
+    jmethodID methodID = env->GetMethodID(clazz, "getAssetManager", "()Landroid/content/res/AssetManager;");
+
+    if (methodID != nullptr) {
+        jobject assetManagerObject = env->CallObjectMethod(instance, methodID);
+        Sexy::gAssetsManager = AAssetManager_fromJava(env, assetManagerObject);
+    }
+}
+#endif
+
+
 namespace Sexy
 {
 	std::string gAppDataFolder = "";
@@ -34,10 +51,6 @@ void Sexy::PrintF(const char *text, ...)
 	va_start(args, text);
 	vsnprintf(str, sizeof(str), text, args);
 	va_end(args);
-
-#if defined(__SWITCH__) || defined(__3DS__)
-	svcOutputDebugString(str, sizeof(str));
-#endif
 
 	fprintf(stdout, "%s", str);
 }
@@ -132,7 +145,6 @@ void Sexy::SetAppDataFolder(const std::string& thePath)
 
 	Sexy::gAppDataFolder = aPath;
 }
-
 
 std::string Sexy::URLEncode(const std::string& theString)
 {

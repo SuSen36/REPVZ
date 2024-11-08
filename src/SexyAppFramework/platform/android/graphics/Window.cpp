@@ -11,7 +11,7 @@ void SexyAppBase::MakeWindow()
 {
     if (mWindow)
     {
-        SDL_SetWindowFullscreen((SDL_Window*)mWindow, (!mIsWindowed ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+        SDL_SetWindowFullscreen((SDL_Window*)mWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
     }
     else
     {
@@ -32,7 +32,7 @@ void SexyAppBase::MakeWindow()
             SexyStringToStringFast(mTitle).c_str(),
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             mWidth, mHeight,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | (!mIsWindowed ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
+            SDL_WINDOW_OPENGL  | SDL_WINDOW_FULLSCREEN_DESKTOP
         );
 
         if (!mWindow)

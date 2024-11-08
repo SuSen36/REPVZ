@@ -26,7 +26,8 @@ public class PVZActivity extends SDLActivity {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); // 强制为横屏
         // 直接复制资产，不请求权限
-        copyAssetsToExternalStorage();
+        //copyAssetsToExternalStorage();
+        initializeAssetManager();
     }
 
     private void copyAssetsToExternalStorage() {
@@ -37,7 +38,7 @@ public class PVZActivity extends SDLActivity {
             files = assetManager.list(""); // 列出根目录下的文件
 
             if (files != null && files.length > 0) {
-                String dataDirPath = getExternalFilesDir(null) + "/AssetsFolder";
+                String dataDirPath = String.valueOf(getExternalFilesDir(null));
                 createDataFolder(dataDirPath);
 
                 int fileCount = files.length; // 统计文件数量
@@ -88,20 +89,22 @@ public class PVZActivity extends SDLActivity {
             }
 
             // 使用 InputStream 和 OutputStream 进行文件复制
-            try (InputStream in = assetManager.open(filename);
-                 OutputStream out = Files.newOutputStream(outFile.toPath())) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                try (InputStream in = assetManager.open(filename);
+                     OutputStream out = Files.newOutputStream(outFile.toPath())) {
 
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, read);
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
+
+                    // 复制成功后的进一步处理（如日志）可以在此处添加
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "复制文件 " + filename + " 时出错：" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-
-                // 复制成功后的进一步处理（如日志）可以在此处添加
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "复制文件 " + filename + " 时出错：" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
         } catch (IOException e) {
@@ -109,5 +112,9 @@ public class PVZActivity extends SDLActivity {
             Toast.makeText(this, "访问文件 " + filename + " 时出错：" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+    public native void initializeAssetManager();
 
+    public AssetManager getAssetManager() {
+        return this.getAssets();
+    }
 }

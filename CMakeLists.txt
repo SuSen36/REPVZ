@@ -119,11 +119,11 @@ if (WIN32)
 	configure_file("${bass_SOURCE_DIR}/x64/bass.dll" ${CMAKE_BINARY_DIR} COPYONLY)
 endif()
 
-if(WIN32)
-add_executable(re-plants-vs-zombies ${SOURCES})
+if (WIN32)
+	add_executable(re-plants-vs-zombies ${SOURCES})
 else (ANDROID)
-add_library(re-plants-vs-zombies SHARED ${SOURCES})
-endif ()
+	add_library(re-plants-vs-zombies SHARED ${SOURCES})
+endif()
 
 target_include_directories(re-plants-vs-zombies PRIVATE
 	${PROJECT_SOURCE_DIR}/src
@@ -154,7 +154,7 @@ endif()
 # 设置资源目录
 set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Resources)
 
-# Windows 平台处理
+# Windows 平台资源复制
 if(WIN32)
 	# 获取资源目录下的所有资源文件
 	file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
@@ -179,7 +179,7 @@ if(WIN32)
 	endforeach()
 endif()
 
-# Android 平台处理
+# Android 平台资源复制
 if(ANDROID)
 	set(ANDROID_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android-project/app/src/main/assets")
 

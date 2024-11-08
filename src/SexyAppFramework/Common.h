@@ -22,11 +22,20 @@
 #include <cstdint>
 #include <ctime>
 
+#ifdef ANDROID
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#else
+typedef void AAssetManager; // 所有平台上都使用 void* 替代 HWND
+typedef void AAsset;
+#endif
+
 #ifdef _WIN32
 #define NOMINMAX 1
 #include <windows.h>
 #include <mmsystem.h>
 #else
+
 
 #include <cwctype>
 #include <cstring>
@@ -130,7 +139,7 @@ namespace Sexy
 const ulong SEXY_RAND_MAX = 0x7FFFFFFF;
 
 extern bool			gDebug;
-//extern HINSTANCE	gHInstance;
+extern AAssetManager* gAssetsManager;
 
 #define printf(...) Sexy::PrintF(__VA_ARGS__)
 void				PrintF(const char *text, ...);
@@ -255,5 +264,10 @@ inline void			inlineTrim(std::string &theData, const std::string& theChars = " \
 struct StringLessNoCase { bool operator()(const std::string &s1, const std::string &s2) const { return _stricmp(s1.c_str(),s2.c_str())<0; } };
 
 }
-
+#ifdef ANDROID
+extern "C" {
+JNIEXPORT void JNICALL
+Java_com_popcap_pvz_PVZActivity_initializeAssetManager(JNIEnv *env, jobject thiz);
+}
+#endif
 #endif //__SEXYAPPFRAMEWORK_COMMON_H__

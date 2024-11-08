@@ -94,6 +94,7 @@ public:
 	~PakInterface();
 
 	bool					AddPakFile(const std::string& theFileName);
+    bool                    AddDirectory(const std::string &theFileName);
 	PFILE*					FOpen(const char* theFileName, const char* theAccess);
 	int						FClose(PFILE* theFile);
 	int						FSeek(PFILE* theFile, long theOffset, int theOrigin);
@@ -109,6 +110,7 @@ public:
 	BOOL					FindNextFile(HANDLE hFindFile, LPWIN32_FIND_DATA lpFindFileData);
 	BOOL					FindClose(HANDLE hFindFile);
 	*/
+
 };
 
 extern PakInterface* gPakInterface;

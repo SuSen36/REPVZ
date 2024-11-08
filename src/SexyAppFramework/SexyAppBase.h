@@ -134,7 +134,7 @@ public:
 	void*					mContext;
 	void*					mSurface; // for EGL
 
-	uint32_t					mRandSeed;
+	uint32_t				mRandSeed;
 		
 	std::string				mCompanyName;
 	std::string				mFullCompanyName;

@@ -5,18 +5,11 @@
 #include <string>
 #include <fstream>
 #include <unistd.h>
-#include <time.h>
-#include <math.h>
+#include <ctime>
+#include <cmath>
 
 #include <SDL.h>
 
-#ifdef __SWITCH__
-#include <switch.h>
-#include <locale>
-#include <codecvt>
-#elifdef __3DS__
-#include <3ds.h>
-#endif
 #include <iostream>
 #include "SexyAppBase.h"
 //#include "../SexyAppFramework/misc/SEHCatcher.h"
@@ -55,12 +48,6 @@ const int DEMO_FILE_ID = 0x42BEEF78;
 const int DEMO_VERSION = 2;
 
 SexyAppBase* Sexy::gSexyAppBase = NULL;
-
-//SEHCatcher Sexy::gSEHCatcher;
-
-//HMODULE gDDrawDLL = NULL;
-//HMODULE gDSoundDLL = NULL;
-//HMODULE gVersionDLL = NULL;
 
 //typedef struct { UINT cbSize; DWORD dwTime; } LASTINPUTINFO;
 //typedef BOOL (WINAPI*GetLastInputInfoFunc)(LASTINPUTINFO *plii);
@@ -121,30 +108,6 @@ static GLImage* gFPSImage = NULL;
 
 //////////////////////////////////////////////////////////////////////////
 
-/*
-typedef HRESULT (WINAPI *SHGetFolderPathFunc)(HWND, int, HANDLE, DWORD, LPTSTR);
-void* GetSHGetFolderPath(const char* theDLL, HMODULE* theMod)
-{
-	HMODULE aMod = LoadLibrary(theDLL);
-	SHGetFolderPathFunc aFunc = NULL;
-
-	if (aMod != NULL)
-	{
-		*((void**)&aFunc) = (void*)GetProcAddress(aMod, "SHGetFolderPathA");
-		if (aFunc == NULL)
-		{
-			FreeLibrary(aMod);
-			aMod = NULL;
-		}
-	}	
-
-	*theMod = aMod;
-	return (void *)aFunc;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////
-
 SexyAppBase::SexyAppBase()
 {
 	gSexyAppBase = this;
@@ -174,7 +137,7 @@ SexyAppBase::SexyAppBase()
 	//mChangeDirTo = GetFileDir(aPath);
 
 #ifdef ANDROID
-    mChangeDirTo = "/storage/emulated/0/Android/data/com.popcap.pvz/files/AssetsFolder/";
+    mChangeDirTo = "/storage/emulated/0/Android/data/com.popcap.pvz/files/";
 #else
 	mChangeDirTo = "./";
 #endif
@@ -202,10 +165,8 @@ SexyAppBase::SexyAppBase()
 	mPreferredY = -1;
 	mIsScreenSaver = false;
 	mAllowMonitorPowersave = true;
-	//mHWnd = NULL;
-	mGLInterface = NULL;	
-	mMusicInterface = NULL;
-	//mInvisHWnd = NULL;
+	mGLInterface = nullptr;
+	mMusicInterface = nullptr;
 	mFrameTime = 10;
 	mNonDrawCount = 0;
 	mDrawCount = 0;
@@ -224,7 +185,7 @@ SexyAppBase::SexyAppBase()
 	mFastForwardToUpdateNum = 0;
 	mFastForwardToMarker = false;
 	mFastForwardStep = false;
-	mSoundManager = NULL;
+	mSoundManager = nullptr;
 	mCursorNum = CURSOR_POINTER;		
 	mMouseIn = false;
 	mRunning = false;
@@ -250,7 +211,6 @@ SexyAppBase::SexyAppBase()
 	mHasFocus = true;			
 	mCustomCursorsEnabled = false;	
 	mCustomCursorDirty = false;
-	//mOverrideCursor = NULL;
 	mIsOpeningURL = false;		
 	mInitialized = false;	
 	mLastShutdownWasGraceful = true;	
@@ -317,7 +277,7 @@ SexyAppBase::SexyAppBase()
 	int i;
 
 	for (i = 0; i < NUM_CURSORS; i++)
-		mCursorImages[i] = NULL;	
+		mCursorImages[i] = nullptr;
 
 	for (i = 0; i < 256; i++)
 		mAdd8BitMaxTable[i] = i;
@@ -355,7 +315,7 @@ SexyAppBase::SexyAppBase()
 	mWidgetManager = new WidgetManager(this);
 	mResourceManager = new ResourceManager(this);
 
-	mPrimaryThreadId = 0;
+	mPrimaryThreadId = nullptr;
 
 	/*
 	if (GetSystemMetrics(86)) // check for tablet pc
@@ -366,31 +326,6 @@ SexyAppBase::SexyAppBase()
 	else*/
 	mTabletPC = false;
 
-	//gSEHCatcher.mApp = this;	
-	
-	//std::wifstream stringsFile(_wfopen(L".\\properties\\fstrings", L"rb"));
-	//
-	//if(!stringsFile)
-	//{
-	//	MessageBox(NULL, "file missing: 'install-folder\\properties\\fstrings' Please re-install", "FATAL ERROR", MB_OK);
-	//	DoExit(1);
-	//}
-	//std::getline(stringsFile, mString_HardwareAccelSwitchedOn);
-	//std::getline(stringsFile, mString_HardwareAccelConfirm);
-	//std::getline(stringsFile, mString_HardwareAccelNotWorking);
-	//std::getline(stringsFile, mString_SetColorDepth);
-	//std::getline(stringsFile, mString_FailedInitDirectDrawColon);
-	//std::getline(stringsFile, mString_UnableOpenProperties);
-	//std::getline(stringsFile, mString_SigCheckFailed);
-	//std::getline(stringsFile, mString_InvalidCommandLineParam);
-	//std::getline(stringsFile, mString_RequiresDirectX);
-	//std::getline(stringsFile, mString_YouNeedDirectX);
-	//std::getline(stringsFile, mString_FailedInitDirectDraw);
-	//std::getline(stringsFile, mString_FatalError);
-	//std::getline(stringsFile, mString_UnexpectedErrorOccured);
-	//std::getline(stringsFile, mString_PleaseHelpBy);
-	//std::getline(stringsFile, mString_FailedConnectPopcap);
-	//stringsFile.close();
 }
 
 SexyAppBase::~SexyAppBase()
@@ -510,18 +445,13 @@ SexyAppBase::~SexyAppBase()
 	//DestroyCursor(mHandCursor);
 	//DestroyCursor(mDraggingCursor);			
 
-	gSexyAppBase = NULL;
+	gSexyAppBase = nullptr;
 
 	WriteDemoBuffer();
 
 	//if (mMutex != NULL)
 		//::CloseHandle(mMutex);
 
-	/*
-	FreeLibrary(gDDrawDLL);
-	FreeLibrary(gDSoundDLL);
-	FreeLibrary(gVersionDLL);
-	*/
 }
 
 /*
@@ -943,7 +873,7 @@ void SexyAppBase::DemoAssertIntEqual(int theInt)
 
 Dialog* SexyAppBase::NewDialog(int theDialogId, bool isModal, const SexyString& theDialogHeader, const SexyString& theDialogLines, const SexyString& theDialogFooter, int theButtonMode)
 {	
-	Dialog* aDialog = new Dialog(NULL, NULL, theDialogId, isModal, theDialogHeader,	theDialogLines, theDialogFooter, theButtonMode);		
+	Dialog* aDialog = new Dialog(nullptr, nullptr, theDialogId, isModal, theDialogHeader,	theDialogLines, theDialogFooter, theButtonMode);
 	return aDialog;
 }
 
@@ -966,7 +896,7 @@ Dialog*	SexyAppBase::GetDialog(int theDialogId)
 	if (anItr != mDialogMap.end())	
 		return anItr->second;
 
-	return NULL;
+	return nullptr;
 }
 
 bool SexyAppBase::KillDialog(int theDialogId, bool removeWidget, bool deleteWidget)
@@ -2101,31 +2031,33 @@ bool SexyAppBase::WriteBufferToFile(const std::string& theFileName, const Buffer
 
 bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* theBuffer, bool dontWriteToDemo)
 {
-	if ((mPlayingDemoBuffer) && (!dontWriteToDemo))
-	{
-		if (mManualShutdown)
-			return false;
+    if ((mPlayingDemoBuffer) && (!dontWriteToDemo))
+    {
+        if (mManualShutdown)
+            return false;
 
-		PrepareDemoCommand(true);
-		mDemoNeedsCommand = true;
-		
-		DBG_ASSERTE(!mDemoIsShortCmd);		
-		DBG_ASSERTE(mDemoCmdNum == DEMO_FILE_READ);
+        PrepareDemoCommand(true);
+        mDemoNeedsCommand = true;
 
-		bool success = mDemoBuffer.ReadNumBits(1, false) != 0;
-		if (!success)
-			return false;
+        DBG_ASSERTE(!mDemoIsShortCmd);
+        DBG_ASSERTE(mDemoCmdNum == DEMO_FILE_READ);
 
-		uint32_t aLen = mDemoBuffer.ReadLong();		
-				
-		theBuffer->Clear();
-		for (int i = 0; i < (int) aLen; i++)
-			theBuffer->WriteByte(mDemoBuffer.ReadByte());
+        bool success = mDemoBuffer.ReadNumBits(1, false) != 0;
+        if (!success)
+            return false;
 
-		return true;		
-	}
-	else
-	{
+        uint32_t aLen = mDemoBuffer.ReadLong();
+
+        theBuffer->Clear();
+        for (int i = 0; i < (int) aLen; i++)
+            theBuffer->WriteByte(mDemoBuffer.ReadByte());
+
+        return true;
+    }
+    else
+    {
+
+        // 其他平台处理
 		PFILE* aFP = p_fopen(theFileName.c_str(), "rb");
 
 		if (aFP == NULL)
@@ -2135,16 +2067,16 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 				WriteDemoTimingBlock();
 				mDemoBuffer.WriteNumBits(0, 1);
 				mDemoBuffer.WriteNumBits(DEMO_FILE_READ, 5);
-				mDemoBuffer.WriteNumBits(0, 1); // failure				
+				mDemoBuffer.WriteNumBits(0, 1); // failure
 			}
 
 			return false;
 		}
-		
+
 		p_fseek(aFP, 0, SEEK_END);
 		int aFileSize = p_ftell(aFP);
 		p_fseek(aFP, 0, SEEK_SET);
-		
+
 		uchar* aData = new uchar[aFileSize];
 
 		p_fread(aData, 1, aFileSize, aFP);
@@ -2158,16 +2090,18 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 			WriteDemoTimingBlock();
 			mDemoBuffer.WriteNumBits(0, 1);
 			mDemoBuffer.WriteNumBits(DEMO_FILE_READ, 5);
-			mDemoBuffer.WriteNumBits(1, 1); // success			
+			mDemoBuffer.WriteNumBits(1, 1); // success
 			mDemoBuffer.WriteLong(aFileSize);
 			mDemoBuffer.WriteBytes(aData, aFileSize);
 		}
 
-		delete [] aData;
+		delete[] aData;
 
 		return true;
-	}
+
+    }
 }
+
 
 bool SexyAppBase::FileExists(const std::string& theFileName)
 {
@@ -3462,7 +3396,8 @@ bool SexyAppBase::PrepareDemoCommand([[maybe_unused]] bool required)
 
 void SexyAppBase::ProcessDemo()
 {
-	if (mPlayingDemoBuffer)
+    //TODO: 演示模式暂时关闭
+	if (mPlayingDemoBuffer && false)
 	{
 		// At end of demo buffer?  How dare you!
 		DBG_ASSERTE(!mDemoBuffer.AtEnd());
@@ -4526,7 +4461,7 @@ bool SexyAppBase::UpdateAppStep(bool* updated)
 		{
 			int anOldUpdateCnt = mUpdateCount;
 			Process();		
-			if (updated != NULL)
+			if (updated != nullptr)
 				*updated = mUpdateCount != anOldUpdateCnt;			
 		}
 	}
@@ -5103,6 +5038,7 @@ void SexyAppBase::Init()
 
 	gPakInterface->AddPakFile("main.pak");
 
+    //gPakInterface->AddDirectory("main");
 	// Create a message we can use to talk to ourselves inter-process
 	//mNotifyGameMessage = RegisterWindowMessage((__S("Notify") + StringToSexyString(mProdName)).c_str());
 

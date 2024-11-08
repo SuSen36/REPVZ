@@ -338,8 +338,8 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
             PlayZombieReanim("anim_walkdolphin", ReanimLoopType::REANIM_LOOP, 0, 0.0f);
             PickRandomSpeed();
         }
-        SetupWaterTrack("zombie_dolphinrider_whitewater");
-        SetupWaterTrack("zombie_dolphinrider_dolphininwater");
+        SetupWaterTrack("Zombie_dolphinrider_whitewater");
+        SetupWaterTrack("Zombie_dolphinrider_dolphininwater");
         break;
 
     case ZombieType::ZOMBIE_GARGANTUAR:
@@ -1775,10 +1775,16 @@ void Zombie::UpdateZombieDolphinRider()
     bool aBackwards = IsWalkingBackwards();
     if (mZombiePhase == ZombiePhase::PHASE_DOLPHIN_WALKING && !aBackwards)
     {
-        if (mX > 700 && mX <= 720)
+        //TODO：安卓端海豚僵尸的mX为780以上，而不是725，修复他
+        int x1 = mX;
+        if (static_cast<float>(mX) > 700.0f && static_cast<float>(mX) <= 800.0f)
         {
             mZombiePhase = ZombiePhase::PHASE_DOLPHIN_INTO_POOL;
             PlayZombieReanim("anim_jumpinpool", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 16.0f);
+        }
+        else
+        {
+            TodLog("条件不满足: mX = %d, 应在 700 到 725 之间", mX);  // 使用 %d 输出整数
         }
     }
     else if (mZombiePhase == ZombiePhase::PHASE_DOLPHIN_INTO_POOL)
