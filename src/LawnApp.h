@@ -27,7 +27,6 @@ class PopDRMComm;
 class ChallengeScreen;
 class StoreScreen;
 class AlmanacDialog;
-class TypingCheck;
 
 namespace Sexy
 {
@@ -104,16 +103,16 @@ public:
 	int								mPlayTimeInactiveSession;						//+0x884
 	BoardResult						mBoardResult;									//+0x888
 	bool							mSawYeti;										//+0x88C
-	TypingCheck*					mKonamiCheck;									//+0x890
-	TypingCheck*					mMustacheCheck;									//+0x894
-	TypingCheck*					mMoustacheCheck;								//+0x898
-	TypingCheck*					mSuperMowerCheck;								//+0x89C
-	TypingCheck*					mSuperMowerCheck2;								//+0x8A0
-	TypingCheck*					mFutureCheck;									//+0x8A4
-	TypingCheck*					mPinataCheck;									//+0x8A8
-	TypingCheck*					mDanceCheck;									//+0x8AC
-	TypingCheck*					mDaisyCheck;									//+0x8B0
-	TypingCheck*					mSukhbirCheck;									//+0x8B4
+	std::string					    mKonamiCheck;									//+0x890
+    std::string					    mMustacheCheck;									//+0x894
+    std::string					    mMoustacheCheck;								//+0x898
+    std::string					    mSuperMowerCheck;								//+0x89C
+	std::string					    mSuperMowerCheck2;								//+0x8A0
+	std::string					    mFutureCheck;									//+0x8A4
+	std::string					    mPinataCheck;									//+0x8A8
+	std::string					    mDanceCheck;									//+0x8AC
+	std::string					    mDaisyCheck;									//+0x8B0
+	std::string					    mSukhbirCheck;									//+0x8B4
 	bool							mMustacheMode;									//+0x8B8
 	bool							mSuperMowerMode;								//+0x8B9
 	bool							mFutureMode;									//+0x8BA

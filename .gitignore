@@ -415,4 +415,3 @@ tools/read-compiled/target
 *.sublime-workspace
 
 build-*/
-/android-project/app/src/main/assets/

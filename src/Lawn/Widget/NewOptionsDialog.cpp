@@ -12,6 +12,7 @@
 #include "SexyAppFramework/widget/Slider.h"
 #include "SexyAppFramework/widget/Checkbox.h"
 #include "../../Sexy.TodLib/TodStringFile.h"
+#include "CheatDialog.h"
 
 using namespace Sexy;
 
@@ -55,7 +56,7 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector) :
     mSfxVolumeSlider->SetValue(theApp->GetSfxVolume() / 0.65);
 
     mFullscreenCheckbox = MakeNewCheckbox(NewOptionsDialog::NewOptionsDialog_Fullscreen, this, !theApp->mIsWindowed);
-    mHardwareAccelerationCheckbox = MakeNewCheckbox(NewOptionsDialog::NewOptionsDialog_HardwareAcceleration, this, theApp->Is3DAccelerated());
+    mCheatButton = MakeButton(NewOptionsDialog::NewOptionsDialog_HardwareAcceleration, this, __S("C"));
 
     if (mFromGameSelector)
     {
@@ -97,7 +98,7 @@ NewOptionsDialog::~NewOptionsDialog()
     delete mMusicVolumeSlider;
     delete mSfxVolumeSlider;
     delete mFullscreenCheckbox;
-    delete mHardwareAccelerationCheckbox;
+    delete mCheatButton;
     delete mAlmanacButton;
     delete mRestartButton;
     delete mBackToMainButton;
@@ -120,7 +121,7 @@ void NewOptionsDialog::AddedToManager(Sexy::WidgetManager* theWidgetManager)
     AddWidget(mBackToMainButton);
     AddWidget(mMusicVolumeSlider);
     AddWidget(mSfxVolumeSlider);
-    AddWidget(mHardwareAccelerationCheckbox);
+    AddWidget(mCheatButton);
     AddWidget(mFullscreenCheckbox);
     AddWidget(mBackToGameButton);
 }
@@ -133,7 +134,7 @@ void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
     RemoveWidget(mMusicVolumeSlider);
     RemoveWidget(mSfxVolumeSlider);
     RemoveWidget(mFullscreenCheckbox);
-    RemoveWidget(mHardwareAccelerationCheckbox);
+    RemoveWidget(mCheatButton);
     RemoveWidget(mBackToMainButton);
     RemoveWidget(mBackToGameButton);
     RemoveWidget(mRestartButton);
@@ -144,9 +145,9 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
 {
     Dialog::Resize(theX, theY, theWidth, theHeight);
     mMusicVolumeSlider->Resize(199, 116, 135, 40);
-    mSfxVolumeSlider->Resize(199, 143, 135, 40);
-    mHardwareAccelerationCheckbox->Resize(283, 175, 46, 45);
-    mFullscreenCheckbox->Resize(284, 206, 46, 45);
+    mSfxVolumeSlider->Resize(199, 143, 135, 46);
+    mCheatButton->Resize(283, 175, 46, 46);
+    mFullscreenCheckbox->Resize(284, 206, 42, 46);
     mAlmanacButton->Resize(107, 241, 209, 46);
     mRestartButton->Resize(mAlmanacButton->mX, mAlmanacButton->mY + 43, 209, 46);
     mBackToMainButton->Resize(mRestartButton->mX, mRestartButton->mY + 43, 209, 46);
@@ -156,7 +157,7 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
     {
         mMusicVolumeSlider->mY += 5;
         mSfxVolumeSlider->mY += 10;
-        mHardwareAccelerationCheckbox->mY += 15;
+        mCheatButton->mY += 15;
         mFullscreenCheckbox->mY += 20;
     }
 
@@ -186,7 +187,7 @@ void NewOptionsDialog::Draw(Sexy::Graphics* g)
 
     TodDrawString(g, __S("Music"), 186, 140 + aMusicOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
     TodDrawString(g, __S("Sound FX"), 186, 167 + aSfxOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
-    TodDrawString(g, __S("3D Acceleration"), 274, 197 + a3DAccelOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+    TodDrawString(g, __S("Secret code"), 274, 197 + a3DAccelOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
     TodDrawString(g, __S("Full Screen"), 274, 229 + aFullScreenOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
 }
 
@@ -229,41 +230,8 @@ void NewOptionsDialog::CheckboxChecked(int theId, bool checked)
                 __S("OK"), 
                 Dialog::BUTTONS_FOOTER
             );
-
+            //TODO：修复安卓奔溃的问题
             mFullscreenCheckbox->SetChecked(true, false);
-        }
-        break;
-
-    case NewOptionsDialog::NewOptionsDialog_HardwareAcceleration:
-        if (checked)
-        {
-            if (!mApp->Is3DAccelerationSupported())
-            {
-                mHardwareAccelerationCheckbox->SetChecked(false, false);
-                mApp->DoDialog(
-                    Dialogs::DIALOG_INFO,
-                    true,
-                    __S("Not Supported"),
-                    __S( "Hardware Acceleration cannot be enabled on this computer.\n\n"
-                        "Your video card does not\n"
-                        "meet the minimum requirements\n"
-                        "for this game."),
-                    __S("OK"),
-                    Dialog::BUTTONS_FOOTER
-                );
-            }
-            else if (!mApp->Is3DAccelerationRecommended())
-            {
-                mApp->DoDialog(
-                    Dialogs::DIALOG_INFO,
-                    true,
-                    __S("Warning"),
-                    __S( "Your video card may not fully support this feature.\n\n"
-                        "If you experience slower performance, please disable Hardware Acceleration.\n"),
-                    __S("OK"),
-                    Dialog::BUTTONS_FOOTER
-                );
-            }
         }
         break;
     }
@@ -272,11 +240,6 @@ void NewOptionsDialog::CheckboxChecked(int theId, bool checked)
 //0x45D290
 void NewOptionsDialog::KeyDown(Sexy::KeyCode theKey)
 {
-    if (mApp->mBoard)
-    {
-        mApp->mBoard->DoTypingCheck(theKey);
-    }
-
     if (theKey == KeyCode::KEYCODE_SPACE || theKey == KeyCode::KEYCODE_RETURN)
     {
         Dialog::ButtonDepress(Dialog::ID_OK);
@@ -374,6 +337,14 @@ void NewOptionsDialog::ButtonDepress(int theId)
             }
         }
         break;
+    }
+
+    case NewOptionsDialog::NewOptionsDialog_HardwareAcceleration:
+    {
+        mApp->KillDialog(Dialogs::DIALOG_CHEAT);
+        CheatDialog* aDialog = new CheatDialog(mApp);
+        LawnApp::CenterDialog(aDialog, aDialog->mWidth, aDialog->mHeight);
+        mApp->AddDialog(Dialogs::DIALOG_CHEAT, aDialog);
     }
 
     case NewOptionsDialog::NewOptionsDialog_Update:

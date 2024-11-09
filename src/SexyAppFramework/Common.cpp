@@ -5,10 +5,10 @@
 #include <codecvt>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #include <dirent.h>
-#include <stdarg.h>
+#include <cstdarg>
 
 
 
@@ -74,60 +74,6 @@ void Sexy::SRand(ulong theSeed)
 {
 	gMTRand.SRand(theSeed);
 }
-
-/*
-bool Sexy::CheckFor98Mill()
-{
-	static bool needOsCheck = true;
-	static bool is98Mill = false;
-
-	if (needOsCheck)
-	{
-		// bool invalid = false; // unused
-		OSVERSIONINFOEXA osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
-
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
-		if( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-		{
-			osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
-			if ( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-				return false;
-		}
-
-		needOsCheck = false;
-		is98Mill = osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS; // let's check Win95, 98, *AND* ME.
-	}
-
-	return is98Mill;
-}
-
-bool Sexy::CheckForVista()
-{
-	static bool needOsCheck = true;
-	static bool isVista = false;
-
-	if (needOsCheck)
-	{
-		// bool invalid = false; // unused
-		OSVERSIONINFOEXA osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
-
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
-		if( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-		{
-			osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
-			if ( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-				return false;
-		}
-
-		needOsCheck = false;
-		isVista = osvi.dwMajorVersion >= 6;
-	}
-
-	return isVista;
-}
-*/
 
 std::string Sexy::GetAppDataFolder()
 {

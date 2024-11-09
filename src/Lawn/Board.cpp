@@ -1,4 +1,4 @@
-#include <time.h>
+#include <ctime>
 #include <SDL.h>
 #include "ZenGarden.h"
 #include "BoardInclude.h"
@@ -8,7 +8,6 @@
 #include "System/PlayerInfo.h"
 #include "System/PoolEffect.h"
 #include "System/PopDRMComm.h"
-#include "System/TypingCheck.h"
 #include "Widget/StoreScreen.h"
 #include "Widget/AwardScreen.h"
 #include "../Sexy.TodLib/Trail.h"
@@ -7862,35 +7861,34 @@ void Board::SetSukhbirMode(bool theEnableSukhbir)
 }
 
 //0x41B1D0
-void Board::DoTypingCheck(KeyCode theKey)
+bool Board::DoTypingCheck(const std::string& theString)
 {
-	if (mApp->mKonamiCheck->Check(theKey))
+	if (mApp->mKonamiCheck == theString)
 	{
 		mApp->PlayFoley(FoleyType::FOLEY_DROP);
-		return;
+		return true;
 	}
-	if (mApp->mMustacheCheck->Check(theKey) || mApp->mMoustacheCheck->Check(theKey))
+	if (mApp->mMustacheCheck == theString || mApp->mMoustacheCheck == theString)
 	{
 		SetMustacheMode(!mMustacheMode);
 		ReportAchievement::GiveAchievement(mApp, MustacheMode, false); // @Patoke: add achievement
-		return;
+		return true;
 	}
-	if (mApp->mSuperMowerCheck->Check(theKey) || mApp->mSuperMowerCheck2->Check(theKey))
+	if (mApp->mSuperMowerCheck == theString || mApp->mSuperMowerCheck2 == theString)
 	{
 		SetSuperMowerMode(!mSuperMowerMode);
-		return;
+		return true;
 	}
-	if (mApp->mFutureCheck->Check(theKey))
+	if (mApp->mFutureCheck == theString)
 	{
 		SetFutureMode(!mFutureMode);
-		return;
+		return true;
 	}
-	if (mApp->mPinataCheck->Check(theKey))
+	if (mApp->mPinataCheck == theString)
 	{
 		if (mApp->CanDoPinataMode())
 		{
 			SetPinataMode(!mPinataMode);
-			return;
 		}
 		else
 		{
@@ -7899,15 +7897,14 @@ void Board::DoTypingCheck(KeyCode theKey)
 				DisplayAdvice(__S("[CANT_USE_CODE]"), MessageStyle::MESSAGE_STYLE_BIG_MIDDLE_FAST, AdviceType::ADVICE_NONE);
 			}
 			mApp->PlaySample(Sexy::SOUND_BUZZER);
-			return;
 		}
+        return true;
 	}
-	if (mApp->mDanceCheck->Check(theKey))
+	if (mApp->mDanceCheck == theString)
 	{
 		if (mApp->CanDoDanceMode())
 		{
 			SetDanceMode(!mDanceMode);
-			return;
 		}
 		else
 		{
@@ -7916,15 +7913,14 @@ void Board::DoTypingCheck(KeyCode theKey)
 				DisplayAdvice(__S("[CANT_USE_CODE]"), MessageStyle::MESSAGE_STYLE_BIG_MIDDLE_FAST, AdviceType::ADVICE_NONE);
 			}
 			mApp->PlaySample(Sexy::SOUND_BUZZER);
-			return;
 		}
+        return true;
 	}
-	if (mApp->mDaisyCheck->Check(theKey))
+	if (mApp->mDaisyCheck == theString)
 	{
 		if (mApp->CanDoDaisyMode())
 		{
 			SetDaisyMode(!mDaisyMode);
-			return;
 		}
 		else
 		{
@@ -7933,21 +7929,22 @@ void Board::DoTypingCheck(KeyCode theKey)
 				DisplayAdvice(__S("[CANT_USE_CODE]"), MessageStyle::MESSAGE_STYLE_BIG_MIDDLE_FAST, AdviceType::ADVICE_NONE);
 			}
 			mApp->PlaySample(Sexy::SOUND_BUZZER);
-			return;
 		}
+        return true;
 	}
-	if (mApp->mSukhbirCheck->Check(theKey))
+	if (mApp->mSukhbirCheck == theString)
 	{
 		SetSukhbirMode(!mSukhbirMode);
-		return;
+		return true;
 	}
+    return false;
 }
 
 //0x41B820
 void Board::KeyDown(KeyCode theKey)
 {
-	DoTypingCheck(theKey);
 
+    //TODO:制作window的植物栏快捷键
 	if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO && 
 		mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN && 
 		mApp->mGameMode != GameMode::GAMEMODE_TREE_OF_WISDOM)

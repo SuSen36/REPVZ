@@ -66,7 +66,6 @@ set(Lawn__System__System_Include
     "Lawn/System/ProfileMgr.h"
     "Lawn/System/ReanimationLawn.h"
     "Lawn/System/SaveGame.h"
-    "Lawn/System/TypingCheck.h"
 )
 source_group("Lawn\\System\\System Include" FILES ${Lawn__System__System_Include})
 
@@ -79,7 +78,6 @@ set(Lawn__System__System_Source
     "Lawn/System/ProfileMgr.cpp"
     "Lawn/System/ReanimationLawn.cpp"
     "Lawn/System/SaveGame.cpp"
-    "Lawn/System/TypingCheck.cpp"
 )
 source_group("Lawn\\System\\System Source" FILES ${Lawn__System__System_Source})
 

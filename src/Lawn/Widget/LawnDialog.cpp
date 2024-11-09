@@ -208,11 +208,6 @@ void LawnDialog::CheckboxChecked()
 //0x457340
 void LawnDialog::KeyDown(KeyCode theKey)
 {
-    if (mId == DIALOG_PAUSED && mApp->mBoard)
-    {
-        mApp->mBoard->DoTypingCheck(theKey);
-    }
-
     if (mId != DIALOG_ALMANAC)
     {
         if (theKey == KEYCODE_SPACE || theKey == KEYCODE_RETURN || theKey == 'y' || theKey == 'Y')

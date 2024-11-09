@@ -1,7 +1,7 @@
 #ifndef __DATAARRAY_H__
 #define __DATAARRAY_H__
 
-#include <string.h>
+#include <cstring>
 #include "TodDebug.h"
 #include "TodCommon.h"
 

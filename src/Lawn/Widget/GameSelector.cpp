@@ -12,7 +12,6 @@
 #include "../../GameConstants.h"
 #include "../System/PlayerInfo.h"
 #include "../System/ProfileMgr.h"
-#include "../System/TypingCheck.h"
 #include "../../Sexy.TodLib/TodFoley.h"
 #include "../../Sexy.TodLib/TodDebug.h"
 #include "SexyAppFramework/graphics/Font.h"
@@ -1090,6 +1089,8 @@ void GameSelector::OrderInManagerChanged()
 // GOTY @Patoke: 0x44EB11
 void GameSelector::KeyDown(KeyCode theKey)
 {
+    //TODO：作弊键修改待定
+    /*
 	if (mApp->mKonamiCheck->Check(theKey))
 	{
 		mApp->PlayFoley(FoleyType::FOLEY_DROP);
@@ -1162,6 +1163,7 @@ void GameSelector::KeyDown(KeyCode theKey)
 		mApp->mSukhbirMode = !mApp->mSukhbirMode;
 		return;
 	}
+    */
 }
 
 //0x44C200

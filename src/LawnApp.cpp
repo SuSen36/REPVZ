@@ -1,5 +1,5 @@
 //#include <corecrt.h>
-#include <time.h>
+#include <ctime>
 #include "LawnApp.h"
 #include "Lawn/Board.h"
 #include "Lawn/Plant.h"
@@ -21,7 +21,6 @@
 #include "Lawn/Widget/GameButton.h"
 #include "Sexy.TodLib/Reanimator.h"
 #include "Lawn/Widget/UserDialog.h"
-#include "Lawn/System/TypingCheck.h"
 #include "Sexy.TodLib/TodParticle.h"
 #include "Lawn/Widget/AwardScreen.h"
 #include "Lawn/Widget/TitleScreen.h"
@@ -83,16 +82,16 @@ LawnApp::LawnApp()
 	mCreditScreen = nullptr;
 	mTitleScreen = nullptr;
 	mSoundSystem = nullptr;
-	mKonamiCheck = nullptr;
-	mMustacheCheck = nullptr;
-	mMoustacheCheck = nullptr;
-	mSuperMowerCheck = nullptr;
-	mSuperMowerCheck2 = nullptr;
-	mFutureCheck = nullptr;
-	mPinataCheck = nullptr;
-	mDanceCheck = nullptr;
-	mDaisyCheck = nullptr;
-	mSukhbirCheck = nullptr;
+    mKonamiCheck = "wwssadadba";
+    mMustacheCheck = "mustache";
+    mMoustacheCheck = "moustache";
+    mSuperMowerCheck = "trickedout";
+    mSuperMowerCheck2 = "tricked out";
+    mFutureCheck = "future";
+    mPinataCheck = "pinata";
+    mDanceCheck = "dance";
+    mDaisyCheck = "daisies";
+    mSukhbirCheck = "sukhbir";
 	mMustacheMode = false;
 	mSuperMowerMode = false;
 	mFutureMode = false;
@@ -176,47 +175,6 @@ LawnApp::~LawnApp()
 
 	delete mSoundSystem;
 	delete mMusic;
-
-	if (mKonamiCheck)
-	{
-		delete mKonamiCheck;
-	}
-	if (mMustacheCheck)
-	{
-		delete mMustacheCheck;
-	}
-	if (mMoustacheCheck)
-	{
-		delete mMoustacheCheck;
-	}
-	if (mSuperMowerCheck)
-	{
-		delete mSuperMowerCheck;
-	}
-	if (mSuperMowerCheck2)
-	{
-		delete mSuperMowerCheck2;
-	}
-	if (mFutureCheck)
-	{
-		delete mFutureCheck;
-	}
-	if (mPinataCheck)
-	{
-		delete mPinataCheck;
-	}
-	if (mDanceCheck)
-	{
-		delete mDanceCheck;
-	}
-	if (mDaisyCheck)
-	{
-		delete mDaisyCheck;
-	}
-	if (mSukhbirCheck)
-	{
-		delete mSukhbirCheck;
-	}
 
 	if (mGameSelector)
 	{
@@ -1139,7 +1097,7 @@ bool LawnApp::KillNewOptionsDialog()
 		return false;
 
 	bool wantWindowed = !aNewOptionsDialog->mFullscreenCheckbox->IsChecked();
-	bool want3D = aNewOptionsDialog->mHardwareAccelerationCheckbox->IsChecked();
+	bool want3D = true;
 	SwitchScreenMode(wantWindowed, want3D, false);
 
 	KillDialog(Dialogs::DIALOG_NEWOPTIONS);
@@ -1323,26 +1281,6 @@ void LawnApp::Init()
 	mEffectSystem = new EffectSystem();
 	mEffectSystem->EffectSystemInitialize();
 
-	mKonamiCheck = new TypingCheck();
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_UP);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_UP);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_DOWN);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_DOWN);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_LEFT);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_RIGHT);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_LEFT);
-	mKonamiCheck->AddKeyCode(KeyCode::KEYCODE_RIGHT);
-	mKonamiCheck->AddChar('b');
-	mKonamiCheck->AddChar('a');
-	mMustacheCheck = new TypingCheck("mustache");
-	mMoustacheCheck = new TypingCheck("moustache");
-	mSuperMowerCheck = new TypingCheck("trickedout");
-	mSuperMowerCheck2 = new TypingCheck("tricked out");
-	mFutureCheck = new TypingCheck("future");
-	mPinataCheck = new TypingCheck("pinata");
-	mDanceCheck = new TypingCheck("dance");
-	mDaisyCheck = new TypingCheck("daisies");
-	mSukhbirCheck = new TypingCheck("sukhbir");
 
 #ifdef _DEBUG
 	aDuration = mTimer.GetDuration();

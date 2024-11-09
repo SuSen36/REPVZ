@@ -1775,9 +1775,9 @@ void Zombie::UpdateZombieDolphinRider()
     bool aBackwards = IsWalkingBackwards();
     if (mZombiePhase == ZombiePhase::PHASE_DOLPHIN_WALKING && !aBackwards)
     {
-        //TODO：安卓端海豚僵尸的mX为780以上，而不是725，修复他
+        //TODO：安卓端海豚僵尸的进行移动，可能是动画问题
         int x1 = mX;
-        if (static_cast<float>(mX) > 700.0f && static_cast<float>(mX) <= 800.0f)
+        if (static_cast<float>(mX) > 700.0f)
         {
             mZombiePhase = ZombiePhase::PHASE_DOLPHIN_INTO_POOL;
             PlayZombieReanim("anim_jumpinpool", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 16.0f);

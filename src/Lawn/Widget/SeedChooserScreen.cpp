@@ -1134,7 +1134,7 @@ void SeedChooserScreen::CloseSeedChooser()
 //0x486E80
 void SeedChooserScreen::KeyDown(KeyCode theKey)
 {
-	mBoard->DoTypingCheck(theKey);
+	//mBoard->DoTypingCheck(theKey);
 }
 
 //0x486EA0

@@ -1,4 +1,5 @@
 #include "CheatDialog.h"
+#include "../Board.h"
 #include "../../LawnApp.h"
 #include "../LawnCommon.h"
 #include "ChallengeScreen.h"
@@ -7,13 +8,13 @@
 #include "../System/PlayerInfo.h"
 #include "SexyAppFramework/widget/WidgetManager.h"
 
-CheatDialog::CheatDialog(LawnApp* theApp) : LawnDialog(theApp, Dialogs::DIALOG_CHEAT, true, __S("CHEAT"), __S("Enter New Level:"), __S(""), Dialog::BUTTONS_OK_CANCEL)
+CheatDialog::CheatDialog(LawnApp* theApp) : LawnDialog(theApp, Dialogs::DIALOG_CHEAT, true, __S("CHEAT"), __S("Enter Your Cheat Code:"), __S(""), Dialog::BUTTONS_OK_CANCEL)
 {
 	mApp = theApp;
 	mVerticalCenterText = false;
-	mLevelEditWidget = CreateEditWidget(0, this, this);
-	mLevelEditWidget->mMaxChars = 12;
-	mLevelEditWidget->AddWidthCheckFont(FONT_BRIANNETOD12, 220);
+    mCheatEditWidget = CreateEditWidget(0, this, this);
+    mCheatEditWidget->mMaxChars = 12;
+    mCheatEditWidget->AddWidthCheckFont(FONT_BRIANNETOD12, 220);
 
 	SexyString aCheatStr;
 	if (mApp->mGameMode != GameMode::GAMEMODE_ADVENTURE)
@@ -28,14 +29,14 @@ CheatDialog::CheatDialog(LawnApp* theApp) : LawnDialog(theApp, Dialogs::DIALOG_C
 	{
 		aCheatStr = mApp->GetStageString(mApp->mPlayerInfo->GetLevel());
 	}
-	mLevelEditWidget->SetText(aCheatStr, true);
+    mCheatEditWidget->SetText(aCheatStr, true);
 
 	CalcSize(110, 40);
 }
 
 CheatDialog::~CheatDialog()
 {
-	delete mLevelEditWidget;
+	delete mCheatEditWidget;
 }
 
 int CheatDialog::GetPreferredHeight(int theWidth)
@@ -46,26 +47,26 @@ int CheatDialog::GetPreferredHeight(int theWidth)
 void CheatDialog::Resize(int theX, int theY, int theWidth, int theHeight)
 {
 	LawnDialog::Resize(theX, theY, theWidth, theHeight);
-	mLevelEditWidget->Resize(mContentInsets.mLeft + 12, mHeight - 155, mWidth - mContentInsets.mLeft - mContentInsets.mRight - 24, 28);
+    mCheatEditWidget->Resize(mContentInsets.mLeft + 12, mHeight - 155, mWidth - mContentInsets.mLeft - mContentInsets.mRight - 24, 28);
 }
 
 void CheatDialog::AddedToManager(WidgetManager* theWidgetManager)
 {
 	LawnDialog::AddedToManager(theWidgetManager);
-	AddWidget(mLevelEditWidget);
-	theWidgetManager->SetFocus(mLevelEditWidget);
+	AddWidget(mCheatEditWidget);
+	theWidgetManager->SetFocus(mCheatEditWidget);
 }
 
 void CheatDialog::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	LawnDialog::RemovedFromManager(theWidgetManager);
-	RemoveWidget(mLevelEditWidget);
+	RemoveWidget(mCheatEditWidget);
 }
 
 void CheatDialog::Draw(Graphics* g)
 {
 	LawnDialog::Draw(g);
-	DrawEditBox(g, mLevelEditWidget);
+	DrawEditBox(g, mCheatEditWidget);
 }
 
 void CheatDialog::EditWidgetText(int theId, const SexyString& theString)
@@ -83,8 +84,14 @@ bool CheatDialog::AllowChar(int theId, SexyChar theChar)
 bool CheatDialog::ApplyCheat()
 {
 	int aChallengeIndex;
-	if (sexysscanf(mLevelEditWidget->mString.c_str(), __S("c%d"), &aChallengeIndex) == 1 || 
-		sexysscanf(mLevelEditWidget->mString.c_str(), __S("C%d"), &aChallengeIndex) == 1)
+    std::string cheatInput = mCheatEditWidget->mString;
+    std::transform(cheatInput.begin(), cheatInput.end(), cheatInput.begin(), ::tolower);
+    if (mApp->mBoard && mApp->mBoard->DoTypingCheck(cheatInput))
+    {
+        return true;
+    }
+	if (sexysscanf(cheatInput.c_str(), __S("c%d"), &aChallengeIndex) == 1 ||
+		sexysscanf(cheatInput.c_str(), __S("C%d"), &aChallengeIndex) == 1)
 	{
 		mApp->mGameMode = (GameMode)std::clamp(aChallengeIndex, 0, NUM_CHALLENGE_MODES);
 		return true;
@@ -93,23 +100,23 @@ bool CheatDialog::ApplyCheat()
 	int aLevel = -1;
 	int aFinishedAdventure = 0;
 	int aArea, aSubArea;
-	if (sexysscanf(mLevelEditWidget->mString.c_str(), __S("f%d-%d"), &aArea, &aSubArea) == 2 ||
-		sexysscanf(mLevelEditWidget->mString.c_str(), __S("F%d-%d"), &aArea, &aSubArea) == 2)
+	if (sexysscanf(cheatInput.c_str(), __S("f%d-%d"), &aArea, &aSubArea) == 2 ||
+		sexysscanf(cheatInput.c_str(), __S("F%d-%d"), &aArea, &aSubArea) == 2)
 	{
 		aLevel = (aArea - 1) * LEVELS_PER_AREA + aSubArea;
 		aFinishedAdventure = 1;
 	}
-	else if (sexysscanf(mLevelEditWidget->mString.c_str(), __S("f%d"), &aLevel) == 1 || sexysscanf(mLevelEditWidget->mString.c_str(), __S("F%d"), &aLevel) == 1)
+	else if (sexysscanf(cheatInput.c_str(), __S("f%d"), &aLevel) == 1 || sexysscanf(cheatInput.c_str(), __S("F%d"), &aLevel) == 1)
 	{
 		aFinishedAdventure = 1;
 	}
-	else if (sexysscanf(mLevelEditWidget->mString.c_str(), __S("%d-%d"), &aArea, &aSubArea) == 2)
+	else if (sexysscanf(cheatInput.c_str(), __S("%d-%d"), &aArea, &aSubArea) == 2)
 	{
 		aLevel = (aArea - 1) * LEVELS_PER_AREA + aSubArea;
 	}
 	else
 	{
-		sexysscanf(mLevelEditWidget->mString.c_str(), __S("%d"), &aLevel);
+		sexysscanf(cheatInput.c_str(), __S("%d"), &aLevel);
 	}
 
 	if (aLevel <= 0)

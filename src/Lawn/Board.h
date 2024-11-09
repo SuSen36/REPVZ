@@ -483,7 +483,7 @@ public:
 	int								GetGraveStonesCount();
 	/*inline*/ bool					IsSurvivalStageWithRepick();
 	/*inline*/ bool					IsLastStandStageWithRepick();
-	void							DoTypingCheck(KeyCode theKey);
+	bool					    	DoTypingCheck(const std::string& theString);
 	int								CountZombieByType(ZombieType theZombieType);
 	static /*inline*/ bool			IsZombieTypeSpawnedOnly(ZombieType theZombieType);
 };
