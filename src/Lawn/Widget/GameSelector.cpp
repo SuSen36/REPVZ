@@ -240,6 +240,19 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mChangeUserButton->mBtnNoDraw = true;
 	mChangeUserButton->mMouseVisible = false;
 
+    mZombatarButton = MakeNewButton(
+            GameSelector::GameSelector_Zombatar,
+            this,
+            "",
+            nullptr,
+            Sexy::IMAGE_BLANK,
+            Sexy::IMAGE_BLANK,
+            Sexy::IMAGE_BLANK
+    );
+    mZombatarButton->Resize(0, 0, 250, 30);
+    mZombatarButton->mBtnNoDraw = true;
+    mZombatarButton->mMouseVisible = false;
+
 	mOverlayWidget = new GameSelectorOverlay(this);
 	mOverlayWidget->Resize(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
 
@@ -1377,6 +1390,7 @@ void GameSelector::ButtonDepress(int theId)
 			mApp->mZenGarden->SetupForZenTutorial();
 		break;
 	case GameSelector::GameSelector_Zombatar:
+        mApp->DoPakDialog();
 		//if (mApp->mPlayerInfo->mAckZombatarTOS)
 		//	GameSelector::ShowZombatarScreen();
 		//else

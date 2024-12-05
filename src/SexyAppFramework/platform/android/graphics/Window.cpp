@@ -32,7 +32,7 @@ void SexyAppBase::MakeWindow()
             SexyStringToStringFast(mTitle).c_str(),
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             mWidth, mHeight,
-            SDL_WINDOW_OPENGL  | SDL_WINDOW_FULLSCREEN_DESKTOP
+            SDL_WINDOW_OPENGL |( SDL_WINDOW_FULLSCREEN_DESKTOP)
         );
 
         if (!mWindow)

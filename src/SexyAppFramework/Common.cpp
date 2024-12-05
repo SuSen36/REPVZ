@@ -20,27 +20,12 @@
 
 //HINSTANCE Sexy::gHInstance;
 bool Sexy::gDebug = false;
-AAssetManager* Sexy::gAssetsManager = nullptr;
 static Sexy::MTRand gMTRand;
-
-#ifdef ANDROID
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_popcap_pvz_PVZActivity_initializeAssetManager(JNIEnv *env, jobject instance) {
-    jclass clazz = env->GetObjectClass(instance);
-    jmethodID methodID = env->GetMethodID(clazz, "getAssetManager", "()Landroid/content/res/AssetManager;");
-
-    if (methodID != nullptr) {
-        jobject assetManagerObject = env->CallObjectMethod(instance, methodID);
-        Sexy::gAssetsManager = AAssetManager_fromJava(env, assetManagerObject);
-    }
-}
-#endif
-
-
 namespace Sexy
 {
+    std::string gRootFolder = "";
 	std::string gAppDataFolder = "";
+    std::string gPakFolder = "";
 }
 
 void Sexy::PrintF(const char *text, ...)
@@ -51,6 +36,10 @@ void Sexy::PrintF(const char *text, ...)
 	va_start(args, text);
 	vsnprintf(str, sizeof(str), text, args);
 	va_end(args);
+
+#if defined(__SWITCH__) || defined(__3DS__)
+	svcOutputDebugString(str, sizeof(str));
+#endif
 
 	fprintf(stdout, "%s", str);
 }
@@ -75,6 +64,60 @@ void Sexy::SRand(ulong theSeed)
 	gMTRand.SRand(theSeed);
 }
 
+/*
+bool Sexy::CheckFor98Mill()
+{
+	static bool needOsCheck = true;
+	static bool is98Mill = false;
+
+	if (needOsCheck)
+	{
+		// bool invalid = false; // unused
+		OSVERSIONINFOEXA osvi;
+		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
+
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
+		if( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
+		{
+			osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
+			if ( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
+				return false;
+		}
+
+		needOsCheck = false;
+		is98Mill = osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS; // let's check Win95, 98, *AND* ME.
+	}
+
+	return is98Mill;
+}
+
+bool Sexy::CheckForVista()
+{
+	static bool needOsCheck = true;
+	static bool isVista = false;
+
+	if (needOsCheck)
+	{
+		// bool invalid = false; // unused
+		OSVERSIONINFOEXA osvi;
+		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
+
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
+		if( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
+		{
+			osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
+			if ( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
+				return false;
+		}
+
+		needOsCheck = false;
+		isVista = osvi.dwMajorVersion >= 6;
+	}
+
+	return isVista;
+}
+*/
+
 std::string Sexy::GetAppDataFolder()
 {
 	return Sexy::gAppDataFolder;
@@ -90,6 +133,22 @@ void Sexy::SetAppDataFolder(const std::string& thePath)
 	}
 
 	Sexy::gAppDataFolder = aPath;
+}
+std::string Sexy::GetPakFolder()
+{
+    return Sexy::gPakFolder;
+}
+
+void Sexy::SetPakFolder(const std::string& thePath)
+{
+    std::string aPath = thePath;
+    if (!aPath.empty())
+    {
+        if (aPath[aPath.length()-1] != '\\' && aPath[aPath.length()-1] != '/')
+            aPath += '/';
+    }
+
+    Sexy::gPakFolder = aPath;
 }
 
 std::string Sexy::URLEncode(const std::string& theString)

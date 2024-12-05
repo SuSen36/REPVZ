@@ -854,7 +854,7 @@ bool ImageLib::WritePNGImage(const std::string& theFileName, Image* theImage)
 		png_destroy_write_struct(&png_ptr, &info_ptr);
 		fclose(fp);
 		// If we get here, we had a problem writeing the file
-		return NULL;
+		return false;
 	}
 
 	png_init_io(png_ptr, fp);

@@ -302,7 +302,7 @@ float                       PlantFlowerPotHeightOffset(SeedType theSeedType, flo
 class PlantDefinition
 {
 public:
-    SeedType                mSeedType;          //+0x0
+    SeedType               mSeedType;          //+0x0
     Image**                 mPlantImage;        //+0x4
     ReanimationType         mReanimationType;   //+0x8
     int                     mPacketIndex;       //+0xC

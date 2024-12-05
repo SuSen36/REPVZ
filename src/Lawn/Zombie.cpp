@@ -239,7 +239,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
 
         if (IsOnBoard())
         {
-            PickBungeeZombieTarget(-1);
+            PickBungeeZombieTarget(-1,-1);
             
             if (mDead)
             {
@@ -1024,7 +1024,7 @@ int Zombie::CountBungeesTargetingSunFlowers()
 }
 
 //0x5246A0
-void Zombie::PickBungeeZombieTarget(int theColumn)
+void Zombie::PickBungeeZombieTarget(int theCol, int theRow)
 {
     bool aAllowSunFlowerTarget = true;
     if (CountBungeesTargetingSunFlowers() == mBoard->CountSunFlowers() - 1)
@@ -1037,38 +1037,38 @@ void Zombie::PickBungeeZombieTarget(int theColumn)
 
     for (int x = 0; x < MAX_GRID_SIZE_X; x++)
     {
-        if (theColumn == -1 || theColumn == x)  // 限制仅能在 theColumn 列寻找目标，除非 theColumn 为 -1
+        if (theCol == -1 || theCol == x)  // 限制仅能在 theCol 列寻找目标，除非 theCol 为 -1
         {
             for (int y = 0; y < MAX_GRID_SIZE_Y; y++)
             {
-                int aWeight = 1;
-                if (mBoard->GetGraveStoneAt(x, y) || mBoard->mGridSquareType[x][y] == GridSquareType::GRIDSQUARE_DIRT)
+                if (theRow == -1 || theRow == y)  // 限制仅能在 theRow 列寻找目标，除非 theCow 为 -1
                 {
-                    continue;
-                }
-
-                Plant* aPlant = mBoard->GetTopPlantAt(x, y, PlantPriority::TOPPLANT_BUNGEE_ORDER);
-                if (aPlant)
-                {
-                    if (!aAllowSunFlowerTarget && aPlant->MakesSun())
-                    {
+                    int aWeight = 1;
+                    if (mBoard->GetGraveStoneAt(x, y) ||
+                        mBoard->mGridSquareType[x][y] == GridSquareType::GRIDSQUARE_DIRT) {
                         continue;
                     }
 
-                    if (aPlant->mSeedType == SeedType::SEED_GRAVEBUSTER || aPlant->mSeedType == SeedType::SEED_COBCANNON)
-                    {
-                        continue;
+                    Plant *aPlant = mBoard->GetTopPlantAt(x, y, PlantPriority::TOPPLANT_BUNGEE_ORDER);
+                    if (aPlant) {
+                        if (!aAllowSunFlowerTarget && aPlant->MakesSun()) {
+                            continue;
+                        }
+
+                        if (aPlant->mSeedType == SeedType::SEED_GRAVEBUSTER ||
+                            aPlant->mSeedType == SeedType::SEED_COBCANNON) {
+                            continue;
+                        }
+
+                        aWeight = 10000;
                     }
 
-                    aWeight = 10000;
-                }
-
-                if (!mBoard->BungeeIsTargetingCell(x, y))
-                {
-                    aPicks[aPickCount].mX = x;
-                    aPicks[aPickCount].mY = y;
-                    aPicks[aPickCount].mWeight = aWeight;
-                    aPickCount++;
+                    if (!mBoard->BungeeIsTargetingCell(x, y)) {
+                        aPicks[aPickCount].mX = x;
+                        aPicks[aPickCount].mY = y;
+                        aPicks[aPickCount].mWeight = aWeight;
+                        aPickCount++;
+                    }
                 }
             }
         }
@@ -1082,9 +1082,10 @@ void Zombie::PickBungeeZombieTarget(int theColumn)
 
     TodWeightedGridArray* aGrid = TodPickFromWeightedGridArray(aPicks, aPickCount);
     mTargetCol = aGrid->mX;
-    SetRow(aGrid->mY);
-    mPosX = mBoard->GridToPixelX(mTargetCol, mRow);
-    mPosY = GetPosYBasedOnRow(mRow);
+    mTargetRow = aGrid->mY;
+    SetRow(mTargetRow);
+    mPosX = mBoard->GridToPixelX(mTargetCol, mTargetRow);
+    mPosY = GetPosYBasedOnRow(mTargetRow);
 }
 
 //0x524970
@@ -9972,7 +9973,7 @@ void Zombie::BossBungeeSpawn()
     for (int i = 0; i < NUM_BOSS_BUNGEES; i++)
     {
         Zombie* aZombie = mBoard->AddZombieInRow(ZombieType::ZOMBIE_BUNGEE, 0, 0);
-        aZombie->PickBungeeZombieTarget(mTargetCol + i);
+        aZombie->PickBungeeZombieTarget(mTargetCol + i, mTargetRow + i);
         aZombie->mAltitude = aZombie->mPosY - 30.0f;
         mFollowerZombieID[i] = mBoard->ZombieGetID(aZombie);
     }

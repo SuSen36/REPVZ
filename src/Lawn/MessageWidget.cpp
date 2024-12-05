@@ -51,79 +51,95 @@ void MessageWidget::ClearLabel()
 // GOTY @Patoke: inlined 0x459715
 void MessageWidget::SetLabel(const SexyString& theNewLabel, MessageStyle theMessageStyle)
 {
-	SexyString aLabel = TodStringTranslate(theNewLabel);
-	TOD_ASSERT(aLabel.length() < MAX_MESSAGE_LENGTH - 1);
+    SexyString aLabel = TodStringTranslate(theNewLabel);
 
-	if (mReanimType != ReanimationType::REANIM_NONE && mDuration > 0)
-	{
-		mMessageStyleNext = theMessageStyle;
-		strcpy(mLabelNext, aLabel.c_str());
-		ClearLabel();
-	}
-	else
-	{
-		ClearReanim();
-		strcpy(mLabel, aLabel.c_str());
-		mMessageStyle = theMessageStyle;
-		mReanimType = ReanimationType::REANIM_NONE;
+    // 检查 aLabel 长度是否超出限制
+    TOD_ASSERT(aLabel.length() < MAX_MESSAGE_LENGTH - 1);
 
-		switch (theMessageStyle)
-		{
-		case MessageStyle::MESSAGE_STYLE_HINT_LONG:
-		case MessageStyle::MESSAGE_STYLE_BIG_MIDDLE:
-		case MessageStyle::MESSAGE_STYLE_ZEN_GARDEN_LONG:
-		case MessageStyle::MESSAGE_STYLE_HINT_TALL_LONG:
-			mDuration = 1500;
-			break;
+    if (mReanimType != ReanimationType::REANIM_NONE && mDuration > 0)
+    {
+        mMessageStyleNext = theMessageStyle;
 
-		case MessageStyle::MESSAGE_STYLE_HINT_TALL_UNLOCKMESSAGE:
-			mDuration = 500;
-			break;
+        // 检查 mLabelNext 的长度
+        if (aLabel.length() < MAX_MESSAGE_LENGTH)
+        {
+            strncpy(mLabelNext, aLabel.c_str(), MAX_MESSAGE_LENGTH - 1);
+            mLabelNext[MAX_MESSAGE_LENGTH - 1] = '\0'; // 确保字符串以 null 结尾
+        }
+        ClearLabel();
+    }
+    else
+    {
+        ClearReanim();
 
-		case MessageStyle::MESSAGE_STYLE_HINT_FAST:
-		case MessageStyle::MESSAGE_STYLE_HINT_TALL_FAST:
-		case MessageStyle::MESSAGE_STYLE_BIG_MIDDLE_FAST:
-		case MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1:
-		case MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL2:
-		case MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER:
-			mDuration = 500;
-			break;
+        // 检查 mLabel 的长度
+        if (aLabel.length() < MAX_MESSAGE_LENGTH)
+        {
+            strncpy(mLabel, aLabel.c_str(), MAX_MESSAGE_LENGTH - 1);
+            mLabel[MAX_MESSAGE_LENGTH - 1] = '\0';
+        }
+        mMessageStyle = theMessageStyle;
+        mReanimType = ReanimationType::REANIM_NONE;
 
-		case MessageStyle::MESSAGE_STYLE_HINT_STAY:
-		case MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY:
-		case MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER_STAY:
-			mDuration = 10000;
-			break;
+        switch (theMessageStyle)
+        {
+            // 根据不同的 MessageStyle 设置 mDuration
+            case MessageStyle::MESSAGE_STYLE_HINT_LONG:
+            case MessageStyle::MESSAGE_STYLE_BIG_MIDDLE:
+            case MessageStyle::MESSAGE_STYLE_ZEN_GARDEN_LONG:
+            case MessageStyle::MESSAGE_STYLE_HINT_TALL_LONG:
+                mDuration = 1500;
+                break;
 
-		case MessageStyle::MESSAGE_STYLE_HOUSE_NAME:
-			mDuration = 250;
-			break;
+            case MessageStyle::MESSAGE_STYLE_HINT_TALL_UNLOCKMESSAGE:
+                mDuration = 500;
+                break;
 
-		case MessageStyle::MESSAGE_STYLE_HUGE_WAVE:
-			mDuration = 750;
-			mReanimType = ReanimationType::REANIM_TEXT_FADE_ON;
-			break;
+            case MessageStyle::MESSAGE_STYLE_HINT_FAST:
+            case MessageStyle::MESSAGE_STYLE_HINT_TALL_FAST:
+            case MessageStyle::MESSAGE_STYLE_BIG_MIDDLE_FAST:
+            case MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1:
+            case MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL2:
+            case MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER:
+                mDuration = 500;
+                break;
 
-		case MessageStyle::MESSAGE_STYLE_SLOT_MACHINE:
-			mDuration = 750;
-			break;
+            case MessageStyle::MESSAGE_STYLE_HINT_STAY:
+            case MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY:
+            case MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER_STAY:
+                mDuration = 10000;
+                break;
 
-		case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT: // @Patoke: implemented
-			mDuration = 250;
-			break;
+            case MessageStyle::MESSAGE_STYLE_HOUSE_NAME:
+                mDuration = 250;
+                break;
 
-		default:
-			TOD_ASSERT();
-			break;
-		}
-		
-		if (mReanimType != ReanimationType::REANIM_NONE)
-		{
-			LayoutReanimText();
-		}
-		mDisplayTime = mDuration;
-	}
+            case MessageStyle::MESSAGE_STYLE_HUGE_WAVE:
+                mDuration = 750;
+                mReanimType = ReanimationType::REANIM_TEXT_FADE_ON;
+                break;
+
+            case MessageStyle::MESSAGE_STYLE_SLOT_MACHINE:
+                mDuration = 750;
+                break;
+
+            case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT: // @Patoke: implemented
+                mDuration = 250;
+                break;
+
+            default:
+            TOD_ASSERT();
+                break;
+        }
+
+        if (mReanimType != ReanimationType::REANIM_NONE)
+        {
+            LayoutReanimText();
+        }
+        mDisplayTime = mDuration;
+    }
 }
+
 
 //0x4591E0
 void MessageWidget::LayoutReanimText()

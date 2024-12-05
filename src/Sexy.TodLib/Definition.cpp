@@ -1,13 +1,13 @@
 #include "TodCommon.h"
 #include "TodParticle.h"
 #include "Trail.h"
-#include <assert.h>
+#include <cassert>
 #include <cstring>
-#include <stddef.h>
+#include <cstddef>
 #include <sys/stat.h>
 #include "TodDebug.h"
 #include "Definition.h"
-#include "zlib.h"
+#include "SexyAppFramework/zlib/zlib.h"
 #include "SexyAppFramework/paklib/PakInterface.h"
 #include "../SexyAppFramework/misc/PerfTimer.h"
 #include "../SexyAppFramework/misc/XMLParser.h"
@@ -308,14 +308,6 @@ unsigned int DefinitionGetSize(DefMap* theDefMap, void* theDefinition) {
     return theDefMap->mDefSize + DefinitionGetDeepSize(theDefMap, theDefinition);
 }
 
-void* DefinitionAlloc(int theSize)
-{
-    void* aPtr = operator new[](theSize);
-    TOD_ASSERT(aPtr);
-    memset(aPtr, 0, theSize);
-    return aPtr;
-}
-
 //0x443BE0
 bool DefinitionLoadImage(Image** theImage, const SexyString& theName)
 {
@@ -384,7 +376,7 @@ inline bool DefReadFromCacheArray(void*& theReadPtr, DefinitionArrayDef* theArra
         return true;
 
     int aArraySize = aDefSize * theArray->mArrayCount;
-    theArray->mArrayData = DefinitionAlloc(aArraySize);  // 申请内存并初始化填充为 0
+    theArray->mArrayData = malloc(aArraySize);  // 申请内存并初始化填充为 0
     SMemR(theReadPtr, theArray->mArrayData, aArraySize);  // 仍然是粗略读取全部数据，然后再根据 theDefMap 的结构字段数组修复指针
     for (int i = 0; i < theArray->mArrayCount; i++)
         if (!DefMapReadFromCache(theReadPtr, theDefMap, (void*)((intptr_t)theArray->mArrayData + theDefMap->mDefSize * i)))  // 最后一个参数表示 pData[i]
@@ -400,7 +392,7 @@ inline bool DefReadFromCacheFloatTrack(void*& theReadPtr, FloatParameterTrack* t
     if (aCountNodes > 0)
     {
         int aSize = aCountNodes * sizeof(FloatParameterTrackNode);
-        FloatParameterTrackNode* aPtr = (FloatParameterTrackNode*)DefinitionAlloc(aSize);
+        FloatParameterTrackNode* aPtr = (FloatParameterTrackNode*)malloc(aSize);
         theTrack->mNodes = aPtr;
         SMemR(theReadPtr, aPtr, aSize);
     }
@@ -417,7 +409,7 @@ inline bool DefReadFromCacheString(void*& theReadPtr, char** theString)
         *theString = (char*)"";
     else
     {
-        char* aPtr = (char*)DefinitionAlloc(aLen + 1);
+        char* aPtr = (char*)malloc(aLen + 1);
         *theString = aPtr;
         SMemR(theReadPtr, aPtr, aLen);
         aPtr[aLen] = '\0';
@@ -555,10 +547,10 @@ void* DefinitionUncompressCompiledBuffer(void* theCompressedBuffer, size_t theCo
         return nullptr;
     }
     
-    Bytef* aUncompressedBuffer = (Bytef*)DefinitionAlloc(aHeader->mUncompressedSize);
+    Bytef* aUncompressedBuffer = (Bytef*)malloc(aHeader->mUncompressedSize);
     Bytef* aSrc = (Bytef*)((intptr_t)theCompressedBuffer + sizeof(CompressedDefinitionHeader));  // 实际解压数据从第 3 个四字节开始
     // BuGFIXX!!
-    ulong aUncompressedSizeResult = aHeader->mUncompressedSize;  // 用作出参的未压缩数据实际长度
+    uLong aUncompressedSizeResult = aHeader->mUncompressedSize;  // 用作出参的未压缩数据实际长度
     int aResult = uncompress(aUncompressedBuffer, &aUncompressedSizeResult, aSrc, theCompressedBufferSize - sizeof(CompressedDefinitionHeader));
     (void)aResult; // Compiler can't work out that this is used in the Debug build
     TOD_ASSERT(aResult == Z_OK);
@@ -578,7 +570,7 @@ bool DefinitionReadCompiledFile(const SexyString& theCompiledFilePath, DefMap* t
     fseek(pFile, 0, 2);  // 将读取位置的指针移动至文件末尾
     size_t aCompressedSize = ftell(pFile);  // 此时获取到的偏移量即为整个文件的大小
     fseek(pFile, 0, 0);  // 再把读取位置的指针移回文件开头
-    void* aCompressedBuffer = DefinitionAlloc(aCompressedSize);
+    void* aCompressedBuffer = malloc(aCompressedSize);
     // 读取文件，并判断实际读取的大小是否为完整的文件大小，若不等则判断为读取失败
     bool aReadCompressedFailed = fread(aCompressedBuffer, sizeof(char), aCompressedSize, pFile) != aCompressedSize;
     fclose(pFile);  // 关闭资源文件流并释放 pFile 占用的内存
@@ -785,7 +777,7 @@ bool DefinitionReadStringField(XMLParser* theXmlParser, char** theValue)
     }
     else
     {
-        *theValue = (char*)DefinitionAlloc(aStringValue.size());
+        *theValue = (char*)malloc(aStringValue.size());
         strcpy(*theValue, aStringValue.c_str());
     }
     return true;
@@ -824,7 +816,7 @@ bool DefinitionReadArrayField(XMLParser* theXmlParser, DefinitionArrayDef* theAr
     if (theArray->mArrayCount == 0)
     {
         theArray->mArrayCount = 1;
-        theArray->mArrayData = DefinitionAlloc(aDefMap->mDefSize);
+        theArray->mArrayData = malloc(aDefMap->mDefSize);
     }
     else
     {
@@ -833,7 +825,7 @@ bool DefinitionReadArrayField(XMLParser* theXmlParser, DefinitionArrayDef* theAr
         if (theArray->mArrayCount >= 1 && (theArray->mArrayCount == 1 || ((theArray->mArrayCount & (theArray->mArrayCount - 1)) == 0)))
         {
             void* anOldData = theArray->mArrayData;
-            theArray->mArrayData = DefinitionAlloc(2 * theArray->mArrayCount * aDefMap->mDefSize);
+            theArray->mArrayData = malloc(2 * theArray->mArrayCount * aDefMap->mDefSize);
             memcpy(theArray->mArrayData, anOldData, theArray->mArrayCount * aDefMap->mDefSize);
             delete[] (char *)anOldData;
         }
@@ -1034,7 +1026,7 @@ bool DefinitionReadFloatTrackField(XMLParser* theXmlParser, FloatParameterTrack*
     */
 
     size_t alloc_size = aFloatTrackVec.size() * sizeof(FloatParameterTrackNode);
-    theTrack->mNodes = (FloatParameterTrackNode*)DefinitionAlloc(alloc_size);
+    theTrack->mNodes = (FloatParameterTrackNode*)malloc(alloc_size);
     if (!theTrack->mNodes) return false;
 
     ::memcpy(theTrack->mNodes, aFloatTrackVec.data(), alloc_size);
@@ -1264,7 +1256,7 @@ void DefMapWriteToCache(void*& theWritePtr, DefMap* theDefMap, void* theDefiniti
 
 void* DefinitionCompressCompiledBuffer(void* theBuffer, unsigned int theBufferSize, unsigned int* theResultSize) {
     uLongf aCompressedSize = compressBound(theBufferSize);
-    auto aCompressedBuffer = (CompressedDefinitionHeader*)DefinitionAlloc(aCompressedSize + sizeof(CompressedDefinitionHeader));
+    auto aCompressedBuffer = (CompressedDefinitionHeader*)malloc(aCompressedSize + sizeof(CompressedDefinitionHeader));
     compress((Bytef*)((uintptr_t)aCompressedBuffer + sizeof(CompressedDefinitionHeader)), &aCompressedSize, (Bytef*)theBuffer, theBufferSize);
     aCompressedBuffer->mCookie = 0xDEADFED4;
     aCompressedBuffer->mUncompressedSize = theBufferSize;
@@ -1275,7 +1267,7 @@ void* DefinitionCompressCompiledBuffer(void* theBuffer, unsigned int theBufferSi
 bool DefinitionWriteCompiledFile(const SexyString& theCompiledFilePath, DefMap* theDefMap, void* theDefinition) {
     unsigned int aCompressedSize = 0;
     unsigned int aDefSize = DefinitionGetSize(theDefMap, theDefinition) + sizeof(unsigned int);
-    void* aDefBasePtr = DefinitionAlloc(aDefSize);
+    void* aDefBasePtr = malloc(aDefSize);
     void* aDef = aDefBasePtr;
     uint aDefHash = DefinitionCalcHash(theDefMap);
 
@@ -1374,7 +1366,7 @@ void FloatTrackSetDefault(FloatParameterTrack& theTrack, float theValue)
     if (theTrack.mNodes == nullptr && theValue != 0.0f)  // 确保该参数轨道无节点（未被赋值过）且给定的默认值不为 0
     {
         theTrack.mCountNodes = 1;  // 默认参数轨道有且仅有 1 个节点
-        FloatParameterTrackNode* aNode = (FloatParameterTrackNode*)DefinitionAlloc(sizeof(FloatParameterTrackNode));
+        FloatParameterTrackNode* aNode = (FloatParameterTrackNode*)malloc(sizeof(FloatParameterTrackNode));
         theTrack.mNodes = aNode;
         aNode->mTime = 0.0f;
         aNode->mLowValue = theValue;

@@ -11,6 +11,7 @@ file(GLOB SOURCES
 		src/SexyAppFramework/imagelib/*.cpp
 		src/SexyAppFramework/misc/*.cpp
 		src/SexyAppFramework/paklib/*.cpp
+		src/SexyAppFramework/modlib/*.cpp
 		src/SexyAppFramework/sound/*.cpp
 		src/SexyAppFramework/widget/*.cpp
 		src/SexyAppFramework/fcaseopen/*.c
@@ -119,11 +120,11 @@ if (WIN32)
 	configure_file("${bass_SOURCE_DIR}/x64/bass.dll" ${CMAKE_BINARY_DIR} COPYONLY)
 endif()
 
-if (WIN32)
-	add_executable(re-plants-vs-zombies ${SOURCES})
+if(WIN32)
+add_executable(re-plants-vs-zombies ${SOURCES})
 else (ANDROID)
-	add_library(re-plants-vs-zombies SHARED ${SOURCES})
-endif()
+add_library(re-plants-vs-zombies SHARED ${SOURCES})
+endif ()
 
 target_include_directories(re-plants-vs-zombies PRIVATE
 	${PROJECT_SOURCE_DIR}/src
@@ -154,32 +155,32 @@ endif()
 # 设置资源目录
 set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Resources)
 
-# Windows 平台资源复制
-if(WIN32)
-	# 获取资源目录下的所有资源文件
-	file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
+# Windows 平台处理
+#if(WIN32)
+#	# 获取资源目录下的所有资源文件
+#	file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
+#
+#	foreach(RES_FILE ${RESOURCES})
+#		# 获取文件的相对路径
+#		file(RELATIVE_PATH RELATIVE_PATH "${RESOURCE_DIR}" "${RES_FILE}")
+#
+#		# 创建目标路径
+#		set(TARGET_PATH "${CMAKE_CURRENT_BINARY_DIR}/${RELATIVE_PATH}")
+#
+#		# 创建目标文件的目录
+#		get_filename_component(TARGET_DIR "${TARGET_PATH}" DIRECTORY)
+#
+#		# 添加目标路径的命令
+#		add_custom_command(
+#				TARGET re-plants-vs-zombies POST_BUILD
+#				COMMAND ${CMAKE_COMMAND} -E make_directory "${TARGET_DIR}"
+#				COMMAND ${CMAKE_COMMAND} -E copy "${RES_FILE}" "${TARGET_PATH}"
+#				COMMENT "Copying resource file ${RELATIVE_PATH} to build directory"
+#		)
+#	endforeach()
+#endif()
 
-	foreach(RES_FILE ${RESOURCES})
-		# 获取文件的相对路径
-		file(RELATIVE_PATH RELATIVE_PATH "${RESOURCE_DIR}" "${RES_FILE}")
-
-		# 创建目标路径
-		set(TARGET_PATH "${CMAKE_CURRENT_BINARY_DIR}/${RELATIVE_PATH}")
-
-		# 创建目标文件的目录
-		get_filename_component(TARGET_DIR "${TARGET_PATH}" DIRECTORY)
-
-		# 添加目标路径的命令
-		add_custom_command(
-				TARGET re-plants-vs-zombies POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E make_directory "${TARGET_DIR}"
-				COMMAND ${CMAKE_COMMAND} -E copy "${RES_FILE}" "${TARGET_PATH}"
-				COMMENT "Copying resource file ${RELATIVE_PATH} to build directory"
-		)
-	endforeach()
-endif()
-
-# Android 平台资源复制
+# Android 平台处理
 if(ANDROID)
 	set(ANDROID_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android-project/app/src/main/assets")
 

@@ -5,10 +5,11 @@
 #include <string>
 #include <fstream>
 #include <unistd.h>
-#include <ctime>
-#include <cmath>
+#include <time.h>
+#include <math.h>
 
 #include <SDL.h>
+
 
 #include <iostream>
 #include "SexyAppBase.h"
@@ -39,8 +40,14 @@
 #include "sound/DummyMusicInterface.h"
 #include "SexyAppFramework/fcaseopen/fcaseopen.h"
 
+#include <fstream> // 引入文件流库
+#include <sstream> // 引入字符串流库
+#include <unordered_set> // 引入哈希集合以确保唯一性
+
 #include "../SexyAppFramework/misc/memmgr.h"
 #include "../SexyAppFramework/misc/RegEmu.h"
+
+#include <filesystem>
 
 using namespace Sexy;
 
@@ -48,6 +55,12 @@ const int DEMO_FILE_ID = 0x42BEEF78;
 const int DEMO_VERSION = 2;
 
 SexyAppBase* Sexy::gSexyAppBase = NULL;
+
+//SEHCatcher Sexy::gSEHCatcher;
+
+//HMODULE gDDrawDLL = NULL;
+//HMODULE gDSoundDLL = NULL;
+//HMODULE gVersionDLL = NULL;
 
 //typedef struct { UINT cbSize; DWORD dwTime; } LASTINPUTINFO;
 //typedef BOOL (WINAPI*GetLastInputInfoFunc)(LASTINPUTINFO *plii);
@@ -108,6 +121,30 @@ static GLImage* gFPSImage = NULL;
 
 //////////////////////////////////////////////////////////////////////////
 
+/*
+typedef HRESULT (WINAPI *SHGetFolderPathFunc)(HWND, int, HANDLE, DWORD, LPTSTR);
+void* GetSHGetFolderPath(const char* theDLL, HMODULE* theMod)
+{
+	HMODULE aMod = LoadLibrary(theDLL);
+	SHGetFolderPathFunc aFunc = NULL;
+
+	if (aMod != NULL)
+	{
+		*((void**)&aFunc) = (void*)GetProcAddress(aMod, "SHGetFolderPathA");
+		if (aFunc == NULL)
+		{
+			FreeLibrary(aMod);
+			aMod = NULL;
+		}
+	}	
+
+	*theMod = aMod;
+	return (void *)aFunc;
+}
+*/
+
+//////////////////////////////////////////////////////////////////////////
+
 SexyAppBase::SexyAppBase()
 {
 	gSexyAppBase = this;
@@ -165,8 +202,10 @@ SexyAppBase::SexyAppBase()
 	mPreferredY = -1;
 	mIsScreenSaver = false;
 	mAllowMonitorPowersave = true;
-	mGLInterface = nullptr;
-	mMusicInterface = nullptr;
+	//mHWnd = NULL;
+	mGLInterface = NULL;	
+	mMusicInterface = NULL;
+	//mInvisHWnd = NULL;
 	mFrameTime = 10;
 	mNonDrawCount = 0;
 	mDrawCount = 0;
@@ -185,7 +224,7 @@ SexyAppBase::SexyAppBase()
 	mFastForwardToUpdateNum = 0;
 	mFastForwardToMarker = false;
 	mFastForwardStep = false;
-	mSoundManager = nullptr;
+	mSoundManager = NULL;
 	mCursorNum = CURSOR_POINTER;		
 	mMouseIn = false;
 	mRunning = false;
@@ -211,6 +250,7 @@ SexyAppBase::SexyAppBase()
 	mHasFocus = true;			
 	mCustomCursorsEnabled = false;	
 	mCustomCursorDirty = false;
+	//mOverrideCursor = NULL;
 	mIsOpeningURL = false;		
 	mInitialized = false;	
 	mLastShutdownWasGraceful = true;	
@@ -277,7 +317,7 @@ SexyAppBase::SexyAppBase()
 	int i;
 
 	for (i = 0; i < NUM_CURSORS; i++)
-		mCursorImages[i] = nullptr;
+		mCursorImages[i] = NULL;	
 
 	for (i = 0; i < 256; i++)
 		mAdd8BitMaxTable[i] = i;
@@ -315,7 +355,7 @@ SexyAppBase::SexyAppBase()
 	mWidgetManager = new WidgetManager(this);
 	mResourceManager = new ResourceManager(this);
 
-	mPrimaryThreadId = nullptr;
+	mPrimaryThreadId = 0;
 
 	/*
 	if (GetSystemMetrics(86)) // check for tablet pc
@@ -326,6 +366,31 @@ SexyAppBase::SexyAppBase()
 	else*/
 	mTabletPC = false;
 
+	//gSEHCatcher.mApp = this;	
+	
+	//std::wifstream stringsFile(_wfopen(L".\\properties\\fstrings", L"rb"));
+	//
+	//if(!stringsFile)
+	//{
+	//	MessageBox(NULL, "file missing: 'install-folder\\properties\\fstrings' Please re-install", "FATAL ERROR", MB_OK);
+	//	DoExit(1);
+	//}
+	//std::getline(stringsFile, mString_HardwareAccelSwitchedOn);
+	//std::getline(stringsFile, mString_HardwareAccelConfirm);
+	//std::getline(stringsFile, mString_HardwareAccelNotWorking);
+	//std::getline(stringsFile, mString_SetColorDepth);
+	//std::getline(stringsFile, mString_FailedInitDirectDrawColon);
+	//std::getline(stringsFile, mString_UnableOpenProperties);
+	//std::getline(stringsFile, mString_SigCheckFailed);
+	//std::getline(stringsFile, mString_InvalidCommandLineParam);
+	//std::getline(stringsFile, mString_RequiresDirectX);
+	//std::getline(stringsFile, mString_YouNeedDirectX);
+	//std::getline(stringsFile, mString_FailedInitDirectDraw);
+	//std::getline(stringsFile, mString_FatalError);
+	//std::getline(stringsFile, mString_UnexpectedErrorOccured);
+	//std::getline(stringsFile, mString_PleaseHelpBy);
+	//std::getline(stringsFile, mString_FailedConnectPopcap);
+	//stringsFile.close();
 }
 
 SexyAppBase::~SexyAppBase()
@@ -445,13 +510,18 @@ SexyAppBase::~SexyAppBase()
 	//DestroyCursor(mHandCursor);
 	//DestroyCursor(mDraggingCursor);			
 
-	gSexyAppBase = nullptr;
+	gSexyAppBase = NULL;
 
 	WriteDemoBuffer();
 
 	//if (mMutex != NULL)
 		//::CloseHandle(mMutex);
 
+	/*
+	FreeLibrary(gDDrawDLL);
+	FreeLibrary(gDSoundDLL);
+	FreeLibrary(gVersionDLL);
+	*/
 }
 
 /*
@@ -873,7 +943,7 @@ void SexyAppBase::DemoAssertIntEqual(int theInt)
 
 Dialog* SexyAppBase::NewDialog(int theDialogId, bool isModal, const SexyString& theDialogHeader, const SexyString& theDialogLines, const SexyString& theDialogFooter, int theButtonMode)
 {	
-	Dialog* aDialog = new Dialog(nullptr, nullptr, theDialogId, isModal, theDialogHeader,	theDialogLines, theDialogFooter, theButtonMode);
+	Dialog* aDialog = new Dialog(NULL, NULL, theDialogId, isModal, theDialogHeader,	theDialogLines, theDialogFooter, theButtonMode);		
 	return aDialog;
 }
 
@@ -896,7 +966,7 @@ Dialog*	SexyAppBase::GetDialog(int theDialogId)
 	if (anItr != mDialogMap.end())	
 		return anItr->second;
 
-	return nullptr;
+	return NULL;
 }
 
 bool SexyAppBase::KillDialog(int theDialogId, bool removeWidget, bool deleteWidget)
@@ -2031,33 +2101,31 @@ bool SexyAppBase::WriteBufferToFile(const std::string& theFileName, const Buffer
 
 bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* theBuffer, bool dontWriteToDemo)
 {
-    if ((mPlayingDemoBuffer) && (!dontWriteToDemo))
-    {
-        if (mManualShutdown)
-            return false;
+	if ((mPlayingDemoBuffer) && (!dontWriteToDemo))
+	{
+		if (mManualShutdown)
+			return false;
 
-        PrepareDemoCommand(true);
-        mDemoNeedsCommand = true;
+		PrepareDemoCommand(true);
+		mDemoNeedsCommand = true;
+		
+		DBG_ASSERTE(!mDemoIsShortCmd);		
+		DBG_ASSERTE(mDemoCmdNum == DEMO_FILE_READ);
 
-        DBG_ASSERTE(!mDemoIsShortCmd);
-        DBG_ASSERTE(mDemoCmdNum == DEMO_FILE_READ);
+		bool success = mDemoBuffer.ReadNumBits(1, false) != 0;
+		if (!success)
+			return false;
 
-        bool success = mDemoBuffer.ReadNumBits(1, false) != 0;
-        if (!success)
-            return false;
+		uint32_t aLen = mDemoBuffer.ReadLong();		
+				
+		theBuffer->Clear();
+		for (int i = 0; i < (int) aLen; i++)
+			theBuffer->WriteByte(mDemoBuffer.ReadByte());
 
-        uint32_t aLen = mDemoBuffer.ReadLong();
-
-        theBuffer->Clear();
-        for (int i = 0; i < (int) aLen; i++)
-            theBuffer->WriteByte(mDemoBuffer.ReadByte());
-
-        return true;
-    }
-    else
-    {
-
-        // 其他平台处理
+		return true;		
+	}
+	else
+	{
 		PFILE* aFP = p_fopen(theFileName.c_str(), "rb");
 
 		if (aFP == NULL)
@@ -2067,16 +2135,16 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 				WriteDemoTimingBlock();
 				mDemoBuffer.WriteNumBits(0, 1);
 				mDemoBuffer.WriteNumBits(DEMO_FILE_READ, 5);
-				mDemoBuffer.WriteNumBits(0, 1); // failure
+				mDemoBuffer.WriteNumBits(0, 1); // failure				
 			}
 
 			return false;
 		}
-
+		
 		p_fseek(aFP, 0, SEEK_END);
 		int aFileSize = p_ftell(aFP);
 		p_fseek(aFP, 0, SEEK_SET);
-
+		
 		uchar* aData = new uchar[aFileSize];
 
 		p_fread(aData, 1, aFileSize, aFP);
@@ -2090,18 +2158,16 @@ bool SexyAppBase::ReadBufferFromFile(const std::string& theFileName, Buffer* the
 			WriteDemoTimingBlock();
 			mDemoBuffer.WriteNumBits(0, 1);
 			mDemoBuffer.WriteNumBits(DEMO_FILE_READ, 5);
-			mDemoBuffer.WriteNumBits(1, 1); // success
+			mDemoBuffer.WriteNumBits(1, 1); // success			
 			mDemoBuffer.WriteLong(aFileSize);
 			mDemoBuffer.WriteBytes(aData, aFileSize);
 		}
 
-		delete[] aData;
+		delete [] aData;
 
 		return true;
-
-    }
+	}
 }
-
 
 bool SexyAppBase::FileExists(const std::string& theFileName)
 {
@@ -3396,8 +3462,7 @@ bool SexyAppBase::PrepareDemoCommand([[maybe_unused]] bool required)
 
 void SexyAppBase::ProcessDemo()
 {
-    //TODO: 演示模式暂时关闭
-	if (mPlayingDemoBuffer && false)
+	if (mPlayingDemoBuffer)
 	{
 		// At end of demo buffer?  How dare you!
 		DBG_ASSERTE(!mDemoBuffer.AtEnd());
@@ -4461,7 +4526,7 @@ bool SexyAppBase::UpdateAppStep(bool* updated)
 		{
 			int anOldUpdateCnt = mUpdateCount;
 			Process();		
-			if (updated != nullptr)
+			if (updated != NULL)
 				*updated = mUpdateCount != anOldUpdateCnt;			
 		}
 	}
@@ -5036,10 +5101,77 @@ void SexyAppBase::Init()
 	strcat(aPath, "/savedata/");
 	SetAppDataFolder(aPath);
 
-	gPakInterface->AddPakFile("main.pak");
 
-    //gPakInterface->AddDirectory("main");
-	// Create a message we can use to talk to ourselves inter-process
+    //gPakInterface->AddPakFile("main.pak", 0); // 设置 main.pak 的优先级为 99
+
+
+// 假设 gPakInterface 和 GetPakFolder()、MkDir() 已经定义好
+    char aPakPath[512];
+    getcwd(aPakPath, sizeof(aPakPath));
+    strcat(aPakPath, "/paks/");
+    SetPakFolder(aPakPath);
+
+    if (std::filesystem::exists(GetPakFolder())) {
+        std::vector<std::string> pakList; // 存储 pak_list.txt 中的文件名
+        std::ifstream pakListFile("paks/pak_list.txt"); // 打开 pak_list.txt 文件
+
+        if (pakListFile.is_open()) {
+            std::string line;
+            // 读取每一行并检查文件是否存在
+            while (std::getline(pakListFile, line)) {
+                if (std::filesystem::exists(line)) {
+                    pakList.push_back(line); // 只添加存在的文件
+                }
+            }
+            pakListFile.close();
+        }
+
+        std::unordered_set<std::string> pakListSet(pakList.begin(), pakList.end()); // 使用集合快速查找
+        std::unordered_set<std::string> addedPakFiles; // 存储已经添加的文件路径
+
+        std::reverse(pakList.begin(), pakList.end());
+        int priority = 0;
+
+        // 首先，遍历 paks/ 文件夹中的所有文件，添加未在 pak_list.txt 中且尚未添加的 .pak 文件
+        for (const auto &entry : std::filesystem::directory_iterator(GetPakFolder())) {
+            // 检查是否为常规文件且扩展名为 .pak
+            if (entry.is_regular_file() && entry.path().extension() == ".pak") {
+                // 获取相对于根目录的路径
+                std::string pakFilePath = std::filesystem::relative(entry.path(), mChangeDirTo).string();
+                std::replace(pakFilePath.begin(), pakFilePath.end(), '\\', '/');
+
+                // 确保该文件不在 pak_list 中且尚未添加
+                if (pakListSet.find(pakFilePath) == pakListSet.end() && addedPakFiles.insert(pakFilePath).second) {
+                    // 添加文件到接口并增加优先级
+                    gPakInterface->AddPakFile(pakFilePath, priority++); // 直接使用当前优先级
+                }
+            }
+        }
+
+       // 然后，遍历 pak_list 中的文件，添加已经存在的 .pak 文件
+        for (const auto &pakFileName : pakList) {
+            if (addedPakFiles.insert(pakFileName).second) { // 检查是否已经添加过
+                gPakInterface->AddPakFile(pakFileName, priority); // 使用相对路径添加文件
+                priority++; // 增加优先级
+            }
+        }
+
+        // 更新 pak_list.txt
+        std::ofstream outputPakListFile("paks/pak_list.txt", std::ios::out | std::ios::trunc); // 打开文件进行写入
+        if (outputPakListFile.is_open()) {
+            // 写入已添加的 PAK 文件
+            for (const auto& pakFile : addedPakFiles) {
+                outputPakListFile << pakFile << std::endl; // 写入每个添加的 PAK 文件
+            }
+            outputPakListFile.close(); // 关闭文件
+        }
+
+    } else {
+        MkDir(GetPakFolder());
+    }
+
+
+    // Create a message we can use to talk to ourselves inter-process
 	//mNotifyGameMessage = RegisterWindowMessage((__S("Notify") + StringToSexyString(mProdName)).c_str());
 
 	// Create a globally unique mutex
@@ -5066,7 +5198,7 @@ void SexyAppBase::Init()
 
 	srand(SDL_GetTicks());
 
-	mIsWideWindow = sizeof(SexyChar) == sizeof(wchar_t);
+	mIsWideWindow = false;
 
 	/*
 	WNDCLASS wc;

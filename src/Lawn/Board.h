@@ -117,7 +117,11 @@ public:
 	GameButton*						mMenuButton;											//+0x148
 	GameButton*						mStoreButton;											//+0x14C
 	bool							mIgnoreMouseUp;											//+0x150
-	ToolTipWidget*					mToolTip;												//+0x154
+	bool                            mIgnoreMouseDown;                                       //+0x151
+    bool                            mMouseDragging;                                         //+0x152
+    int                             mMouseDragStartX;                                       //+0x154
+    int                             mMouseDragStartY;                                       //+0x158
+    ToolTipWidget*					mToolTip;												//+0x154
 	//_Font*							mDebugFont;											//+0x158
 	CutScene*						mCutScene;												//+0x15C
 	Challenge*						mChallenge;												//+0x160
@@ -256,6 +260,7 @@ public:
 	PlantingReason					CanPlantAt(int theGridX, int theGridY, SeedType theSeedType);
 	virtual void					MouseMove(int x, int y);
 	virtual void					MouseDrag(int x, int y);
+    virtual void                    MouseTouch(int x, int y);
 	virtual void					MouseDown(int x, int y, int theClickCount);
 	virtual void					MouseUp(int x, int y, int theClickCount);
 	virtual void					KeyChar(SexyChar theChar);

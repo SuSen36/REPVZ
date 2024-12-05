@@ -46,6 +46,7 @@
 #include "SexyAppFramework/widget/Dialog.h"
 #include "SDL_timer.h"
 #include "SDL_events.h"
+#include "Lawn/Widget/PakDialog.h"
 
 
 bool gIsPartnerBuild = false; // GOTY @Patoke: 0x729659
@@ -780,6 +781,15 @@ void LawnApp::DoUserDialog()
 	mWidgetManager->SetFocus(aDialog);
 }
 
+void LawnApp::DoPakDialog()
+{
+    KillDialog(Dialogs::DIALOG_PAKDIALOG);
+
+    PakDialog* aDialog = new PakDialog(this);
+    CenterDialog(aDialog, aDialog->mWidth, aDialog->mHeight);
+    AddDialog(Dialogs::DIALOG_PAKDIALOG, aDialog);
+    mWidgetManager->SetFocus(aDialog);
+}
 //0x450930
 void LawnApp::FinishUserDialog(bool isYes)
 {
@@ -803,6 +813,21 @@ void LawnApp::FinishUserDialog(bool isYes)
 
 		KillDialog(Dialogs::DIALOG_USERDIALOG);
 	}
+}
+//0x450930
+void LawnApp::FinishPakDialog(bool isYes)
+{
+    PakDialog* aPakDialog = (PakDialog*)GetDialog(Dialogs::DIALOG_PAKDIALOG);
+    if (aPakDialog)
+    {
+        if (isYes)
+        {
+            // 保存 PAK 列表
+
+        }
+        aPakDialog->SavePakList(); // 调用保存方法
+        KillDialog(Dialogs::DIALOG_PAKDIALOG);
+    }
 }
 
 //0x450A10

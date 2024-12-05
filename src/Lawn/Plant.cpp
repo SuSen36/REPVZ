@@ -4666,7 +4666,7 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
     {
         int aOffsetX, aOffsetY;
         GetPeaHeadOffset(aOffsetX, aOffsetY);
-        aOriginX = mX + aOffsetX + 27;
+        aOriginX = mX + aOffsetX - 30;
         aOriginY = mY + aOffsetY - 33;
     }
     else if (mSeedType == SeedType::SEED_GATLINGPEA)

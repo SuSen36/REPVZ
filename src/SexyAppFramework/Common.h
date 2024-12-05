@@ -156,6 +156,8 @@ extern std::wstring	StrFormat(const wchar_t* fmt ...);
 //bool				CheckForVista();
 std::string			GetAppDataFolder();
 void				SetAppDataFolder(const std::string& thePath);
+std::string			GetPakFolder();
+void				SetPakFolder(const std::string& thePath);
 std::string			URLEncode(const std::string& theString);
 std::string			StringToUpper(const std::string& theString);
 std::wstring		StringToUpper(const std::wstring& theString);

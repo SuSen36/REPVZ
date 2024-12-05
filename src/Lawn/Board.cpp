@@ -42,6 +42,7 @@ bool gShownMoreSunTutorial = false;
 // GOTY @Patoke: 0x40A3C0
 Board::Board(LawnApp* theApp)
 {
+
 	mApp = theApp;
 	mApp->mBoard = this;
 	TodHesitationTrace("preboard");
@@ -2015,10 +2016,9 @@ void Board::DisplayAdvice(const SexyString& theAdvice, MessageStyle theMessageSt
 			return;
 
 		mHelpDisplayed[theHelpIndex] = true;
+        mAdvice->SetLabel(theAdvice, theMessageStyle);
+        mHelpIndex = theHelpIndex;
 	}
-
-	mAdvice->SetLabel(theAdvice, theMessageStyle);
-	mHelpIndex = theHelpIndex;
 }
 
 //0x40CA10
@@ -3168,8 +3168,117 @@ void Board::MouseDrag(int x, int y)
 {
 	Widget::MouseDrag(x, y);
 	mChallenge->MouseMove(x, y);
-}
 
+    mMouseDragging = true;
+
+    HitResult aHitResult;
+    MouseHitTest(x, y, &aHitResult);
+    CursorType aCursor = mCursorObject->mCursorType;
+
+    if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_COIN)
+    {
+        Coin* aCoin = (Coin*)aHitResult.mObject;
+        if (aCoin->mBoard)
+        {
+            aCoin->MouseDown(x, y, 1);
+        }
+        UpdateCursor();
+        return;
+    }
+
+}
+void Board::MouseTouch(int x, int y) {
+    HitResult aHitResult;
+    MouseHitTest(x, y, &aHitResult);
+    CursorType aCursor = mCursorObject->mCursorType;
+
+    int theClickCount = 1;
+
+    int deltaX = std::abs(mMouseDragStartX - x);
+    int deltaY = std::abs(mMouseDragStartY - y);
+    int distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    const int MIN_DRAG_DISTANCE = 10; // 设置最小拖动距离（可以根据需要调整）
+
+
+    if (distance < MIN_DRAG_DISTANCE)
+    {
+        return;
+    }
+
+    if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_NONE)
+    {
+        if (aCursor == CURSOR_TYPE_COBCANNON_TARGET)
+        {
+            MouseDownCobcannonFire(x, y, 1);
+            UpdateCursor();
+            return;
+        }
+    }
+    else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_COIN)
+    {
+        Coin* aCoin = (Coin*)aHitResult.mObject;
+        if (aCoin->mBoard)
+        {
+            aCoin->MouseDown(x, y, 1);
+        }
+        UpdateCursor();
+        return;
+    }
+    if (aCursor == CursorType::CURSOR_TYPE_SHOVEL ||
+        aCursor == CursorType::CURSOR_TYPE_WATERING_CAN ||
+        aCursor == CursorType::CURSOR_TYPE_FERTILIZER ||
+        aCursor == CursorType::CURSOR_TYPE_BUG_SPRAY ||
+        aCursor == CursorType::CURSOR_TYPE_PHONOGRAPH ||
+        aCursor == CursorType::CURSOR_TYPE_CHOCOLATE ||
+        aCursor == CursorType::CURSOR_TYPE_GLOVE ||
+        aCursor == CursorType::CURSOR_TYPE_MONEY_SIGN ||
+        aCursor == CursorType::CURSOR_TYPE_WHEEELBARROW ||
+        aCursor == CursorType::CURSOR_TYPE_TREE_FOOD)
+    {
+        MouseDownWithTool(x, y, theClickCount, aCursor);
+    }
+    else if (IsPlantInCursor())
+    {
+        MouseDownWithPlant(x, y, theClickCount);
+    }
+    else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_SEEDPACKET)
+    {
+        if (!mPaused)
+        {
+            ((SeedPacket*)aHitResult.mObject)->MouseDown(x, y, theClickCount);
+        }
+    }
+    else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_NEXT_GARDEN)
+    {
+        if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
+        {
+            mApp->mZenGarden->GotoNextGarden();
+        }
+        else if (mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
+        {
+            mChallenge->TreeOfWisdomNextGarden();
+        }
+        mApp->PlaySample(Sexy::SOUND_TAP);
+    }
+    else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_SHOVEL ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_WATERING_CAN ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_FERTILIZER ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_BUG_SPRAY ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_PHONOGRAPH ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_CHOCOLATE ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_GLOVE ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_MONEY_SIGN ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_WHEELBARROW ||
+             aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_TREE_FOOD)
+    {
+        PickUpTool(aHitResult.mObjectType);
+    }
+    else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_PLANT)
+    {
+        ((Plant*)aHitResult.mObject)->MouseDown(x, y, theClickCount);
+    }
+}
 //0x40E780
 Zombie* Board::ZombieHitTest(int theMouseX, int theMouseY)
 {
@@ -4567,11 +4676,14 @@ void Board::MouseDown(int x, int y, int theClickCount)
 	if (mTimeStopCounter > 0)
 		return;
 
+    mMouseDragStartX = x;
+    mMouseDragStartY = y;
+
 	HitResult aHitResult;
 	MouseHitTest(x, y, &aHitResult);
 	if (mChallenge->MouseDown(x, y, theClickCount, &aHitResult))
 		return;
-
+    mMouseDragging = false;
 	if (mMenuButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
 	{
 		mApp->PlaySample(Sexy::SOUND_GRAVEBUTTON);
@@ -4786,6 +4898,12 @@ void Board::MouseUp(int x, int y, int theClickCount)
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED && mChallenge->MouseUp(x, y) && theClickCount > 0)
 		return;
+    if (mMouseDragging) {
+        MouseTouch(x,y);
+        mMouseDragging = false;
+        mMouseDragStartX = 0;
+        mMouseDragStartY = 0;
+    }
 
 	if (CanInteractWithBoardButtons() && theClickCount > 0)
 	{

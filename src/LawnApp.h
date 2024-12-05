@@ -146,7 +146,9 @@ public:
 	void							ConfirmCheckForUpdates() { ; }
 	void							CheckForUpdates() { ; }
 	void							DoUserDialog();
+    void							DoPakDialog();
 	void							FinishUserDialog(bool isYes);
+    void							FinishPakDialog(bool isYes);
 	void							DoCreateUserDialog();
 	void							DoCheatDialog();
 	void							FinishCheatDialog(bool isYes);

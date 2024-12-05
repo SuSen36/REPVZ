@@ -95,6 +95,7 @@ set(Lawn__Widget__Widget_Include
     "Lawn/Widget/LawnDialog.h"
     "Lawn/Widget/NewOptionsDialog.h"
     "Lawn/Widget/NewUserDialog.h"
+    "Lawn/Widget/PakDialog.h"
     "Lawn/Widget/SeedChooserScreen.h"
     "Lawn/Widget/StoreScreen.h"
     "Lawn/Widget/TitleScreen.h"
@@ -116,6 +117,7 @@ set(Lawn__Widget__Widget_Source
     "Lawn/Widget/LawnDialog.cpp"
     "Lawn/Widget/NewOptionsDialog.cpp"
     "Lawn/Widget/NewUserDialog.cpp"
+    "Lawn/Widget/PakDialog.cpp"
     "Lawn/Widget/SeedChooserScreen.cpp"
     "Lawn/Widget/StoreScreen.cpp"
     "Lawn/Widget/TitleScreen.cpp"
@@ -251,6 +253,16 @@ set(SexyAppFramework__PakLib__PakLib_Include
 )
 source_group("SexyAppFramework\\PakLib\\PakLib Include" FILES ${SexyAppFramework__PakLib__PakLib_Include})
 
+set(SexyAppFramework__ModLib__ModLib_Source
+        "SexyAppFramework/modlib/ModLib.cpp"
+)
+source_group("SexyAppFramework\\ModLib\\ModLib Source" FILES ${SexyAppFramework__ModLib__ModLib_Source})
+
+set(SexyAppFramework__ModLib__ModLib_Include
+        "SexyAppFramework/modlib/ModLib.h"
+)
+source_group("SexyAppFramework\\ModLib\\ModLib Include" FILES ${SexyAppFramework__ModLib__ModLib_Include})
+
 set(SexyAppFramework__Misc__Misc_Source
         "SexyAppFramework/misc/Buffer.cpp"
         "SexyAppFramework/misc/CritSect.cpp"
@@ -377,6 +389,8 @@ set(ALL_FILES
     ${SexyAppFramework__Sound__Sound_Source}
     ${SexyAppFramework__PakLib__PakLib_Include}
     ${SexyAppFramework__PakLib__PakLib_Source}
+    ${SexyAppFramework__ModLib__ModLib_Include}
+    ${SexyAppFramework__ModLib__ModLib_Source}
     ${SexyAppFramework__Misc__Misc_Include}
     ${SexyAppFramework__Misc__Misc_Source}
     ${SexyAppFramework__Imagelib__Imagelib_Include}
@@ -402,14 +416,10 @@ add_subdirectory(Sexy.TodLib)
 target_sources(${PROJECT_NAME} PRIVATE
 
     # No group sources
-    "Cursor13.cur"
     "LawnApp.cpp"
     "LawnApp.h"
     "main.cpp"
-    ".gitattributes"
-    ".gitignore"
     "resource.h"
-    "LawnProject.rc"
 )
 
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")

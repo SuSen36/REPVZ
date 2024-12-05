@@ -156,7 +156,7 @@ void UserDialog::ListClicked(int theId, int theIdx, int theClickCount)
     else
     {
         mUserList->SetSelect(theIdx);
-        if (theClickCount == 2)  // ���˫��
+        if (theClickCount == 2)  //double-click
         {
             mApp->FinishUserDialog(true);
         }

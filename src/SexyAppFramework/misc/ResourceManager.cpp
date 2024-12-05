@@ -399,7 +399,7 @@ bool ResourceManager::ParseFontResource(XMLElement &theElement)
 			aRes->mXMLAttributes = oldRes->mXMLAttributes;
 			delete oldRes;
 		}
-		else			
+		else
 		{
 			delete aRes;
 			return false;
@@ -428,7 +428,7 @@ bool ResourceManager::ParseFontResource(XMLElement &theElement)
 		aRes->mSize = sexyatoi(anItr->second.c_str());
 		if (aRes->mSize<=0)
 			return Fail("SysFont needs point size");
-			
+
 		aRes->mBold = theElement.mAttributes.find(__S("bold"))!=theElement.mAttributes.end();
 		aRes->mItalic = theElement.mAttributes.find(__S("italic"))!=theElement.mAttributes.end();
 		aRes->mShadow = theElement.mAttributes.find(__S("shadow"))!=theElement.mAttributes.end();

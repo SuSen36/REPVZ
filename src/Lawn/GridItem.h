@@ -41,7 +41,7 @@ public:
 	ParticleSystemID		mGridItemParticleID;							//+0x38
 	ZombieType				mZombieType;									//+0x3C
 	SeedType				mSeedType;										//+0x40
-	ScaryPotType			mScaryPotType;									//+0x44
+    ScaryPotType			mScaryPotType;									//+0x44
 	bool					mHighlighted;									//+0x48
 	int						mTransparentCounter;							//+0x4C
 	int						mSunCount;										//+0x50

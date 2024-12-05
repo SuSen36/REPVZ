@@ -208,24 +208,34 @@ void AchievementsWidget::MouseWheel(int theDelta) {
 
 // GOTY @Patoke: 0x459670
 void ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, bool theForceGive) {
-	// todo @Patoke: finish adding the achievement give events
-	if (!theApp->mPlayerInfo)
-		return;
+    if (!theApp || !theApp->mPlayerInfo)
+        return;
 
-	if (theApp->mPlayerInfo->mEarnedAchievements[theAchievement])
-		return;
+    if (theAchievement < 0) {
+        return;
+    }
 
-	theApp->mPlayerInfo->mEarnedAchievements[theAchievement] = true;
+    if (theApp->mPlayerInfo->mEarnedAchievements[theAchievement])
+        return;
 
-	if (!theForceGive)
-		return;
+    theApp->mPlayerInfo->mEarnedAchievements[theAchievement] = true;
 
-	std::string aAchievementName = gAchievementList[theAchievement].name;
-	aAchievementName.append(" Achievement!");
+    if (!theForceGive)
+        return;
 
-	theApp->mBoard->DisplayAdvice(aAchievementName, MESSAGE_STYLE_ACHIEVEMENT, AdviceType::ADVICE_NONE);
-	theApp->PlaySample(SOUND_ACHIEVEMENT);
+    const std::string& achievementName = gAchievementList[theAchievement].name;
+    if (achievementName.empty()) {
+        return;
+    }
+
+    std::string aAchievementName = achievementName + " Achievement!";
+
+    // 显示成就消息
+    theApp->mBoard->DisplayAdvice(aAchievementName, MESSAGE_STYLE_ACHIEVEMENT, AdviceType::ADVICE_NONE);
+    // 播放成就音效
+    theApp->PlaySample(SOUND_ACHIEVEMENT);
 }
+
 
 // GOTY @Patoke: 0x44D5B0
 void ReportAchievement::AchievementInitForPlayer(LawnApp* theApp) {
