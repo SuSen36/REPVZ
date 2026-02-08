@@ -3,9 +3,10 @@
 #include "XMLParser.h"
 #include "SexyAppFramework/sound/SoundManager.h"
 #include "SexyAppFramework/graphics/SDLImage.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
 #include "SexyAppFramework/imagelib/ImageLib.h"
+#include "SexyAppFramework/SexyAppBase.h"
 
 
 using namespace Sexy;
@@ -779,40 +780,44 @@ bool ResourceManager::DoLoadFont(FontRes* theRes)
 			aFont = aRefFont->Duplicate();
 		}
 		else
-			aFont = new ImageFont(mApp, theRes->mPath);
+		{
+			// Check for .ttf extension
+			if (theRes->mPath.size() > 4 && theRes->mPath.substr(theRes->mPath.size() - 4) == ".ttf")
+			{
+				// It's a TTF font, use the new constructor
+				// Assuming theRes->mSize holds the point size, which is parsed from XML for SysFonts
+				int pointSize = theRes->mSize > 0 ? theRes->mSize : 14; // Default to 14 if not specified
+				TTFFont* aTTFFont = new TTFFont(theRes->mPath, pointSize);
+				if (!aTTFFont->IsLoaded())
+				{
+					delete aTTFFont;
+					return Fail(StrFormat("Failed to load TTF font: %s", theRes->mPath.c_str()));
+				}
+				aFont = aTTFFont;
+			}
+			else
+			{
+				// Fallback to old TTFFont logic if you want to support both
+				// For now, we assume we are fully switching to TTF and this path might be an error
+				// If old fonts are still needed, the old TTFFont class would need to be preserved under a different name
+				return Fail("Attempting to load a non-TTF font, which is not supported in this implementation.");
+			}
+		}
 	}
 	else
 	{
-		Image *anImage = mApp->GetImage(theRes->mImagePath);
-		if (anImage==NULL)
-			return Fail(StrFormat("Failed to load image: %s",theRes->mImagePath.c_str()));
-
-		theRes->mImage = anImage;
-		aFont = new ImageFont(anImage, theRes->mPath);
+		// This path was for image-based fonts with separate image and data files.
+		// This is now deprecated in our TTF-only approach.
+		return Fail("Loading fonts from separate image and data files is no longer supported.");
 	}
 
-	ImageFont *anImageFont = dynamic_cast<ImageFont*>(aFont);
-	if (anImageFont!=NULL)
+	if (aFont == NULL)
 	{
-		if (anImageFont->mFontData==NULL || !anImageFont->mFontData->mInitialized)
-		{
-			delete aFont;
-			return Fail(StrFormat("Failed to load font: %s",theRes->mPath.c_str()));
-		}
-
-		if (!theRes->mTags.empty())
-		{
-			char aBuf[1024];
-			strcpy(aBuf,theRes->mTags.c_str());
-			const char *aPtr = strtok(aBuf,", \r\n\t");
-			while (aPtr != NULL)
-			{
-				anImageFont->AddTag(aPtr);
-				aPtr = strtok(NULL,", \r\n\t");
-			}
-			anImageFont->Prepare();
-		}
+		return Fail(StrFormat("Failed to load font: %s", theRes->mPath.c_str()));
 	}
+
+	// The old checks for anImageFont and mFontData are no longer valid for the TTF implementation.
+	// We can add new checks if necessary, e.g., check if the TTF_Font* inside is valid.
 
 	theRes->mFont = aFont;
 

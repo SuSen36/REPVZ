@@ -1,6 +1,6 @@
 #include "HyperlinkWidget.h"
 #include "SexyAppFramework/graphics/Graphics.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
 #include "WidgetManager.h"
 #include "../../Resources.h" // bad

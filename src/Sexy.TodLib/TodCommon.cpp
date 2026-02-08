@@ -10,7 +10,7 @@
 #include "SexyAppFramework/graphics/Font.h"
 #include "SexyAppFramework/graphics/SDLImage.h"
 #include "SexyAppFramework/graphics/Graphics.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "SexyAppFramework/misc/SexyMatrix.h"
 
 
@@ -385,171 +385,15 @@ void TodDrawImageCelScaled(Graphics* g, Image* theImageStrip, int thePosX, int t
 		g->DrawImage(theImageStrip, aDestRect, aSrcRect);
 }
 
-static const int POOL_SIZE = 4096;
-static RenderCommand gRenderCommandPool[POOL_SIZE];
-static RenderCommand* gRenderTail[256];
-static RenderCommand* gRenderHead[256];
+
 
 //0x511E50
 void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& theMatrix, const SexyString& theString, const Color& theColor)
 {
 	SexyString aFinalString = TodStringTranslate(theString);
-
-	memset(gRenderTail, 0, sizeof(gRenderTail));
-	memset(gRenderHead, 0, sizeof(gRenderHead));
-	ImageFont* aFont = (ImageFont*)theFont;
-	if (!aFont->mFontData->mInitialized)
-		return;
-
-	aFont->Prepare();
-	int aCurXPos = 0;
-	int aCurPoolIdx = 0;
-	for (int aCharNum = 0; aCharNum < (int)aFinalString.size(); aCharNum++)
-	{
-		SexyChar aChar = aFont->GetMappedChar(aFinalString[aCharNum]);
-		SexyChar aNextChar = '\0';
-		if (aCharNum < (int)aFinalString.size() - 1)
-		{
-			aNextChar = aFont->GetMappedChar(aFinalString[aCharNum + 1]);
-		}
-
-		int aMaxXPos = aCurXPos;
-		for (auto aKernItr = aFont->mActiveLayerList.begin(); aKernItr != aFont->mActiveLayerList.end(); aKernItr++)
-		{
-			FontLayer* aLayer = aKernItr->mBaseFontLayer;
-			CharData* aCharData = aLayer->GetCharData(aChar);
-			double aScale = aFont->mScale;
-			int aLayerPointSize = aLayer->mPointSize;
-			if (aLayerPointSize)
-			{
-				aScale *= (float)aFont->mPointSize / (float)aLayerPointSize;
-			}
-
-			int anImageX, anImageY, aCharWidth, aSpacing;
-			if (aScale == 1.0f)
-			{
-				anImageX = aCharData->mOffset.mX + aLayer->mOffset.mX + aCurXPos;
-				anImageY = aCharData->mOffset.mY + aLayer->mOffset.mY - aLayer->mAscent;
-				aCharWidth = aCharData->mWidth;
-
-				if (aNextChar == '\0')
-				{
-					aSpacing = 0;
-				}
-				else
-				{
-					aSpacing = aLayer->mSpacing;
-
-					//aSpacing += aCharData->mKerningOffsets[aNextChar];
-					auto anItr = aCharData->mKerningOffsets.find(aNextChar);
-					if (anItr != aCharData->mKerningOffsets.end())
-					{
-						aSpacing += anItr->second;
-					}
-				}
-			}
-			else
-			{
-				anImageX = aCurXPos + floor((aCharData->mOffset.mX + aLayer->mOffset.mX) * aScale);
-				anImageY = -floor((aLayer->mAscent - aLayer->mOffset.mY - aCharData->mOffset.mY) * aScale);
-				aCharWidth = aCharData->mWidth * aScale;
-
-				if (aNextChar == '\0')
-				{
-					aSpacing = 0;
-				}
-				else
-				{
-					aSpacing = aLayer->mSpacing;
-
-					//aSpacing += aCharData->mKerningOffsets[aNextChar] * aScale;
-					auto anItr = aCharData->mKerningOffsets.find(aNextChar);
-					if (anItr != aCharData->mKerningOffsets.end())
-					{
-						aSpacing += anItr->second * aScale;
-					}
-				}
-			}
-
-			Color aColor;
-			aColor.mRed = std::min(aLayer->mColorAdd.mRed + theColor.mRed * aLayer->mColorMult.mRed / 255, 255);
-			aColor.mGreen = std::min(aLayer->mColorAdd.mGreen + theColor.mGreen * aLayer->mColorMult.mGreen / 255, 255);
-			aColor.mBlue = std::min(aLayer->mColorAdd.mBlue + theColor.mBlue * aLayer->mColorMult.mBlue / 255, 255);
-			aColor.mAlpha = std::min(aLayer->mColorAdd.mAlpha + theColor.mAlpha * aLayer->mColorMult.mAlpha / 255, 255);
-			int anOrder = aCharData->mOrder + aLayer->mBaseOrder;
-
-			if (aCurPoolIdx >= POOL_SIZE)
-				break;
-
-			RenderCommand* aRenderCommand = &gRenderCommandPool[aCurPoolIdx++];
-			aRenderCommand->mImage = aKernItr->mScaledImage;
-			aRenderCommand->mColor = aColor;
-			aRenderCommand->mDest[0] = anImageX;
-			aRenderCommand->mDest[1] = anImageY;
-			//aRenderCommand->mSrc[0] = aKernItr->mScaledCharImageRects[aChar].mX;
-			//aRenderCommand->mSrc[1] = aKernItr->mScaledCharImageRects[aChar].mY;
-			//aRenderCommand->mSrc[2] = aKernItr->mScaledCharImageRects[aChar].mWidth;
-			//aRenderCommand->mSrc[3] = aKernItr->mScaledCharImageRects[aChar].mHeight;
-			aRenderCommand->mSrc[0] = aKernItr->mScaledCharImageRects.find(aChar)->second.mX;
-			aRenderCommand->mSrc[1] = aKernItr->mScaledCharImageRects.find(aChar)->second.mY;
-			aRenderCommand->mSrc[2] = aKernItr->mScaledCharImageRects.find(aChar)->second.mWidth;
-			aRenderCommand->mSrc[3] = aKernItr->mScaledCharImageRects.find(aChar)->second.mHeight;
-			aRenderCommand->mMode = aLayer->mDrawMode;
-			aRenderCommand->mUseAlphaCorrection = aLayer->mUseAlphaCorrection;
-			aRenderCommand->mNext = nullptr;
-
-			int anOrderIdx = std::min(std::max(anOrder + 128, 0), 255);
-			if (gRenderTail[anOrderIdx])
-			{
-				gRenderTail[anOrderIdx]->mNext = aRenderCommand;
-				gRenderTail[anOrderIdx] = aRenderCommand;
-			}
-			else
-			{
-				gRenderHead[anOrderIdx] = aRenderCommand;
-				gRenderTail[anOrderIdx] = aRenderCommand;
-			}
-
-			//aCurXPos += aSpacing + aCharWidth;
-			//if (aCurXPos > aMaxXPos)
-			//{
-			//	aMaxXPos = aCurXPos;
-			//}
-			if (aMaxXPos < aCurXPos + aSpacing + aCharWidth)
-			{
-				aMaxXPos = aCurXPos + aSpacing + aCharWidth;
-			}
-		}
-
-		aCurXPos = aMaxXPos;
-	}
-
-	for (int aPoolIdx = 0; aPoolIdx < 256; aPoolIdx++)
-	{
-		RenderCommand* aRenderCommand = gRenderHead[aPoolIdx];
-
-		while (aRenderCommand)
-		{
-			int aDrawMode = g->GetDrawMode();
-			if (aRenderCommand->mMode != -1)
-			{
-				aDrawMode = aRenderCommand->mMode;
-			}
-
-			if (aRenderCommand->mImage)
-			{
-				Rect aSrcRect(aRenderCommand->mSrc[0], aRenderCommand->mSrc[1], aRenderCommand->mSrc[2], aRenderCommand->mSrc[3]);
-				SexyTransform2D aTransform;
-				float aPosX = aSrcRect.mWidth * 0.5f + aRenderCommand->mDest[0];
-				float aPosY = aSrcRect.mHeight * 0.5f + aRenderCommand->mDest[1];
-				SexyMatrix3Translation(aTransform, aPosX, aPosY);
-				SexyMatrix3Multiply(aTransform, theMatrix, aTransform);
-				TodBltMatrix(g, aRenderCommand->mImage, aTransform, g->mClipRect, aRenderCommand->mColor, aDrawMode, aSrcRect);
-			}
-			
-			aRenderCommand = aRenderCommand->mNext;
-		}
-	}
+	g->SetFont((Font*)theFont);
+	g->SetColor(theColor);
+	g->DrawString(aFinalString, theMatrix.m02, theMatrix.m12);
 }
 
 //0x512570

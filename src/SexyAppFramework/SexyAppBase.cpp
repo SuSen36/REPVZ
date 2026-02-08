@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include <SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include <iostream>
 #include "SexyAppBase.h"
@@ -967,6 +968,8 @@ void SexyAppBase::Shutdown()
 		if (mReadFromRegistry)
 			WriteToRegistry();
 
+        TTF_Quit();
+
 		//ImageLib::CloseJPEG2000();
 	}
 }
@@ -1034,6 +1037,7 @@ void SexyAppBase::Redraw(Rect* theClipRect)
 		return;
 
 	static DWORD aRetryTick = 0;
+	SDL_FlushRenderer(gRenderer);
 	SDL_RenderPresent(gRenderer);
 	mFPSFlipCount++;
 }
@@ -2104,6 +2108,11 @@ void SexyAppBase::InitHook()
 void SexyAppBase::Init()
 {
 	mPrimaryThreadId = (void*)SDL_GetCurrentThreadID();
+    
+    if (TTF_Init() < 0)
+    {
+        TodTrace("TTF_Init failed: %s", SDL_GetError());
+    }
 
 	if (mShutdown)
 		return;

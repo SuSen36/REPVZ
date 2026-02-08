@@ -1,7 +1,7 @@
 #include "ButtonWidget.h"
 #include "SexyAppFramework/graphics/Image.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "WidgetManager.h"
 #include "ButtonListener.h"
 #include "../../Resources.h" // bad

@@ -1,7 +1,7 @@
 #include "TitleScreen.h"
 #include "SexyAppFramework/widget/HyperlinkWidget.h"
 #include "SexyAppFramework/widget/WidgetManager.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "SexyAppFramework/sound/SoundManager.h"
 #include "LawnApp.h"
 #include "../../Resources.h"

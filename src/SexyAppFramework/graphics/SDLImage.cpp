@@ -329,22 +329,40 @@ void SDLImage::Create(int theWidth, int theHeight)
 
 uint32_t* SDLImage::GetBits()
 {
-    // For SDLImage, we need to read texture data back to CPU memory
+    if (mBits)
+        return mBits;
+
     if (!mTexture)
         return nullptr;
 
-    SDL_Texture* texture;
+    mBits = new uint32_t[mWidth * mHeight];
+    mPurgeBits = true;
 
-    // Create a surface to read the texture data
-    SDL_Surface* surface = SDL_CreateSurface(mWidth, mHeight, SDL_PIXELFORMAT_ARGB8888);
-    if (!surface)
+    SDL_Texture* readTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, mWidth, mHeight);
+    if (!readTexture)
+    {
+        delete[] mBits;
+        mBits = nullptr;
         return nullptr;
+    }
 
-    // For SDL3, we need to use a different approach
-    // Since this is a compatibility method, we'll return nullptr for now
-    // In a real implementation, we'd need to properly read texture data
-    SDL_DestroySurface(surface);
-    return nullptr;
+    SDL_Texture* prevTarget = SDL_GetRenderTarget(gRenderer);
+    SDL_SetRenderTarget(gRenderer, readTexture);
+
+    SDL_RenderTexture(gRenderer, mTexture, nullptr, nullptr);
+    SDL_FlushRenderer(gRenderer);
+    
+    SDL_Surface* surface = SDL_RenderReadPixels(gRenderer, nullptr);
+    if (surface)
+    {
+        SDL_memcpy(mBits, surface->pixels, mWidth * mHeight * 4);
+        SDL_DestroySurface(surface);
+    }
+
+    SDL_SetRenderTarget(gRenderer, prevTarget);
+    SDL_DestroyTexture(readTexture);
+
+    return mBits;
 }
 
 void SDLImage::BitsChanged()

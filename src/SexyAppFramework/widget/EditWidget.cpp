@@ -1,6 +1,6 @@
 #include "EditWidget.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "WidgetManager.h"
 #include "../SexyAppBase.h"
 #include "EditListener.h"

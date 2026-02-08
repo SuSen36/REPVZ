@@ -3,6 +3,79 @@
 
 using namespace Sexy;
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+DataElement::DataElement()
+{
+	mIsList = false;
+}
+
+DataElement::~DataElement()
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+SingleDataElement::SingleDataElement()
+{
+	mIsList = false;
+}
+
+SingleDataElement::SingleDataElement(const std::string theString) :
+	mString(theString)
+{
+	mIsList = false;
+}
+
+SingleDataElement::~SingleDataElement()
+{
+}
+
+DataElement* SingleDataElement::Duplicate()
+{
+	return new SingleDataElement(mString);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+ListDataElement::ListDataElement()
+{
+	mIsList = true;
+}
+
+ListDataElement::ListDataElement(const ListDataElement& theListDataElement)
+{
+	mIsList = true;
+	for (ulong i = 0; i < theListDataElement.mElementVector.size(); i++)
+		mElementVector.push_back(theListDataElement.mElementVector[i]->Duplicate());
+}
+
+ListDataElement::~ListDataElement()
+{
+	for (ulong i = 0; i < mElementVector.size(); i++)
+		delete mElementVector[i];
+	mElementVector.clear();
+}
+
+ListDataElement& ListDataElement::operator=(const ListDataElement& theListDataElement)
+{
+	for (ulong i = 0; i < mElementVector.size(); i++)
+		delete mElementVector[i];
+	mElementVector.clear();
+
+	for (ulong i = 0; i < theListDataElement.mElementVector.size(); i++)
+		mElementVector.push_back(theListDataElement.mElementVector[i]->Duplicate());
+
+	return *this;
+}
+
+DataElement* ListDataElement::Duplicate()
+{
+	return new ListDataElement(*this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 DescParser::DescParser()
 {
 	mCmdSep = CMDSEP_SEMICOLON;

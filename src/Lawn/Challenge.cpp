@@ -1,4 +1,4 @@
-﻿																																																																																																																																												#include "Coin.h"
+﻿#include "Coin.h"
 #include "Board.h"
 #include "Plant.h"
 #include "Zombie.h"

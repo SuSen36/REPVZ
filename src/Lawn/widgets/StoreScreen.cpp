@@ -16,7 +16,7 @@
 #include "Sexy.TodLib/TodCommon.h"
 #include "Sexy.TodLib/Reanimator.h"
 #include "Sexy.TodLib/TodStringFile.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "SexyAppFramework/widget/WidgetManager.h"
 #include "AchievementsScreen.h"
 

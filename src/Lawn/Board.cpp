@@ -38,7 +38,7 @@
 #include "SexyAppFramework/graphics/Graphics.h"
 #include "Sexy.TodLib/EffectSystem.h"
 #include "Sexy.TodLib/TodStringFile.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "SexyAppFramework/sound/SoundManager.h"
 #include "SexyAppFramework/widget/ButtonWidget.h"
 #include "SexyAppFramework/widget/WidgetManager.h"

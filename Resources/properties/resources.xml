@@ -19,7 +19,7 @@
   <Image id="SODROLLCAP" path="SodRollCap" />
   
   <SetDefaults path="data" idprefix="FONT_" />
-  <Font id="BRIANNETOD16" path="BrianneTod16.txt" />
+  <Font id="BRIANNETOD16" path="BrianneTod16.ttf" size="16" />
 
   <SetDefaults path="sounds" idprefix="SOUND_" />
   <Sound id="BUTTONCLICK" path="buttonclick" />
@@ -30,24 +30,23 @@
 <Resources id="LoadingFonts">
 
 <SetDefaults path="data" idprefix="FONT_" />
-<Image id="IMAGE_HOUSEOFTERROR28" path="houseofterror28" />
-<Font id="HOUSEOFTERROR28" path="HouseofTerror28.txt" />
-<Font id="HOUSEOFTERROR20" path="HouseofTerror20.txt" />
-<Font id="HOUSEOFTERROR16" path="HouseofTerror16.txt" />
-<Font id="TINYBOLD" path="Pix118Bold.txt" />
-<Font id="CONTINUUMBOLD14" path="ContinuumBold14.txt" />
-<Font id="CONTINUUMBOLD14OUTLINE" path="ContinuumBold14Outback.txt" />
-<Font id="DWARVENTODCRAFT12" path="DwarvenTodcraft12.txt" />
-<Font id="DWARVENTODCRAFT15" path="DwarvenTodcraft15.txt" />
-<Font id="DWARVENTODCRAFT18" path="DwarvenTodcraft18.txt" />
-<Font id="DWARVENTODCRAFT18BRIGHTGREENINSET" path="DwarvenTodcraft18BrightGreenInset.txt" />
-<Font id="DWARVENTODCRAFT18GREENINSET" path="DwarvenTodcraft18GreenInset.txt" />
-<Font id="DWARVENTODCRAFT18YELLOW" path="DwarvenTodcraft18Yellow.txt" />
-<Font id="DWARVENTODCRAFT24" path="DwarvenTodcraft24.txt" />
-<Font id="DWARVENTODCRAFT36BRIGHTGREENINSET" path="DwarvenTodcraft36BrightGreenInset.txt" />
-<Font id="DWARVENTODCRAFT36GREENINSET" path="DwarvenTodcraft36GreenInset.txt" />
-<Font id="PICO129" path="Pico129.txt" />
-<Font id="BRIANNETOD12" path="BrianneTod12.txt" />
+<Font id="HOUSEOFTERROR28" path="HouseofTerror28.ttf" size="28" />
+<Font id="HOUSEOFTERROR20" path="HouseofTerror20.ttf" size="20" />
+<Font id="HOUSEOFTERROR16" path="HouseofTerror16.ttf" size="16" />
+<Font id="TINYBOLD" path="Pix118Bold.ttf" size="10" />
+<Font id="CONTINUUMBOLD14" path="ContinuumBold14.ttf" size="14" />
+<Font id="CONTINUUMBOLD14OUTLINE" path="ContinuumBold14Outback.ttf" size="14" />
+<Font id="DWARVENTODCRAFT12" path="DwarvenTodcraft12.ttf" size="12" />
+<Font id="DWARVENTODCRAFT15" path="DwarvenTodcraft15.ttf" size="15" />
+<Font id="DWARVENTODCRAFT18" path="DwarvenTodcraft18.ttf" size="18" />
+<Font id="DWARVENTODCRAFT18BRIGHTGREENINSET" path="DwarvenTodcraft18BrightGreenInset.ttf" size="18" />
+<Font id="DWARVENTODCRAFT18GREENINSET" path="DwarvenTodcraft18GreenInset.ttf" size="18" />
+<Font id="DWARVENTODCRAFT18YELLOW" path="DwarvenTodcraft18Yellow.ttf" size="18" />
+<Font id="DWARVENTODCRAFT24" path="DwarvenTodcraft24.ttf" size="24" />
+<Font id="DWARVENTODCRAFT36BRIGHTGREENINSET" path="DwarvenTodcraft36BrightGreenInset.ttf" size="36" />
+<Font id="DWARVENTODCRAFT36GREENINSET" path="DwarvenTodcraft36GreenInset.ttf" size="36" />
+<Font id="PICO129" path="Pico129.ttf" size="12" />
+<Font id="BRIANNETOD12" path="BrianneTod12.ttf" size="12" />
   
 </Resources>
   
@@ -809,8 +808,8 @@
 
 <Resources id="DelayLoad_Credits">
   <SetDefaults path="data" idprefix="FONT_" />
-  <Font id="BRIANNETOD32" path="BrianneTod32.txt" />
-  <Font id="BRIANNETOD32BLACK" path="BrianneTod32Black.txt" />
+  <Font id="BRIANNETOD32" path="BrianneTod32.ttf" size="32" />
+  <Font id="BRIANNETOD32BLACK" path="BrianneTod32Black.ttf" size="32" />
   
   <SetDefaults path="reanim" idprefix="IMAGE_REANIM_" />
   <Image id="SUNFLOWER_HEAD_SING1" path="SunFlower_head_sing1" />

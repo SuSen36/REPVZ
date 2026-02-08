@@ -1,7 +1,7 @@
 #ifndef __AUTOCRIT_INCLUDED__
 #define __AUTOCRIT_INCLUDED__
 
-#include "../Common.h"
+#include "SexyAppFramework/Common.h"
 #include "CritSect.h"
 #include <SDL3/SDL_mutex.h>
 

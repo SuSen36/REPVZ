@@ -4,7 +4,7 @@
 #include "../SexyAppBase.h"
 #include "WidgetManager.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
-#include "SexyAppFramework/graphics/ImageFont.h"
+#include "SexyAppFramework/graphics/TTFFont.h"
 #include "../../Resources.h" // bad
 
 using namespace Sexy;

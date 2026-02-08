@@ -72,6 +72,7 @@ endif()
 add_subdirectory(Libs/SDL3)
 add_subdirectory(Libs/SDL3_net)
 add_subdirectory(Libs/SDL3_image)
+add_subdirectory(Libs/SDL3_ttf)
 
 include(FetchContent)
 
@@ -161,6 +162,7 @@ target_include_directories(xp-plants-vs-zombies PRIVATE
 	${PROJECT_SOURCE_DIR}/Libs/SDL3/include/SDL3
 	${PROJECT_SOURCE_DIR}/Libs/SDL3_net/include/SDL3_net
 	${PROJECT_SOURCE_DIR}/Libs/SDL3_image/include/SDL3_image
+	${PROJECT_SOURCE_DIR}/Libs/SDL3_ttf/include/SDL3_ttf
 	${PLAT_INCLUDES}
 	${bass_SOURCE_DIR}/${BASS_INCLUDE}
 )
@@ -168,7 +170,7 @@ target_include_directories(xp-plants-vs-zombies PRIVATE
 #target_compile_definitions(xp-plants-vs-zombies PRIVATE _DEBUG)
 
 if (NOT EMSCRIPTEN)
-    target_link_libraries(xp-plants-vs-zombies SDL3::SDL3 SDL3_net::SDL3_net-shared SDL3_image::SDL3_image-shared bass)
+    target_link_libraries(xp-plants-vs-zombies SDL3::SDL3 SDL3_net::SDL3_net-shared SDL3_image::SDL3_image-shared SDL3_ttf::SDL3_ttf-shared bass)
 else()
     target_link_libraries(xp-plants-vs-zombies SDL3) # Emscripten provides its own SDL3
 endif()
@@ -182,6 +184,9 @@ if (WIN32)
     endif()
 	if(EXISTS "${CMAKE_BINARY_DIR}/Libs/SDL3_image/SDL3_image.dll")
 		file(COPY ${CMAKE_BINARY_DIR}/Libs/SDL3_image/SDL3_image.dll DESTINATION ${CMAKE_BINARY_DIR})
+	endif()
+	if(EXISTS "${CMAKE_BINARY_DIR}/Libs/SDL3_ttf/SDL3_ttf.dll")
+		file(COPY ${CMAKE_BINARY_DIR}/Libs/SDL3_ttf/SDL3_ttf.dll DESTINATION ${CMAKE_BINARY_DIR})
 	endif()
 
 	target_link_options(xp-plants-vs-zombies PRIVATE -static -static-libgcc -static-libstdc++)
