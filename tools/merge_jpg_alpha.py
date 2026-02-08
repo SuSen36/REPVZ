@@ -7,14 +7,15 @@
 
 import os
 import sys
+
 from PIL import Image
 
 
-def merge_jpg_with_alpha(jpg_path, alpha_png_path, output_path):
+def merge_jpg_with_alpha(jpg_path, alpha_path, output_path):
     """
-    合并JPG和灰度PNG为带透明度的PNG
+    合并JPG和灰度图为带透明度的PNG
     :param jpg_path: JPG图片路径
-    :param alpha_png_path: 灰度PNG路径（用作alpha通道）
+    :param alpha_path: 灰度图路径（PNG/JPEG/GIF，用作alpha通道）
     :param output_path: 输出PNG路径
     """
     try:
@@ -22,13 +23,13 @@ def merge_jpg_with_alpha(jpg_path, alpha_png_path, output_path):
         jpg_image = Image.open(jpg_path)
         jpg_image = jpg_image.convert('RGB')
         
-        # 打开灰度PNG
-        alpha_image = Image.open(alpha_png_path)
+        # 打开灰度图（支持PNG、JPEG、GIF）
+        alpha_image = Image.open(alpha_path)
         alpha_image = alpha_image.convert('L')  # 确保是灰度模式
         
         # 确保两个图片尺寸相同
         if jpg_image.size != alpha_image.size:
-            print(f"警告: 图片尺寸不匹配 {jpg_path} {jpg_image.size} vs {alpha_png_path} {alpha_image.size}")
+            print(f"警告: 图片尺寸不匹配 {jpg_path} {jpg_image.size} vs {alpha_path} {alpha_image.size}")
             alpha_image = alpha_image.resize(jpg_image.size, Image.Resampling.LANCZOS)
         
         # 创建RGBA图片
@@ -51,46 +52,46 @@ def merge_jpg_with_alpha(jpg_path, alpha_png_path, output_path):
 
 def process_resources_directory(resources_dir):
     """
-    处理整个Resources目录，查找JPG和对应的灰度图
+    遍历目录，查找JPG及其对应的各种格式的灰度图（_版本）
     """
     processed_count = 0
     deleted_count = 0
-    
-    # 遍历所有子目录
+
+    # 定义支持的灰度图后缀
+    alpha_extensions = ['_.png', '_.jpg', '_.jpeg', '_.gif']
+
     for root, dirs, files in os.walk(resources_dir):
         for file in files:
-            if file.endswith('.jpg'):
+            # 仅处理非灰度图本身的主JPG文件
+            if file.lower().endswith('.jpg') and not any(file.lower().endswith(ext) for ext in alpha_extensions):
                 jpg_path = os.path.join(root, file)
                 base_name = os.path.splitext(file)[0]
-                
-                # 查找对应的灰度图（下划线版本）
-                alpha_png_name = base_name + '_.png'
-                alpha_png_path = os.path.join(root, alpha_png_name)
-                
-                if os.path.exists(alpha_png_path):
-                    # 创建输出文件名（替换JPG为PNG）
+
+                # 尝试查找不同后缀的灰度图文件
+                alpha_path = None
+                for ext in alpha_extensions:
+                    potential_path = os.path.join(root, base_name + ext)
+                    if os.path.exists(potential_path):
+                        alpha_path = potential_path
+                        break
+
+                if alpha_path:
                     output_name = base_name + '.png'
                     output_path = os.path.join(root, output_name)
-                    
-                    print(f"处理: {jpg_path} + {alpha_png_path}")
-                    if merge_jpg_with_alpha(jpg_path, alpha_png_path, output_path):
+
+                    print(f"匹配成功: [{file}] + [{os.path.basename(alpha_path)}]")
+
+                    if merge_jpg_with_alpha(jpg_path, alpha_path, output_path):
                         processed_count += 1
-                        
-                        # 删除原始文件
-                        try:
-                            os.remove(jpg_path)
-                            print(f"  已删除: {jpg_path}")
-                            deleted_count += 1
-                        except Exception as e:
-                            print(f"  警告: 无法删除 {jpg_path}: {e}")
-                        
-                        try:
-                            os.remove(alpha_png_path)
-                            print(f"  已删除: {alpha_png_path}")
-                            deleted_count += 1
-                        except Exception as e:
-                            print(f"  警告: 无法删除 {alpha_png_path}: {e}")
-    
+
+                        # 安全删除原始文件
+                        for path_to_del in [jpg_path, alpha_path]:
+                            try:
+                                os.remove(path_to_del)
+                                deleted_count += 1
+                            except Exception as e:
+                                print(f"  警告: 无法删除原始文件 {path_to_del}: {e}")
+
     return processed_count, deleted_count
 
 def main():
