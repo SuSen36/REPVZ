@@ -55,6 +55,6 @@ public:
     void                        ProcessDeleteQueue();
     void                        Update();
 };
-extern EffectSystem* gEffectSystem;  //[0x6A9EB8]
+extern EffectSystem* gEffectSystem;
 
 #endif

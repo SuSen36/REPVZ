@@ -20,10 +20,10 @@ protected:
 	};
 
 public:
-	ListWidget*			mPakList;				//+0x174
-	DialogButton*		mMoveUpButton;			//+0x178
-	DialogButton*		mMoveDownButton;			//+0x17C
-	int					mNumPaks;				//+0x180
+	ListWidget*			mPakList;
+	DialogButton*		mMoveUpButton;
+	DialogButton*		mMoveDownButton;
+	int					mNumPaks;
 
 public:
     PakDialog(LawnApp* theApp);

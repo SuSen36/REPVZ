@@ -16,8 +16,6 @@
 #include "Sexy.TodLib/TodStringFile.h"
 #include "AchievementsScreen.h"
 
-//0x405780
-// GOTY @Patoke: 0x4063E0
 AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowingAchievements)
 {
 	mApp = theApp;
@@ -28,7 +26,6 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 
 	mLoadedResourceNames.push_back("DelayLoad_AwardScreen");
 
-	// @Patoke: implemented
 	if (!theShowingAchievements) {
 		mShowingAchievements = false;
 	}
@@ -124,7 +121,6 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 	mStartButton->Resize(324, 500, 156, 42);
 	mStartButton->mTextOffsetY = -1;
 
-	// @Patoke: implemented
 	mContinueButton = new GameButton(AwardScreen::AwardScreen_Start);
 	mContinueButton->mButtonImage = Sexy::IMAGE_SEEDCHOOSER_BUTTON;
 	mContinueButton->mOverImage = nullptr;
@@ -168,15 +164,17 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 		mStartButton->SetFont(Sexy::FONT_HOUSEOFTERROR20);
 		mStartButton->mColors[ButtonWidget::COLOR_LABEL] = Color(255, 255, 255);
 		mStartButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(213, 159, 43);
-		mStartButton->Resize(325, 505, 190, 73);
+		mStartButton->Resize(325 + 133, 505, 190, 73);
 		mStartButton->mTextOffsetX = 33;
 		mStartButton->mTextOffsetY = -2;
 		mStartButton->mButtonOffsetX = -2;
 		mStartButton->mButtonOffsetY = 8;
 		mStartButton->mParentWidget = this;
+		mMenuButton->Resize(677 + 233, 16, 111, 26);
 	}
 	else if (mAwardType == AWARD_HELP_ZOMBIENOTE)
 	{
+		mStartButton->Resize(324 + 133, 500, 156, 42);
 		mStartButton->SetLabel("[MAIN_MENU_BUTTON]");
 		mMenuButton->mBtnNoDraw = true;
 		mMenuButton->mDisabled = true;
@@ -187,9 +185,9 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 		mMenuButton->mBtnNoDraw = true;
 		mMenuButton->mDisabled = true;
 	}
-	else if (mApp->HasFinishedAdventure()) // @Patoke: change case
+	else if (mApp->HasFinishedAdventure())
 	{
-		ReportAchievement::GiveAchievement(mApp, HomeSecurity, false); // @Patoke: add achievement
+		ReportAchievement::GiveAchievement(mApp, HomeSecurity, false);
 		mStartButton->SetLabel("[CONTINUE_BUTTON]");
 		mMenuButton->mBtnNoDraw = true;
 		mMenuButton->mDisabled = true;
@@ -201,12 +199,10 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 	else
 		mStartButton->SetLabel("[NEXT_LEVEL_BUTTON]");
 
-	// @Patoke: implemented
 	if (mApp->IsAdventureMode() && mApp->EarnedGoldTrophy()) {
 		ReportAchievement::GiveAchievement(mApp, NovelPeasPrize, false);
 	}
 
-	// @Patoke: implemented
 	if (mShowingAchievements) {
 		mShowStartButtonAfterAchievements = !mStartButton->mBtnNoDraw;
 		mShowMenuButtonAfterAchievements = !mMenuButton->mBtnNoDraw;
@@ -231,7 +227,7 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 AwardScreen::~AwardScreen()
 {
 	if (mStartButton) delete mStartButton;
-	if (mContinueButton) delete mContinueButton; // @Patoke: add new button
+	if (mContinueButton) delete mContinueButton;
 	if (mMenuButton) delete mMenuButton;
 }
 
@@ -244,7 +240,6 @@ bool AwardScreen::IsPaperNote()
 	return mApp->IsAdventureMode() && (aLevel == 10 || aLevel == 20 || aLevel == 30 || aLevel == 40 || aLevel == 50);
 }
 
-//0x4064D0
 void AwardScreen::DrawBottom(Graphics* g, const SexyString& theTitle, const SexyString& theAward, const SexyString& theMessage)
 {
 	g->DrawImage(Sexy::IMAGE_AWARDSCREEN_BACK, 0, 0);
@@ -253,7 +248,6 @@ void AwardScreen::DrawBottom(Graphics* g, const SexyString& theTitle, const Sexy
 	TodDrawStringWrapped(g, theMessage, Rect(285, 360, 230, 90), Sexy::FONT_BRIANNETOD16, Color(40, 50, 90), DS_ALIGN_CENTER_VERTICAL_MIDDLE);
 }
 
-//0x4066A0
 void AwardScreen::DrawAwardSeed(Graphics* g)
 {
 	SeedType aSeedType = mApp->GetAwardSeedForLevel(mApp->mPlayerInfo->GetLevel() - 1);
@@ -267,14 +261,12 @@ void AwardScreen::DrawAwardSeed(Graphics* g)
 	g->SetScale(1, 1, 0, 0);
 }
 
-//0x4068D0
-// GOTY @Patoke: 0x4081C0
 void AwardScreen::Draw(Graphics* g)
 {
 	g->SetLinearBlend(true);
 
 	int aLevel = mApp->mPlayerInfo->GetLevel();
-	if (mShowingAchievements) // @Patoke: add call
+	if (mShowingAchievements)
 		DrawAchievements(g);
 	else if (mAwardType == AWARD_CREDITS_ZOMBIENOTE)
 	{
@@ -284,16 +276,16 @@ void AwardScreen::Draw(Graphics* g)
 		g->SetColorizeImages(false);
 		g->SetColor(Color(0, 0, 0, 64));
 		g->FillRect(0, 525, BOARD_WIDTH, BOARD_HEIGHT);
-		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE, 75, 60);
-		g->DrawImage(Sexy::IMAGE_CREDITS_ZOMBIENOTE, 149, 103, 475, 325);
+		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE, 75 + 133, 60);
+		g->DrawImage(Sexy::IMAGE_CREDITS_ZOMBIENOTE, 149 + 133, 103, 475, 325);
 	}
 	else if (mAwardType == AWARD_HELP_ZOMBIENOTE)
 	{
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1, -700, -300, 2800, 1200);
-		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE, 80, 80);
-		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE_HELP, 131, 132);
+		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE, 80 + 133, 80);
+		g->DrawImage(Sexy::IMAGE_ZOMBIE_NOTE_HELP, 131 + 133, 132);
 	}
-	else if (mAwardType != AWARD_ACHIEVEMENTONLY) // @Patoke: add check
+	else if (mAwardType != AWARD_ACHIEVEMENTONLY)
 	{
 		if (!mApp->IsAdventureMode())
 		{
@@ -397,19 +389,16 @@ void AwardScreen::Draw(Graphics* g)
 
 	mStartButton->Draw(g);
 	mMenuButton->Draw(g);
-	mContinueButton->Draw(g); // @Patoke: add call
+	mContinueButton->Draw(g);
 
 	int aFadeInAlpha = TodAnimateCurve(180, 0, mFadeInCounter, 255, 0, CURVE_LINEAR);
 	g->SetColor(IsPaperNote() ? Color(0, 0, 0, aFadeInAlpha) : Color(255, 255, 255, aFadeInAlpha));
 	g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
 }
 
-//0x4076A0
-// GOTY @Patoke: 0x408FE0
 void AwardScreen::Update()
 {
 	Widget::Update();
-	// @Patoke: implemented
 	if (mShowingAchievements) {
 		mAchievementAnimTime++;
 
@@ -428,21 +417,18 @@ void AwardScreen::Update()
 	if (mApp->GetDialogCount() > 0) return;
 	mStartButton->Update();
 	mMenuButton->Update();
-	mContinueButton->Update(); // @Patoke: add call
+	mContinueButton->Update();
 	mApp->SetCursor(mStartButton->IsMouseOver() || mMenuButton->IsMouseOver() ? CURSOR_HAND : CURSOR_POINTER);
 	MarkDirty();
 	if (mFadeInCounter > 0) mFadeInCounter--;
 }
 
-//0x407760
 void AwardScreen::KeyChar(char theChar)
 {
 	if (theChar == ' ' || theChar == '\r' || theChar == '\u001B')
 		StartButtonPressed();
 }
 
-//0x407780
-// GOTY @Patoke: 0x409530
 void AwardScreen::StartButtonPressed()
 {
 	if (mApp->GetDialog(DIALOG_STORE))
@@ -533,13 +519,11 @@ void AwardScreen::StartButtonPressed()
 	}
 }
 
-//0x4079F0
-// GOTY @Patoke: 0x4097A0
 void AwardScreen::MouseDown(int x, int y, int theClickCount)
 {
 	(void)x;(void)y;
 	if (theClickCount == 1) {
-		mStartButton->Update(); // @Patoke: implemented
+		mStartButton->Update();
 		mMenuButton->Update();
 		mContinueButton->Update();
 		if (mStartButton->IsMouseOver() || mMenuButton->IsMouseOver())
@@ -547,8 +531,6 @@ void AwardScreen::MouseDown(int x, int y, int theClickCount)
 	}
 }
 
-//0x407A70
-// GOTY @Patoke: 0x409840
 void AwardScreen::MouseUp(int x, int y, int theClickCount)
 {
 	(void)x;(void)y;
@@ -556,7 +538,7 @@ void AwardScreen::MouseUp(int x, int y, int theClickCount)
 	{
 		if (mStartButton->IsMouseOver())
 			StartButtonPressed();
-		if (mContinueButton->IsMouseOver()) // @Patoke: add call
+		if (mContinueButton->IsMouseOver())
 			AchievementsContinuePressed();
 		if (mMenuButton->IsMouseOver())
 		{
@@ -566,8 +548,6 @@ void AwardScreen::MouseUp(int x, int y, int theClickCount)
 	}
 }
 
-// @Patoke: implement functions
-// GOTY @Patoke: 0x407C20
 void AwardScreen::DrawAchievements(Graphics* g) {
 	g->SetColorizeImages(true);
 	// Rect aTextWrap = Rect(0, 0, 0, 77); // unused
@@ -595,9 +575,7 @@ void AwardScreen::DrawAchievements(Graphics* g) {
 	}
 }
 
-// GOTY @Patoke: 0x409400
 void AwardScreen::AchievementsContinuePressed() {
-	// @Patoke: implemented
 	if (mAwardType == AWARD_ACHIEVEMENTONLY) {
 		mApp->KillAwardScreen();
 		mApp->PreNewGame(GAMEMODE_ADVENTURE, false);

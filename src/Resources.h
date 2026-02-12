@@ -252,6 +252,7 @@ namespace Sexy
 		IMAGE_ZOMBIEBACKUPDANCERHEAD_ID,
 		IMAGE_ZOMBIEBACKUPDANCERHEAD_JACKSON_ID,
 		IMAGE_ZOMBIEBOBSLEDHEAD_ID,
+		IMAGE_ZOMBIEBUNGIHEAD_ID,
 		IMAGE_ZOMBIELADDERHEAD_ID,
 		IMAGE_ZOMBIEYETIHEAD_ID,
 		IMAGE_SEEDPACKETFLASH_ID,
@@ -897,7 +898,6 @@ namespace Sexy
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
-	// @Patoke: updated resources from https://github.com/LolHacksRule/PopCapResourceFilesGeneratedCPP/blob/main/PlantsVsZombies/PC_MAC/FINAL
 	// DelayLoad_Almanac Resources
 	extern Image* IMAGE_ALMANAC_CLOSEBUTTON;
 	extern Image* IMAGE_ALMANAC_CLOSEBUTTONHIGHLIGHT;
@@ -1644,6 +1644,7 @@ namespace Sexy
 	extern Image* IMAGE_ZOMBIEBACKUPDANCERHEAD_JACKSON;
 	extern Image* IMAGE_ZOMBIEBALLOONHEAD;
 	extern Image* IMAGE_ZOMBIEBOBSLEDHEAD;
+	extern Image* IMAGE_ZOMBIEBUNGIHEAD;
 	extern Image* IMAGE_ZOMBIEDANCERHEAD;
 	extern Image* IMAGE_ZOMBIEDANCERHEAD_JACKSON;
 	extern Image* IMAGE_ZOMBIEDIGGERARM;

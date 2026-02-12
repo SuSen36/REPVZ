@@ -6,10 +6,8 @@ using namespace Sexy;
 
 bool gNeedRecalcVariableToIdMap = false;
 
-//0x474700
 bool Sexy::ExtractResourcesByName(ResourceManager* theResourceManager, const char* theName)
 {
-	// @Patoke: updated these, please use compiletime hashes
 	if (!strcmp(theName, "DelayLoad_Almanac")) return ExtractDelayLoad_AlmanacResources(theResourceManager);
 	if (!strcmp(theName, "DelayLoad_AwardScreen")) return ExtractDelayLoad_AwardScreenResources(theResourceManager);
 	if (!strcmp(theName, "DelayLoad_Background1")) return ExtractDelayLoad_Background1Resources(theResourceManager);
@@ -1540,6 +1538,7 @@ Image* Sexy::IMAGE_ZOMBIEBACKUPDANCERHEAD;
 Image* Sexy::IMAGE_ZOMBIEBACKUPDANCERHEAD_JACKSON;
 Image* Sexy::IMAGE_ZOMBIEBALLOONHEAD;
 Image* Sexy::IMAGE_ZOMBIEBOBSLEDHEAD;
+Image* Sexy::IMAGE_ZOMBIEBUNGIHEAD;
 Image* Sexy::IMAGE_ZOMBIEDANCERHEAD;
 Image* Sexy::IMAGE_ZOMBIEDANCERHEAD_JACKSON;
 Image* Sexy::IMAGE_ZOMBIEDIGGERARM;
@@ -1917,6 +1916,7 @@ bool Sexy::ExtractLoadingImagesResources(ResourceManager* theManager)
 		IMAGE_ZOMBIEBACKUPDANCERHEAD_JACKSON = aMgr.GetImageThrow("IMAGE_ZOMBIEBACKUPDANCERHEAD_JACKSON");
 		IMAGE_ZOMBIEBALLOONHEAD = aMgr.GetImageThrow("IMAGE_ZOMBIEBALLOONHEAD");
 		IMAGE_ZOMBIEBOBSLEDHEAD = aMgr.GetImageThrow("IMAGE_ZOMBIEBOBSLEDHEAD");
+		IMAGE_ZOMBIEBUNGIHEAD = aMgr.GetImageThrow("IMAGE_ZOMBIEBUNGIHEAD");
 		IMAGE_ZOMBIEDANCERHEAD = aMgr.GetImageThrow("IMAGE_ZOMBIEDANCERHEAD");
 		IMAGE_ZOMBIEDANCERHEAD_JACKSON = aMgr.GetImageThrow("IMAGE_ZOMBIEDANCERHEAD_JACKSON");
 		IMAGE_ZOMBIEDIGGERARM = aMgr.GetImageThrow("IMAGE_ZOMBIEDIGGERARM");
@@ -2303,7 +2303,6 @@ bool Sexy::ExtractLoadingSoundsResources(ResourceManager* theManager)
 
 bool (*gExtractResourcesByName)(Sexy::ResourceManager* theResourceManager, const char* theName);
 
-// @Patoke: updated these
 void* gResources[(int)Sexy::ResourceId::RESOURCE_ID_MAX] =
 {
 	&Sexy::IMAGE_BLANK,
@@ -2545,6 +2544,7 @@ void* gResources[(int)Sexy::ResourceId::RESOURCE_ID_MAX] =
 	&Sexy::IMAGE_ZOMBIEBACKUPDANCERHEAD,
 	&Sexy::IMAGE_ZOMBIEBACKUPDANCERHEAD_JACKSON,
 	&Sexy::IMAGE_ZOMBIEBOBSLEDHEAD,
+	&Sexy::IMAGE_ZOMBIEBUNGIHEAD,
 	&Sexy::IMAGE_ZOMBIELADDERHEAD,
 	&Sexy::IMAGE_ZOMBIEYETIHEAD,
 	&Sexy::IMAGE_SEEDPACKETFLASH,
@@ -3231,10 +3231,9 @@ Sexy::ResourceId Sexy::GetIdBySound(intptr_t theSound)
 	return GetIdByVariable((void*)theSound);
 }
 
-//0x47FBC0
 Sexy::ResourceId Sexy::GetIdByVariable(void* theVariable)
 {
-	typedef std::map<int, int> MyMap;
+	typedef std::map<intptr_t, int> MyMap;
 	static MyMap aMap;
 
 	if (gNeedRecalcVariableToIdMap)
@@ -3242,10 +3241,13 @@ Sexy::ResourceId Sexy::GetIdByVariable(void* theVariable)
 		gNeedRecalcVariableToIdMap = false;
 		aMap.clear();
 		for (int i = 0; i < (int)ResourceId::RESOURCE_ID_MAX; i++)
-			aMap[*(int*)gResources[i]] = i;
+        {
+            if (gResources[i])
+			    aMap[*(intptr_t*)gResources[i]] = i;
+        }
 	}
 
-	MyMap::iterator anIter = aMap.find((intptr_t)theVariable);
+	auto anIter = aMap.find((intptr_t)theVariable);
 	if (anIter == aMap.end())
 		return ResourceId::RESOURCE_ID_MAX;
 	else

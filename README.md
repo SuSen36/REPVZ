@@ -39,6 +39,12 @@
 
 ## 构建说明
 
+在开始构建之前，请确保已初始化并更新了所有子模块：
+
+```bash
+git submodule update --init --recursive
+```
+
 ### Windows
 需求：
 - CMake 3.2.2 或更高版本

@@ -5,6 +5,7 @@
 #include "GameConstants.h"
 #include "SexyAppFramework/graphics/Graphics.h"
 #include "SexyAppFramework/graphics/GLInterface.h"
+#include "SexyAppFramework/SexyAppBase.h"
 
 int gParticleDefCount;                      // [0x6A9F08]
 TodParticleDefinition* gParticleDefArray;   // [0x6A9F0C]
@@ -118,7 +119,7 @@ ParticleParams gLawnParticleArray[(int)ParticleEffect::NUM_PARTICLES] = {
 	{ ParticleEffect::PARTICLE_STARBURST, "particles/Starburst.xml" },
 	{ ParticleEffect::PARTICLE_CREDITS_FOG, "particles/Credits_fog.xml" },
 	{ ParticleEffect::PARTICLE_PERSENT_PICK_UP_ARROW, "particles/UpsellArrow.xml" },
-};  // 0x6A0FF0
+};
 
 //0x515640 : (ecx = *theParticleFileName, *theParticleDef)  //esp -= 4
 bool TodParticleLoadADef(TodParticleDefinition* theParticleDef, const char* theParticleFileName)
@@ -178,7 +179,6 @@ bool TodParticleLoadADef(TodParticleDefinition* theParticleDef, const char* theP
 	}
 }
 
-//0x515CE0
 void TodParticleLoadDefinitions(ParticleParams* theParticleParamArray, int theParticleParamArraySize)
 {
 	TodHesitationBracket aHesitiation("TodParticleLoadDefinitions");
@@ -204,7 +204,6 @@ void TodParticleLoadDefinitions(ParticleParams* theParticleParamArray, int thePa
 	}
 }
 
-//0x515E30
 void TodParticleFreeDefinitions()
 {
 	for (int i = 0; i < gParticleDefCount; i++)
@@ -297,7 +296,6 @@ void TodParticleEmitter::TodEmitterInitialize(float theX, float theY, TodParticl
 	Update();
 }
 
-//0x5160C0
 void TodParticleSystem::ParticleSystemDie()
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
@@ -310,7 +308,6 @@ void TodParticleSystem::ParticleSystemDie()
 	mDead = true;
 }
 
-//0x516160
 TodParticle* TodParticleEmitter::SpawnParticle(int theIndex, int theSpawnCount)
 {
 	DataArray<TodParticle>& aDataArray = mParticleSystem->mParticleHolder->mParticles;
@@ -461,7 +458,6 @@ float TodParticleEmitter::ParticleTrackEvaluate(FloatParameterTrack& theTrack, T
 	return FloatTrackEvaluate(theTrack, theParticle->mParticleTimeValue, theParticle->mParticleInterp[(int)theParticleTrack]);
 }
 
-//0x516820
 void TodParticleEmitter::UpdateParticleField(TodParticle* theParticle, ParticleField* theParticleField, float theParticleTimeValue, int theFieldIndex)
 {
 	TOD_ASSERT(theFieldIndex < MAX_PARTICLE_FIELDS);
@@ -568,7 +564,6 @@ float TodParticleEmitter::SystemTrackEvaluate(FloatParameterTrack& theTrack, Par
 	return FloatTrackEvaluate(theTrack, mSystemTimeValue, mTrackInterp[(int)theSystemTrack]);
 }
 
-//0x516D70
 void TodParticleEmitter::UpdateSystemField(ParticleField* theParticleField, float theParticleTimeValue, int theFieldIndex)
 {
 	TOD_ASSERT(theFieldIndex < MAX_PARTICLE_FIELDS);
@@ -593,7 +588,6 @@ void TodParticleEmitter::UpdateSystemField(ParticleField* theParticleField, floa
 	}
 }
 
-//0x516E70
 bool TodParticleEmitter::CrossFadeParticleToName(TodParticle* theParticle, const char* theEmitterName)
 {
 	TodEmitterDefinition* aDef = mParticleSystem->FindEmitterDefByName(theEmitterName);
@@ -615,7 +609,6 @@ bool TodParticleEmitter::CrossFadeParticleToName(TodParticle* theParticle, const
 	return CrossFadeParticle(theParticle, aEmitter);
 }
 
-//0x516F00
 bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 {
 	if (theParticle->mParticleAge >= theParticle->mParticleDuration)  // 粒子的生命周期结束时
@@ -656,7 +649,6 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 	return true;
 }
 
-//0x517160
 void TodParticleEmitter::UpdateSpawning()
 {
 	TodParticleEmitter* aCrossFadeEmitter = mParticleSystem->mParticleHolder->mEmitters.DataArrayTryToGet((unsigned int)mCrossFadeEmitterID);
@@ -686,7 +678,6 @@ void TodParticleEmitter::UpdateSpawning()
 	}
 }
 
-//0x5172C0
 void TodParticleEmitter::DeleteNonCrossFading()
 {
 	for (TodListNode<ParticleID>* aNode = mParticleList.mHead; aNode != nullptr; aNode = aNode->mNext)
@@ -697,7 +688,6 @@ void TodParticleEmitter::DeleteNonCrossFading()
 	}
 }
 
-//0x517300
 void TodParticleEmitter::DeleteAll()
 {
 	while (mParticleList.mSize != 0)
@@ -708,8 +698,6 @@ void TodParticleEmitter::DeleteAll()
 	}
 }
 
-//0x517370
-// GOTY @Patoke: 0x521A20
 void TodParticleSystem::Update()
 {
 	if (!mDontUpdate)
@@ -727,7 +715,6 @@ void TodParticleSystem::Update()
 	}
 }
 
-//0x5173E0
 bool TodParticleEmitter::CrossFadeParticle(TodParticle* theParticle, TodParticleEmitter* theToEmitter)
 {
 	if (theParticle->mCrossFadeDuration > 0)  // 粒子已处于交叉混合的过程中
@@ -759,7 +746,6 @@ bool TodParticleEmitter::CrossFadeParticle(TodParticle* theParticle, TodParticle
 	return true;
 }
 
-//0x517490
 void TodParticleEmitter::DeleteParticle(TodParticle* theParticle)
 {
 	TodParticle* aCrossFadeParticle = mParticleSystem->mParticleHolder->mParticles.DataArrayTryToGet((unsigned int)theParticle->mCrossFadeParticleID);
@@ -774,7 +760,6 @@ void TodParticleEmitter::DeleteParticle(TodParticle* theParticle)
 	mParticleSystem->mParticleHolder->mParticles.DataArrayFree(theParticle);
 }
 
-//0x517550
 void TodParticleEmitter::Update()
 {
 	if (mDead)
@@ -838,7 +823,6 @@ float CrossFadeLerp(float theFrom, float theTo, bool theFromIsSet, bool theToIsS
 	return theFrom + (theTo - theFrom) * theFraction;
 }
 
-//0x5176A0
 bool TodParticleEmitter::GetRenderParams(TodParticle* theParticle, ParticleRenderParams* theParams)
 {
 	TodParticleEmitter* aEmitter = theParticle->mParticleEmitter;
@@ -939,7 +923,6 @@ bool TodParticleEmitter::GetRenderParams(TodParticle* theParticle, ParticleRende
 	return true;
 }
 
-//0x517E20
 void RenderParticle(Graphics* g, TodParticle* theParticle, const Color& theColor, ParticleRenderParams* theParams, TodTriangleGroup* theTriangleGroup)
 {
 	TodParticleEmitter* aEmitter = theParticle->mParticleEmitter;
@@ -1019,7 +1002,6 @@ void RenderParticle(Graphics* g, TodParticle* theParticle, const Color& theColor
 	}
 }
 
-//0x518210
 void TodParticleEmitter::DrawParticle(Graphics* g, TodParticle* theParticle, TodTriangleGroup* theTriangleGroup)
 {
 	if (theParticle->mCrossFadeDuration > 0)  // 交叉混合的源粒子，不绘制
@@ -1050,14 +1032,12 @@ void TodParticleEmitter::DrawParticle(Graphics* g, TodParticle* theParticle, Tod
 	}
 }
 
-//0x518370
 void TodParticleSystem::Draw(Graphics* g)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 		mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue)->Draw(g);
 }
 
-//0x5183A0
 void TodParticleEmitter::Draw(Graphics* g)
 {
 	bool aHardWare = true;
@@ -1071,14 +1051,12 @@ void TodParticleEmitter::Draw(Graphics* g)
 	aTriangleGroup.DrawGroup(g);
 }
 
-//0x518440
 void TodParticleSystem::SystemMove(float theX, float theY)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 		mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue)->SystemMove(theX, theY);
 }
 
-//0x518480
 void TodParticleEmitter::SystemMove(float theX, float theY)
 {
 	float aDeltaX = theX - mSystemCenter.x;
@@ -1099,7 +1077,6 @@ void TodParticleEmitter::SystemMove(float theX, float theY)
 	}
 }
 
-//0x518560
 void TodParticleSystem::OverrideColor(const char* theEmitterName, const Color& theColor)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
@@ -1110,7 +1087,6 @@ void TodParticleSystem::OverrideColor(const char* theEmitterName, const Color& t
 	}
 }
 
-//0x5185D0
 void TodParticleSystem::OverrideExtraAdditiveDraw(const char* theEmitterName, bool theEnableExtraAdditiveDraw)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
@@ -1121,8 +1097,6 @@ void TodParticleSystem::OverrideExtraAdditiveDraw(const char* theEmitterName, bo
 	}
 }
 
-//0x518600
-// GOTY @Patoke: 0x522CB0
 void TodParticleSystem::OverrideImage(const char* theEmitterName, Image* theImage)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
@@ -1143,7 +1117,6 @@ void TodParticleSystem::OverrideFrame(const char* theEmitterName, int theFrame)
 	}
 }
 
-//0x518630
 void TodParticleSystem::OverrideScale(const char* theEmitterName, float theScale)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
@@ -1165,7 +1138,6 @@ TodParticleEmitter* TodParticleSystem::FindEmitterByName(const char* theEmitterN
 	return nullptr;
 }
 
-//0x518670
 TodEmitterDefinition* TodParticleSystem::FindEmitterDefByName(const char* theEmitterName)
 {
 	for (int i = 0; i < mParticleDef->mEmitterDefCount; i++)
@@ -1177,7 +1149,6 @@ TodEmitterDefinition* TodParticleSystem::FindEmitterDefByName(const char* theEmi
 	return nullptr;
 }
 
-//0x5186D0
 void TodParticleEmitter::CrossFadeEmitter(TodParticleEmitter* theToEmitter)
 {
 	if (mEmitterCrossFadeCountDown > 0)
@@ -1203,7 +1174,6 @@ void TodParticleEmitter::CrossFadeEmitter(TodParticleEmitter* theToEmitter)
 		CrossFadeParticle(mParticleSystem->mParticleHolder->mParticles.DataArrayGet((unsigned int)aNode->mValue), theToEmitter);
 }
 
-//0x518790
 void TodParticleSystem::CrossFade(const char* theEmitterName)
 {
 	TodEmitterDefinition* aEmitterDef = FindEmitterDefByName(theEmitterName);
@@ -1238,13 +1208,11 @@ void TodParticleSystem::CrossFade(const char* theEmitterName)
 	}
 }
 
-//0x518870
 TodParticleHolder::~TodParticleHolder()
 {
 	DisposeHolder();
 }
 
-//0x518900
 void TodParticleHolder::InitializeHolder()
 {
 	mParticleSystems.DataArrayInitialize(1024U, "particle systems");
@@ -1254,7 +1222,6 @@ void TodParticleHolder::InitializeHolder()
 	mEmitterListNodeAllocator.Initialize(1024, sizeof(TodListNode<ParticleEmitterID>));
 }
 
-//0x5189A0
 void TodParticleHolder::DisposeHolder()
 {
 	mParticleSystems.DataArrayDispose();
@@ -1288,7 +1255,6 @@ TodParticleSystem* TodParticleHolder::AllocParticleSystemFromDef(float theX, flo
 	return aTodParticle;
 }
 
-//0x518A70
 TodParticleSystem* TodParticleHolder::AllocParticleSystem(float theX, float theY, int theRenderOrder, ParticleEffect theParticleEffect)
 {
 	TOD_ASSERT((int)theParticleEffect >= 0 && (int)theParticleEffect < gParticleDefCount);

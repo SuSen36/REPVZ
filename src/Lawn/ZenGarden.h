@@ -35,9 +35,9 @@ public:
 class ZenGarden
 {
 public:
-    LawnApp*                mApp;           //+0x0
-    Board*                  mBoard;         //+0x4
-    GardenType              mGardenType;    //+0x8
+    LawnApp*                mApp;
+    Board*                  mBoard;
+    GardenType              mGardenType;
 	std::vector<std::string> mLoadedResourceNames;
 
 public:

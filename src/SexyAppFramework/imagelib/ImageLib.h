@@ -1,42 +1,51 @@
 #ifndef __IMAGELIB_H__
 #define __IMAGELIB_H__
 
+#include <cstdint>
+#include <memory>
 #include <string>
+#include <cstring>
 
-namespace ImageLib
-{
+#include "SexyAppFramework/misc/ResourceManager.h"
 
-class Image
-{
-public:
-	int						mWidth;
-	int						mHeight;
-	uint32_t*				mBits;
+namespace ImageLib {
+    class Image {
+    public:
+        int mWidth = 0;
+        int mHeight = 0;
+        std::unique_ptr<uint32_t[]> mBits = nullptr;
 
-public:
-	Image();
-	virtual ~Image();
+    public:
+        Image() = default;
+        virtual ~Image() = default;
 
-	int						GetWidth();
-	int						GetHeight();
-	uint32_t*				GetBits();
-};
+        Image(int width, int height)
+                : mWidth(width), mHeight(height), mBits(std::make_unique<uint32_t[]>(mWidth * mHeight)) {
+            memset(mBits.get(), 0, mWidth * mHeight * sizeof(uint32_t));
+        }
 
-bool WriteJPEGImage(const std::string& theFileName, Image* theImage);
-bool WritePNGImage(const std::string& theFileName, Image* theImage);
-bool WriteTGAImage(const std::string& theFileName, Image* theImage);
-bool WriteBMPImage(const std::string& theFileName, Image* theImage);
-extern int gAlphaComposeColor;
-extern bool gAutoLoadAlpha;
-extern bool gIgnoreJPEG2000Alpha;  // I've noticed alpha in jpeg2000's that shouldn't have alpha so this defaults to true
+        Image(int width, int height, std::unique_ptr<uint32_t[]> bits)
+                : mWidth(width), mHeight(height), mBits(std::move(bits)) {}
 
+        int GetWidth() { return mWidth; }
+        int GetHeight() { return mHeight; }
+        uint32_t* GetBits() { return mBits.get(); }
+    };
 
-Image* GetImage(const std::string& theFileName, bool lookForAlphaImage = true);
+    bool WriteJPEGImage(const std::string& theFileName, const Image* theImage);
+    bool WritePNGImage(const std::string& theFileName, const Image* theImage);
+    bool WriteTGAImage(const std::string& theFileName, const Image* theImage);
+    bool WriteBMPImage(const std::string& theFileName, const Image* theImage);
+    
+    extern int gAlphaComposeColor;
+    extern bool gAutoLoadAlpha;
+    extern bool gIgnoreJPEG2000Alpha;
 
-//void InitJPEG2000();
-//void CloseJPEG2000();
-//void SetJ2KCodecKey(const std::string& theKey);
+    // Overload for string path
+    Image* GetImage(const std::string& theFileName, bool lookForAlphaImage = true);
 
+    // Primary overload used by SexyAppBase
+    Image* GetImage(const Sexy::ResourceManager::ImageRes &theRes, bool lookForAlphaImage = true);
 }
 
 #endif //__IMAGELIB_H__

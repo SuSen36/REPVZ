@@ -19,19 +19,17 @@ file(GLOB SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/graphics/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/imagelib/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/misc/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/misc/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/paklib/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/sound/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/widget/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/fcaseopen/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Sexy.TodLib/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Lawn/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Lawn/widgets/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Lawn/system/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/glad/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/imagelib/png/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/imagelib/jpeg/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/imagelib/zlib/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/zlib/*.c
 )
 
 # these files are included and must not be built in the project
@@ -73,6 +71,7 @@ set(SDL_SHARED ON CACHE BOOL "Build shared library of SDL" FORCE)
 # For Emscripten, SDL is usually handled by the toolchain itself
 if(NOT EMSCRIPTEN)
     add_subdirectory(Libs/SDL)
+    add_subdirectory(Libs/SDL_image)
 endif()
 
 include(FetchContent)
@@ -161,6 +160,7 @@ target_compile_definitions(xp-plants-vs-zombies PRIVATE $<$<CONFIG:Debug>:_DEBUG
 target_include_directories(xp-plants-vs-zombies PRIVATE
 	${PROJECT_SOURCE_DIR}/src
 	${PROJECT_SOURCE_DIR}/Libs/SDL/include
+	${PROJECT_SOURCE_DIR}/Libs/SDL_image/include
 	${PLAT_INCLUDES}
 	${bass_SOURCE_DIR}/${BASS_INCLUDE}
 )
@@ -169,7 +169,7 @@ target_include_directories(xp-plants-vs-zombies PRIVATE
 
 
 if (NOT EMSCRIPTEN)
-    target_link_libraries(xp-plants-vs-zombies SDL2::SDL2 bass)
+    target_link_libraries(xp-plants-vs-zombies SDL2::SDL2 SDL2_image::SDL2_image bass)
 else()
     target_link_libraries(xp-plants-vs-zombies SDL2) # Emscripten provides its own SDL2
 endif()

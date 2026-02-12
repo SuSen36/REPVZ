@@ -40,56 +40,55 @@ private:
         GameSelector_Almanac = 108,
         GameSelector_ZenGarden = 109,
         GameSelector_Survival = 110,
-        GameSelector_Zombatar = 111, // @Patoke: add stuff after 110
+        GameSelector_Zombatar = 111,
         GameSelector_AchievementsBack = 112,
         GameSelector_Achievements = 113,
         GameSelector_QuickPlay = 114
     };
 
 public:
-    LawnApp*                    mApp;                       //+0x8C
-    NewLawnButton*              mAdventureButton;           //+0x90
-    NewLawnButton*              mMinigameButton;            //+0x94
-    NewLawnButton*              mPuzzleButton;              //+0x98
-    NewLawnButton*              mOptionsButton;             //+0x9C
-    NewLawnButton*              mQuitButton;                //+0xA0
-    NewLawnButton*              mHelpButton;                //+0xA4
-    NewLawnButton*              mStoreButton;               //+0xA8
-    NewLawnButton*              mAlmanacButton;             //+0xAC
-    NewLawnButton*              mZenGardenButton;           //+0xB0
-    NewLawnButton*              mSurvivalButton;            //+0xB4
-    NewLawnButton*              mChangeUserButton;          //+0xB8
-    NewLawnButton*              mZombatarButton;             //+GOTY @Patoke: 0xC0
-    NewLawnButton*              mAchievementsButton;        //+GOTY @Patoke: 0xC4
-    NewLawnButton*              mQuickPlayButton;           //+GOTY @Patoke: 0xC8
-    Widget*                     mOverlayWidget;             //+0xBC
-    bool                        mStartingGame;              //+0xC0
-    int                         mStartingGameCounter;       //+0xC4
-    bool                        mMinigamesLocked;           //+0xC8
-    bool                        mPuzzleLocked;              //+0xC9
-    bool                        mSurvivalLocked;            //+0xCA
-    bool                        mShowStartButton;           //+0xCB
-    ParticleSystemID            mTrophyParticleID;          //+0xCC
-    ReanimationID               mSelectorReanimID;          //+0xD0
-    ReanimationID               mCloudReanimID[6];          //+0xD4
-    int                         mCloudCounter[6];           //+0xEC
-    ReanimationID               mFlowerReanimID[3];         //+0x104
-    ReanimationID               mLeafReanimID;              //+0x110
-    ReanimationID               mHandReanimID;              //+0x114
-    int                         mLeafCounter;               //+0x118
-    SelectorAnimState           mSelectorState;             //+0x11C
-    int                         mLevel;                     //+0x120
-    bool                        mLoading;                   //+0x124
-    ToolTipWidget*              mToolTip;                   //+0x128
-    bool                        mHasTrophy;                 //+0x12C
-    bool                        mUnlockSelectorCheat;       //+0x12D
-    int                         mSlideCounter;              //+GOTY @Patoke: 0x154
-    int                         mStartX;                    //+GOTY @Patoke: 0x158
-    int                         mStartY;                    //+GOTY @Patoke: 0x15C
-    int                         mDestX;                     //+GOTY @Patoke: 0x160
-    int                         mDestY;                     //+GOTY @Patoke: 0x164
-    //ZombatarWidget*           mZombatarWidget;            //+GOTY @Patoke: 0x168
-    AchievementsWidget*       mAchievementsWidget;        //+GOTY @Patoke: 0x16C
+    LawnApp*                    mApp;
+    NewLawnButton*              mAdventureButton;
+    NewLawnButton*              mMinigameButton;
+    NewLawnButton*              mPuzzleButton;
+    NewLawnButton*              mOptionsButton;
+    NewLawnButton*              mQuitButton;
+    NewLawnButton*              mHelpButton;
+    NewLawnButton*              mStoreButton;
+    NewLawnButton*              mAlmanacButton;
+    NewLawnButton*              mZenGardenButton;
+    NewLawnButton*              mSurvivalButton;
+    NewLawnButton*              mChangeUserButton;
+    NewLawnButton*              mZombatarButton;
+    NewLawnButton*              mAchievementsButton;
+    NewLawnButton*              mQuickPlayButton;
+    Widget*                     mOverlayWidget;
+    bool                        mStartingGame;
+    int                         mStartingGameCounter;
+    bool                        mMinigamesLocked;
+    bool                        mPuzzleLocked;
+    bool                        mSurvivalLocked;
+    bool                        mShowStartButton;
+    ParticleSystemID            mTrophyParticleID;
+    ReanimationID               mSelectorReanimID;
+    ReanimationID               mCloudReanimID[6];
+    int                         mCloudCounter[6];
+    ReanimationID               mFlowerReanimID[3];
+    ReanimationID               mLeafReanimID;
+    ReanimationID               mHandReanimID;
+    int                         mLeafCounter;
+    SelectorAnimState           mSelectorState;
+    int                         mLevel;
+    bool                        mLoading;
+    ToolTipWidget*              mToolTip;
+    bool                        mHasTrophy;
+    bool                        mUnlockSelectorCheat;
+    int                         mSlideCounter;
+    int                         mStartX;
+    int                         mStartY;
+    int                         mDestX;
+    int                         mDestY;
+    AchievementsWidget*       mAchievementsWidget;
 
 public:
     GameSelector(LawnApp* theApp, bool skipAnimation = false);
@@ -118,15 +117,14 @@ public:
     void                        UpdateTooltip();
     /*inline*/ bool             ShouldDoZenTuturialBeforeAdventure();
     void                        AddPreviewProfiles();
-    // @Patoke: implement functions
     /*inline*/ void             SlideTo(int theX, int theY);
-    void                        ShowAchievementsScreen(); // @Patoke: unofficial name
+    void                        ShowAchievementsScreen();
 };
 
 class GameSelectorOverlay : public Widget
 {
 public:
-    GameSelector*               mParent;                    //+0x88
+    GameSelector*               mParent;
 
 public:
     GameSelectorOverlay(GameSelector* theGameSelector);

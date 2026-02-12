@@ -10,6 +10,7 @@
 #include "SexyAppFramework/misc/CritSect.h"
 #include "SexyAppFramework/graphics/SharedImage.h"
 #include "SexyAppFramework/misc/Ratio.h"
+#include "SexyAppFramework/misc/ResourceManager.h"
 
 namespace ImageLib
 {
@@ -29,8 +30,6 @@ class MusicInterface;
 class MemoryImage;
 class HTTPTransfer;
 class Dialog;
-
-class ResourceManager;
 
 class WidgetSafeDeleteInfo
 {

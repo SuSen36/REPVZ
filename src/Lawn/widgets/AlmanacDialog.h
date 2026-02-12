@@ -6,13 +6,13 @@
 #define NUM_ALMANAC_SEEDS 49
 #define NUM_ALMANAC_ZOMBIES 26
 
-constexpr const float			ALMANAC_PLANT_POSITION_X		= 578.0f;
+constexpr const float			ALMANAC_PLANT_POSITION_X		= 711.0f;
 constexpr const float			ALMANAC_PLANT_POSITION_Y		= 140.0f;
-constexpr const float			ALMANAC_ZOMBIE_POSITION_X		= 559.0f;
+constexpr const float			ALMANAC_ZOMBIE_POSITION_X		= 692.0f;
 constexpr const float			ALMANAC_ZOMBIE_POSITION_Y		= 175.0f;
-constexpr const int				ALMANAC_INDEXPLANT_POSITION_X	= 167;
+constexpr const int				ALMANAC_INDEXPLANT_POSITION_X	= 300;
 constexpr const int				ALMANAC_INDEXPLANT_POSITION_Y	= 255;
-constexpr const float			ALMANAC_INDEXZOMBIE_POSITION_X	= 535.0f;
+constexpr const float			ALMANAC_INDEXZOMBIE_POSITION_X	= 668.0f;
 constexpr const float			ALMANAC_INDEXZOMBIE_POSITION_Y	= 215.0f;
 
 class Plant;
@@ -32,18 +32,18 @@ private:
 	};
 
 public:
-	LawnApp*					mApp;					//+0x16C
-	GameButton*					mCloseButton;			//+0x170
-	GameButton*					mIndexButton;			//+0x174
-	GameButton*					mPlantButton;			//+0x178
-	GameButton*					mZombieButton;			//+0x17C
-	AlmanacPage					mOpenPage;				//+0x180
-	Reanimation*				mReanim[4];				//+0x184
-	SeedType					mSelectedSeed;			//+0x194
-	ZombieType					mSelectedZombie;		//+0x198
-	Plant*						mPlant;					//+0x19C
-	Zombie*						mZombie;				//+0x1A0
-	Zombie*						mZombiePerfTest[400];	//+0x1A4
+	LawnApp*					mApp;
+	GameButton*					mCloseButton;
+	GameButton*					mIndexButton;
+	GameButton*					mPlantButton;
+	GameButton*					mZombieButton;
+	AlmanacPage					mOpenPage;
+	Reanimation*				mReanim[4];
+	SeedType					mSelectedSeed;
+	ZombieType					mSelectedZombie;
+	Plant*						mPlant;
+	Zombie*						mZombie;
+	Zombie*						mZombiePerfTest[400];
 	
 public:
 	AlmanacDialog(LawnApp* theApp);

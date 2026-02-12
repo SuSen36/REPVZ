@@ -7,9 +7,9 @@
 class CheatDialog : public LawnDialog, public EditListener
 {
 public:
-	LawnApp*			mApp;					//+0x170
-	EditWidget*			mCheatEditWidget;		//+0x174
-	bool				mIsEasterEggCode;		// 标记是否是彩蛋代码（不需要重新进入关卡）
+	LawnApp*			mApp;
+	EditWidget*			mCheatEditWidget;
+	bool				mRestartRequired;		// 标记是否需要重新开始游戏
 
 public:
 	CheatDialog(LawnApp* theApp);

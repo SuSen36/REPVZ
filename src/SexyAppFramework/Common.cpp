@@ -242,7 +242,7 @@ std::string Sexy::Trim(const std::string& theString)
 }
 
 std::wstring Sexy::Trim(const std::wstring& theString)
-{   //0x5AFD80
+{
 	int aStartPos = 0;
 	while ( aStartPos < (int) theString.length() && iswspace(theString[aStartPos]) )
 		aStartPos++;

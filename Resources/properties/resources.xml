@@ -280,6 +280,7 @@
 <Image id="ZOMBIEDANCERHEAD" path="ZombieDancerHead_disco" />
 <Image id="ZOMBIEDANCERHEAD_JACKSON" path="ZombieDancerHead" />
 <Image id="ZOMBIEBALLOONHEAD" path="ZombieBalloonHead" />
+<Image id="ZOMBIEBUNGIHEAD" path="ZombieBungiHead" />
 <Image id="ZOMBIEIMPHEAD" path="ZombieImpHead" />
 <Image id="ZOMBIEDIGGERHEAD" path="ZombieDiggerHead" />
 <Image id="ZOMBIEDIGGERARM" path="ZombieDiggerArm" />
@@ -779,32 +780,32 @@
 
 <Resources id="DelayLoad_ZombieNote1">
 <SetDefaults path="images" idprefix="IMAGE_" />
-<Image id="ZOMBIE_NOTE1" path="ZombieNoteBlack1" alphagrid="ZombieNote1" />
+<Image id="ZOMBIE_NOTE1" path="ZombieNote1" />
 </Resources>
 
 <Resources id="DelayLoad_ZombieNote2">
 <SetDefaults path="images" idprefix="IMAGE_" />
-<Image id="ZOMBIE_NOTE2" path="ZombieNoteBlack2" alphagrid="ZombieNote2" />
+<Image id="ZOMBIE_NOTE2" path="ZombieNote2" />
 </Resources>
 
 <Resources id="DelayLoad_ZombieNote3">
 <SetDefaults path="images" idprefix="IMAGE_" />
-<Image id="ZOMBIE_NOTE3" path="ZombieNoteBlack3" alphagrid="ZombieNote3" />
+<Image id="ZOMBIE_NOTE3" path="ZombieNote3" />
 </Resources>
 
 <Resources id="DelayLoad_ZombieNote4">
 <SetDefaults path="images" idprefix="IMAGE_" />
-<Image id="ZOMBIE_NOTE4" path="ZombieNoteBlack4" alphagrid="ZombieNote4" />
+<Image id="ZOMBIE_NOTE4" path="ZombieNote4" />
 </Resources>
 
 <Resources id="DelayLoad_ZombieFinalNote">
 <SetDefaults path="images" idprefix="IMAGE_" />
-<Image id="ZOMBIE_FINAL_NOTE" path="ZombieFinalNoteBlack" alphagrid="ZombieFinalNote" />
+<Image id="ZOMBIE_FINAL_NOTE" path="Zombiefinalnote" />
 </Resources>
 
 <Resources id="DelayLoad_ZombieNoteHelp">
 <SetDefaults path="images" idprefix="IMAGE_" />
-<Image id="ZOMBIE_NOTE_HELP" path="ZombieNoteHelpBlack" alphagrid="ZombieNoteHelp" />
+<Image id="ZOMBIE_NOTE_HELP" path="ZombieNoteHelp" />
 </Resources>
 
 <Resources id="DelayLoad_Credits">
@@ -823,7 +824,7 @@
   <Image id="CREDITS_FOGMACHINE" path="Credits_fogmachine" />
   
   <SetDefaults path="images" idprefix="IMAGE_" />
-  <Image id="CREDITS_ZOMBIENOTE" path="Credits_ZombieNoteBlack" alphagrid="Credits_ZombieNote" />
+  <Image id="CREDITS_ZOMBIENOTE" path="Credits_ZombieNote" />
   <Image id="CREDITS_PLAYBUTTON" path="Credits_PlayButton" />
 </Resources>
 

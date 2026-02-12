@@ -10,12 +10,12 @@ class GameButton;
 
 class AchievementScreenItem {
 public:
-	int mId; //+GOTY @Patoke: 0x00
-	int mStartAnimTime; //+GOTY @Patoke: 0x04
-	int mEndAnimTime; //+GOTY @Patoke: 0x08
-	int mDestY; //+GOTY @Patoke: 0x0C
-	int mStartY; //+GOTY @Patoke: 0x10
-	int mY; //+GOTY @Patoke: 0x14
+	int mId;
+	int mStartAnimTime;
+	int mEndAnimTime;
+	int mDestY;
+	int mStartY;
+	int mY;
 };
 
 class AwardScreen : public Widget
@@ -28,20 +28,19 @@ private:
 	};
 
 public:
-	GameButton*							mStartButton;			//+0x88
-	GameButton*							mMenuButton;			//+0x8C
-	LawnApp*							mApp;					//+0x90
-	int									mFadeInCounter;			//+0x94
-	AwardType							mAwardType;				//+0x98 GOTY @Patoke: 0xB8
-	GameButton*							mContinueButton;		//+GOTY @Patoke: 0xA8
-	bool								mShowStartButtonAfterAchievements;	//+GOTY @Patoke: 0xAC
-	bool								mShowMenuButtonAfterAchievements;	//+GOTY @Patoke: 0xAD
-	int									mAchievementAnimTime;	//+GOTY @Patoke: 0xBC
-	bool								mShowingAchievements;	//+GOTY @Patoke: 0xD8
-	std::vector<AchievementScreenItem>	mAchievementItems;		//+GOTY @Patoke: 0xC0
+	GameButton*							mStartButton;
+	GameButton*							mMenuButton;
+	LawnApp*							mApp;
+	int									mFadeInCounter;
+	AwardType							mAwardType;
+	GameButton*							mContinueButton;
+	bool								mShowStartButtonAfterAchievements;
+	bool								mShowMenuButtonAfterAchievements;
+	int									mAchievementAnimTime;
+	bool								mShowingAchievements;
+	std::vector<AchievementScreenItem>	mAchievementItems;
 
 public:
-	// @Patoke: added argument
 	AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowingAchievements = false);
 	virtual ~AwardScreen();
 
@@ -57,7 +56,6 @@ public:
 	void				StartButtonPressed();
 	virtual void		MouseDown(int x, int y, int theClickCount);
 	virtual void		MouseUp(int x, int y, int theClickCount);
-	// @Patoke: implement functions
 	void				DrawAchievements(Graphics* g);
 	void				AchievementsContinuePressed();
 };

@@ -14,7 +14,6 @@ PlayerInfo::PlayerInfo()
 	Reset();
 }
 
-//0x468310
 void PlayerInfo::SyncSummary(DataSync& theSync)
 {
 	theSync.SyncString(mName);
@@ -22,7 +21,6 @@ void PlayerInfo::SyncSummary(DataSync& theSync)
 	theSync.SyncLong(mId);
 }
 
-//0x468390
 void PlayerInfo::SyncDetails(DataSync& theSync)
 {
 	if (theSync.GetReader())
@@ -77,7 +75,6 @@ void PlayerInfo::SyncDetails(DataSync& theSync)
 		theSync.SyncBytes(&mPottedPlant[i], sizeof(PottedPlant));
 	}
 
-	// @Patoke: implemented
 	for (int i = 0; i < 20; i++)
 	{
 		theSync.SyncBool(mEarnedAchievements[i]);
@@ -89,7 +86,6 @@ void PlayerInfo::SyncDetails(DataSync& theSync)
 	}
 }
 
-//0x469400
 void PlayerInfo::LoadDetails()
 {
 	try
@@ -113,8 +109,6 @@ void PlayerInfo::LoadDetails()
 	}
 }
 
-//0x4695F0
-// GOTY @Patoke: 0x46D750
 void PlayerInfo::SaveDetails()
 {
 	DataWriter aWriter;
@@ -127,7 +121,6 @@ void PlayerInfo::SaveDetails()
 	gSexyAppBase->WriteBytesToFile(aFileName, aWriter.GetDataPtr(), aWriter.GetDataLen());
 }
 
-//0x469810
 void PlayerInfo::DeleteUserFiles()
 {
 	std::string aFilename = GetAppDataFolder() + StrFormat("userdata/user%d.dat", mId);
@@ -140,7 +133,6 @@ void PlayerInfo::DeleteUserFiles()
 	}
 }
 
-//0x469940
 void PlayerInfo::Reset()
 {
 	mLevel = 1;
@@ -194,7 +186,6 @@ void PlayerInfo::ResetChallengeRecord(GameMode theGameMode)
 	mChallengeRecords[aGameMode] = 0;
 }
 
-//0x469A00
 void PottedPlant::InitializePottedPlant(SeedType theSeedType)
 {
 	memset(this, 0, sizeof(PottedPlant));

@@ -1,5 +1,6 @@
 ﻿#include "PoolEffect.h"
 #include "LawnApp.h"
+#include "../Board.h"
 #include "../../Resources.h"
 #include "GameConstants.h"
 #include "Sexy.TodLib/TodDebug.h"
@@ -8,7 +9,6 @@
 #include "SexyAppFramework/graphics/GLInterface.h"
 //#include "SexyAppFramework/graphics/D3DInterface.h"
 
-//0x469A60
 void PoolEffect::PoolEffectInitialize()
 {
     TodHesitationBracket aHesitation("PoolEffectInitialize");
@@ -43,7 +43,6 @@ void PoolEffect::PoolEffectDispose()
     delete[] mCausticGrayscaleImage;
 }
 
-//0x469BC0
 unsigned int PoolEffect::BilinearLookupFixedPoint(unsigned int u, unsigned int v)
 {
     unsigned int timeU = u & 0xFFFF0000;
@@ -64,7 +63,6 @@ unsigned int PoolEffect::BilinearLookupFixedPoint(unsigned int u, unsigned int v
         ((((factorU1 * factorV0) / 65536) * mCausticGrayscaleImage[indexV0 * 256 + indexU1]) / 65536);
 }
 
-//0x469CA0
 void PoolEffect::UpdateWaterEffect()
 {
     int idx = 0;
@@ -106,7 +104,6 @@ void PoolEffect::UpdateWaterEffect()
     ++mCausticImage->mBitsChangedCount;
 }
 
-//0x469DE0
 void PoolEffect::PoolEffectDraw(Sexy::Graphics* g, bool theIsNight)
 {
 
@@ -164,7 +161,7 @@ void PoolEffect::PoolEffectDraw(Sexy::Graphics* g, bool theIsNight)
                     int aIndexY = y + aIndexOffsetY[aVertIndex];
                     if (aLayer == 2)
                     {
-                        pVert->x = (704.0f / 15.0f) * aIndexX + 45.0f;
+                        pVert->x = (704.0f / 15.0f) * aIndexX + 45.0f + 220.0f;
                         pVert->y = 30.0f * aIndexY + 288.0f;
                         pVert->u = aOffsetArray[2][aIndexX][aIndexY][0] + aIndexX / 15.0f;
                         pVert->v = aOffsetArray[2][aIndexX][aIndexY][1] + aIndexY / 5.0f;
@@ -189,7 +186,7 @@ void PoolEffect::PoolEffectDraw(Sexy::Graphics* g, bool theIsNight)
                     else
                     {
                         pVert->color = 0xFFFFFFFFUL;
-                        pVert->x = aIndexX * aGridSquareX + 35.0f;
+                        pVert->x = aIndexX * aGridSquareX + 35.0f + 220.0f;
                         pVert->y = aIndexY * aGridSquareY + 279.0f;
                         pVert->u = aOffsetArray[aLayer][aIndexX][aIndexY][0] + aIndexX / 15.0f;
                         pVert->v = aOffsetArray[aLayer][aIndexX][aIndexY][1] + aIndexY / 5.0f;
@@ -215,7 +212,7 @@ void PoolEffect::PoolEffectDraw(Sexy::Graphics* g, bool theIsNight)
     }
 
     UpdateWaterEffect();
-    GLInterface* anInterface = ((GLImage*)g->mDestImage)->mGLInterface;
+    //GLInterface* anInterface = ((GLImage*)g->mDestImage)->mGLInterface;
     //anInterface->CheckDXError(anInterface->mD3DDevice->SetTextureStageState(0, D3DTEXTURESTAGESTATETYPE::D3DTSS_ADDRESSU, D3DTEXTUREADDRESS::D3DTADDRESS_WRAP), "DrawPool");
     //anInterface->CheckDXError(anInterface->mD3DDevice->SetTextureStageState(0, D3DTEXTURESTAGESTATETYPE::D3DTSS_ADDRESSV, D3DTEXTUREADDRESS::D3DTADDRESS_WRAP), "DrawPool");
     g->DrawTrianglesTex(mCausticImage, aVertArray[2], 150);

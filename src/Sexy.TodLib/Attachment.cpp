@@ -17,7 +17,6 @@ Attachment::~Attachment()
 	AttachmentDie();
 }
 
-//0x404490
 void Attachment::Update()
 {
 	TOD_ASSERT(gEffectSystem);
@@ -95,7 +94,6 @@ void Attachment::Update()
 	}
 }
 
-//0x404610
 void Attachment::SetPosition(const SexyVector2& thePosition)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -153,7 +151,6 @@ void Attachment::SetPosition(const SexyVector2& thePosition)
 	}
 }
 
-//0x404780
 void Attachment::OverrideColor(const Color& theColor)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -199,7 +196,6 @@ void Attachment::OverrideColor(const Color& theColor)
 	}
 }
 
-//0x404890
 void Attachment::PropogateColor(const Color& theColor, bool theEnableAdditiveColor, const Color& theAdditiveColor, bool theEnableOverlayColor, const Color& theOverlayColor)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -256,7 +252,6 @@ void Attachment::PropogateColor(const Color& theColor, bool theEnableAdditiveCol
 	}
 }
 
-//0x404A40
 void Attachment::OverrideScale(float theScale)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -302,7 +297,6 @@ void Attachment::OverrideScale(float theScale)
 	}
 }
 
-//0x404B20
 void Attachment::CrossFade(const char* theCrossFadeName)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -321,7 +315,6 @@ void Attachment::CrossFade(const char* theCrossFadeName)
 	}
 }
 
-//0x404B80
 void Attachment::SetMatrix(const SexyTransform2D& theMatrix)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -378,7 +371,6 @@ void Attachment::SetMatrix(const SexyTransform2D& theMatrix)
 	}
 }
 
-//0x404D10
 void Attachment::Draw(Graphics* g, bool theParentHidden)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -444,7 +436,6 @@ void Attachment::Draw(Graphics* g, bool theParentHidden)
 	}
 }
 
-//0x404E80
 void Attachment::Detach()
 {
 	TOD_ASSERT(gEffectSystem);
@@ -513,7 +504,6 @@ void Attachment::Detach()
 	mDead = true;
 }
 
-//0x404FC0
 void Attachment::AttachmentDie()
 {
 	TOD_ASSERT(gEffectSystem);
@@ -591,7 +581,6 @@ AttachmentHolder::AttachmentHolder()
 	//InitializeHolder();
 }
 
-//0x405120
 AttachmentHolder::~AttachmentHolder()
 {
 	DisposeHolder();
@@ -612,7 +601,6 @@ Attachment* AttachmentHolder::AllocAttachment()
 	return mAttachments.DataArrayAlloc();
 }
 
-//0x4051B0
 void AttachmentUpdateAndSetMatrix(AttachmentID& theAttachmentID, SexyTransform2D& theMatrix)
 {
 	if (theAttachmentID == AttachmentID::ATTACHMENTID_NULL)
@@ -631,7 +619,6 @@ void AttachmentUpdateAndSetMatrix(AttachmentID& theAttachmentID, SexyTransform2D
 	}
 }
 
-//0x405200
 void AttachmentUpdateAndMove(AttachmentID& theAttachmentID, float theX, float theY)
 {
 	if (theAttachmentID == AttachmentID::ATTACHMENTID_NULL)
@@ -676,7 +663,6 @@ void AttachmentOverrideScale(AttachmentID& theAttachmentID, float theScale)
 	}
 }
 
-//0x405270
 void AttachmentReanimTypeDie(AttachmentID& theAttachmentID, ReanimationType theReanimType)
 {
 	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet((unsigned int)theAttachmentID);
@@ -699,7 +685,6 @@ void AttachmentReanimTypeDie(AttachmentID& theAttachmentID, ReanimationType theR
 	}
 }
 
-//0x405300
 void AttachmentDetachCrossFadeParticleType(AttachmentID& theAttachmentID, ParticleEffect theParticleEffect, const char* theCrossFadeName)
 {
 	Attachment* aAttachment = gEffectSystem->mAttachmentHolder->mAttachments.DataArrayTryToGet((unsigned int)theAttachmentID);
@@ -760,7 +745,6 @@ void AttachmentCrossFade(AttachmentID& theAttachmentID, const char* theCrossFade
 	}
 }
 
-//0x4053A0
 void AttachmentDraw(AttachmentID& theAttachmentID, Graphics* g, bool theParentHidden)
 {
 	if (theAttachmentID == AttachmentID::ATTACHMENTID_NULL)
@@ -774,7 +758,6 @@ void AttachmentDraw(AttachmentID& theAttachmentID, Graphics* g, bool theParentHi
 	}
 }
 
-//0x4053E0
 void AttachmentDie(AttachmentID& theAttachmentID)
 {
 	if (theAttachmentID == AttachmentID::ATTACHMENTID_NULL)
@@ -789,7 +772,6 @@ void AttachmentDie(AttachmentID& theAttachmentID)
 	}
 }
 
-//0x405430
 void AttachmentDetach(AttachmentID& theAttachmentID)
 {
 	if (theAttachmentID == AttachmentID::ATTACHMENTID_NULL)
@@ -804,7 +786,6 @@ void AttachmentDetach(AttachmentID& theAttachmentID)
 	}
 }
 
-//0x405480
 Reanimation* FindReanimAttachment(AttachmentID& theAttachmentID)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -830,7 +811,6 @@ Reanimation* FindReanimAttachment(AttachmentID& theAttachmentID)
 	return nullptr;
 }
 
-//0x405500
 AttachEffect* FindFirstAttachment(AttachmentID& theAttachmentID)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -843,7 +823,6 @@ AttachEffect* FindFirstAttachment(AttachmentID& theAttachmentID)
 	return (aAttachment->mNumEffects == 0) ? nullptr : &aAttachment->mEffectArray[0];
 }
 
-//0x405540
 AttachEffect* CreateEffectAttachment(AttachmentID& theAttachmentID, EffectType theEffectType, unsigned int theDataID, float theOffsetX, float theOffsetY)
 {
 	TOD_ASSERT(gEffectSystem);
@@ -868,7 +847,6 @@ AttachEffect* CreateEffectAttachment(AttachmentID& theAttachmentID, EffectType t
 	return aAttachEffect;
 }
 
-//0x4055D0
 AttachEffect* AttachReanim(AttachmentID& theAttachmentID, Reanimation* theReanimation, float theOffsetX, float theOffsetY)
 {
 	unsigned int aReanimId = gEffectSystem->mReanimationHolder->mReanimations.DataArrayGetID(theReanimation);
@@ -880,7 +858,6 @@ AttachEffect* AttachReanim(AttachmentID& theAttachmentID, Reanimation* theReanim
 	return aAttachEffect;
 }
 
-//0x405600
 AttachEffect* AttachParticle(AttachmentID& theAttachmentID, TodParticleSystem* theParticleSystem, float theOffsetX, float theOffsetY)
 {
 	if (theParticleSystem == nullptr)

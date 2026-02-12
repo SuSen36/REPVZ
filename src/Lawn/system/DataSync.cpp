@@ -1,5 +1,5 @@
 #include "DataSync.h"
-#include "SexyAppFramework/fcaseopen/fcaseopen.h"
+#include "SexyAppFramework/misc/fcaseopen.h"
 
 DataReader::DataReader()
 {
@@ -62,7 +62,6 @@ void DataReader::Close()
 	}
 }
 
-//0x441BE0
 void DataReader::ReadBytes(void* theMem, uint32_t theNumBytes)
 {
 	if (mData)
@@ -140,26 +139,22 @@ void DataReader::ReadString(SexyString& theStr)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//0x441E70
 DataSync::DataSync(DataReader& theReader)
 {
 	Reset();
 	mReader = &theReader;
 }
 
-//0x441F10
 DataSync::DataSync(DataWriter& theWriter)
 {
 	Reset();
 	mWriter = &theWriter;
 }
 
-//0x441FB0
 DataSync::~DataSync()
 {
 }
 
-//0x442020
 void DataSync::ResetPointerTable()
 {
 	mIntToPointerMap.clear();
@@ -558,7 +553,6 @@ void DataWriter::Close()
 	}
 }
 
-//0x443730
 void DataWriter::EnsureCapacity(uint32_t theNumBytes)
 {
 	if (mCapacity < theNumBytes)
@@ -608,7 +602,6 @@ void DataWriter::WriteBytes(const void* theData, uint32_t theDataLen)
 	}
 }
 
-//0x443770
 void DataWriter::WriteLong(uint32_t theLong)
 {
 	//if (mData)
@@ -624,7 +617,6 @@ void DataWriter::WriteLong(uint32_t theLong)
 	WriteBytes(&theLong, sizeof(uint32_t));
 }
 
-//0x4437C0
 void DataWriter::WriteShort(unsigned short theShort)
 {
 	//if (mData)
@@ -660,7 +652,6 @@ void DataWriter::WriteDouble(double theDouble)
 	WriteBytes(&theDouble, sizeof(double));
 }
 
-//0x443810
 void DataWriter::WriteString(const SexyString& theStr)
 {
 	unsigned short aStrLen = (unsigned short)theStr.length();

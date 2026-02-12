@@ -21,7 +21,6 @@ WidgetMessage::WidgetMessage(LawnApp* theApp)
 	memset(mTextReanimID, (int)ReanimationID::REANIMATIONID_NULL, MAX_MESSAGE_LENGTH);
 }
 
-//0x458FC0
 void WidgetMessage::ClearReanim()
 {
 	for (int i = 0; i < MAX_MESSAGE_LENGTH; i++)
@@ -47,8 +46,6 @@ void WidgetMessage::ClearLabel()
 	}
 }
 
-//0x459010
-// GOTY @Patoke: inlined 0x459715
 void WidgetMessage::SetLabel(const SexyString& theNewLabel, MessageStyle theMessageStyle)
 {
     SexyString aLabel = TodStringTranslate(theNewLabel);
@@ -123,7 +120,7 @@ void WidgetMessage::SetLabel(const SexyString& theNewLabel, MessageStyle theMess
                 mDuration = 750;
                 break;
 
-            case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT: // @Patoke: implemented
+            case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT:
                 mDuration = 250;
                 break;
 
@@ -141,7 +138,6 @@ void WidgetMessage::SetLabel(const SexyString& theNewLabel, MessageStyle theMess
 }
 
 
-//0x4591E0
 void WidgetMessage::LayoutReanimText()
 {
 	float aMaxWidth = 0;
@@ -191,7 +187,6 @@ void WidgetMessage::LayoutReanimText()
 	}
 }
 
-//0x4594B0
 void WidgetMessage::Update()
 {
 	if (!mApp->mBoard || mApp->mBoard->mPaused)
@@ -248,7 +243,6 @@ void WidgetMessage::Update()
 	}
 }
 
-//0x459710
 void WidgetMessage::DrawReanimatedText(Graphics* g, Font* theFont, const Color& theColor, float thePosY)
 {
 	int aLabelLen = sexystrlen(mLabel);
@@ -287,8 +281,6 @@ void WidgetMessage::DrawReanimatedText(Graphics* g, Font* theFont, const Color& 
 	}
 }
 
-//0x459990
-// GOTY @Patoke: inlined 0x45CAEF
 Font* WidgetMessage::GetFont()
 {
 	switch (mMessageStyle)
@@ -309,7 +301,7 @@ Font* WidgetMessage::GetFont()
 	case MessageStyle::MESSAGE_STYLE_HOUSE_NAME:
 	case MessageStyle::MESSAGE_STYLE_HUGE_WAVE:
 	case MessageStyle::MESSAGE_STYLE_ZEN_GARDEN_LONG:
-	case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT: // @Patoke: implemented
+	case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT:
 		return Sexy::FONT_HOUSEOFTERROR28;
 
 	case MessageStyle::MESSAGE_STYLE_SLOT_MACHINE:
@@ -322,8 +314,6 @@ Font* WidgetMessage::GetFont()
 	unreachable();
 }
 
-//0x4599E0
-// GOTY @Patoke: 0x45D2B0
 void WidgetMessage::Draw(Graphics* g)
 {
 	if (mDuration <= 0)
@@ -361,7 +351,7 @@ void WidgetMessage::Draw(Graphics* g)
 	case MessageStyle::MESSAGE_STYLE_HINT_TALL_FAST:
 	case MessageStyle::MESSAGE_STYLE_HINT_TALL_UNLOCKMESSAGE:
 	case MessageStyle::MESSAGE_STYLE_HINT_TALL_LONG:
-	case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT: // @Patoke: implemented
+	case MessageStyle::MESSAGE_STYLE_ACHIEVEMENT:
 		aPosY = 476;
 		aRectHeight = 100;
 		aTextOffsetY = -4;

@@ -15,7 +15,6 @@
 
 using namespace Sexy;
 
-//0x45C050
 NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector) : 
 	Dialog(nullptr, nullptr, Dialogs::DIALOG_NEWOPTIONS, true, __S("Options"), __S(""), __S(""), Dialog::BUTTONS_NONE)
 {
@@ -23,7 +22,7 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector) :
     mFromGameSelector = theFromGameSelector;
     SetColor(Dialog::COLOR_BUTTON_TEXT, Color(255, 255, 100));
     mAlmanacButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Almanac, this, __S("[VIEW_ALMANAC_BUTTON]"));
-    mRestartButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Restart, this, __S("[RESTART_LEVEL_BUTTON]")); // @Patoke: wrong local name
+    mRestartButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Restart, this, __S("[RESTART_LEVEL_BUTTON]"));
     mBackToMainButton = MakeButton(NewOptionsDialog::NewOptionsDialog_MainMenu, this, __S("[MAIN_MENU_BUTTON]"));
 
     mBackToGameButton = MakeNewButton(
@@ -107,14 +106,12 @@ NewOptionsDialog::~NewOptionsDialog()
     delete mBackToGameButton;
 }
 
-//0x45C880
 int NewOptionsDialog::GetPreferredHeight(int theWidth)
 {
     (void)theWidth;
     return IMAGE_OPTIONS_MENUBACK->mWidth;
 }
 
-//0x45C890
 void NewOptionsDialog::AddedToManager(Sexy::WidgetManager* theWidgetManager)
 {
     Dialog::AddedToManager(theWidgetManager);
@@ -127,7 +124,6 @@ void NewOptionsDialog::AddedToManager(Sexy::WidgetManager* theWidgetManager)
     AddWidget(mBackToGameButton);
 }
 
-//0x45C930
 void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
 {
     Dialog::RemovedFromManager(theWidgetManager);
@@ -140,7 +136,6 @@ void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
     RemoveWidget(mRestartButton);
 }
 
-//0x45C9D0
 void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
 {
     Dialog::Resize(theX, theY, theWidth, theHeight);
@@ -168,7 +163,6 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
     }
 }
 
-//0x45CB50
 void NewOptionsDialog::Draw(Sexy::Graphics* g)
 {
     g->DrawImage(IMAGE_OPTIONS_MENUBACK, 0, 0);
@@ -186,7 +180,6 @@ void NewOptionsDialog::Draw(Sexy::Graphics* g)
     TodDrawString(g, __S("Sound FX"), 186, 175 + aSfxOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
 }
 
-//0x45CF50
 void NewOptionsDialog::SliderVal(int theId, double theVal)
 {
     switch (theId)
@@ -207,7 +200,6 @@ void NewOptionsDialog::SliderVal(int theId, double theVal)
     }
 }
 
-//0x45D290
 void NewOptionsDialog::KeyDown(Sexy::KeyCode theKey)
 {
     if (theKey == KeyCode::KEYCODE_SPACE || theKey == KeyCode::KEYCODE_RETURN)
@@ -220,14 +212,12 @@ void NewOptionsDialog::KeyDown(Sexy::KeyCode theKey)
     }
 }
 
-//0x45D2F0
 void NewOptionsDialog::ButtonPress(int theId)
 {
     (void)theId;
     mApp->PlaySample(SOUND_GRAVEBUTTON);
 }
 
-//0x45D310
 void NewOptionsDialog::ButtonDepress(int theId)
 {
     Dialog::ButtonDepress(theId);

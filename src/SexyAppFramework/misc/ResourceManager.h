@@ -3,7 +3,7 @@
 
 #include "../Common.h"
 #include "SexyAppFramework/graphics/Image.h"
-#include "../SexyAppBase.h"
+#include "SexyAppFramework/graphics/SharedImage.h"
 #include <string>
 #include <map>
 
@@ -29,7 +29,7 @@ typedef std::map<SexyString, SexyString>	XMLParamMap;
 ///////////////////////////////////////////////////////////////////////////////
 class ResourceManager
 {
-public: // @Patoke todo: revert to protected
+public:
 	enum ResType
 	{
 		ResType_Image,
@@ -142,8 +142,6 @@ public: // @Patoke todo: revert to protected
 	void					DeleteMap(ResMap &theMap);
 	virtual void			DeleteResources(ResMap &theMap, const std::string &theGroup);
 
-	bool					LoadAlphaGridImage(ImageRes *theRes, GLImage *theImage);
-	bool					LoadAlphaImage(ImageRes *theRes, GLImage *theImage);
 	virtual bool			DoLoadImage(ImageRes *theRes);
 	virtual bool			DoLoadFont(FontRes* theRes);
 	virtual bool			DoLoadSound(SoundRes* theRes);

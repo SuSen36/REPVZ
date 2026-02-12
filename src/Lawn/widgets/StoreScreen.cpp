@@ -44,7 +44,6 @@ void StoreScreenOverlay::Draw(Graphics* g)
     mParent->DrawOverlay(g);
 }
 
-//0x489DA0
 StoreScreen::StoreScreen(LawnApp* theApp) : Dialog(nullptr, nullptr, DIALOG_STORE, true, __S("Store"), __S(""), __S(""), BUTTONS_NONE)
 {
 	mApp = theApp;
@@ -81,7 +80,7 @@ StoreScreen::StoreScreen(LawnApp* theApp) : Dialog(nullptr, nullptr, DIALOG_STOR
     mBackButton->SetFont(Sexy::FONT_HOUSEOFTERROR20);
     mBackButton->mColors[ButtonWidget::COLOR_LABEL] = Color(98, 153, 235);
     mBackButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(167, 192, 235);
-    mBackButton->Resize(366, 512, aMenuImage->mWidth, aMenuImage->mHeight);
+    mBackButton->Resize(366 + 133, 512, aMenuImage->mWidth, aMenuImage->mHeight);
     mBackButton->mTextOffsetX = -7;
     mBackButton->mTextOffsetY = 1;
     mBackButton->mTextDownOffsetX = 2;
@@ -96,7 +95,7 @@ StoreScreen::StoreScreen(LawnApp* theApp) : Dialog(nullptr, nullptr, DIALOG_STOR
     mPrevButton->mDownImage = Sexy::IMAGE_STORE_PREVBUTTONHIGHLIGHT;
     mPrevButton->mColors[ButtonWidget::COLOR_LABEL] = Color(255, 240, 0);
     mPrevButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(200, 200, 255);
-    mPrevButton->Resize(252, 402, aPrevImage->mWidth, aPrevImage->mHeight);
+    mPrevButton->Resize(252 + 133, 402, aPrevImage->mWidth, aPrevImage->mHeight);
 
     mNextButton = new NewLawnButton(nullptr, StoreScreen::StoreScreen_Next, this);
     mNextButton->mDoFinger = true;
@@ -107,7 +106,7 @@ StoreScreen::StoreScreen(LawnApp* theApp) : Dialog(nullptr, nullptr, DIALOG_STOR
     mNextButton->mDownImage = Sexy::IMAGE_STORE_NEXTBUTTONHIGHLIGHT;
     mNextButton->mColors[ButtonWidget::COLOR_LABEL] = Color(255, 240, 0);
     mNextButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(200, 200, 255);
-    mNextButton->Resize(596, 402, aNextImage->mWidth, aNextImage->mHeight);
+    mNextButton->Resize(596 + 133, 402, aNextImage->mWidth, aNextImage->mHeight);
 
     mOverlayWidget = new StoreScreenOverlay(this);
     mOverlayWidget->Resize(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
@@ -135,7 +134,6 @@ StoreScreen::~StoreScreen()
     if (mOverlayWidget) delete mOverlayWidget;
 }
 
-//0x48A760
 StoreItem StoreScreen::GetStoreItemType(int theSpotIndex)
 {
     // 这个函数原版是穷举判断的，这里优化一下……
@@ -154,7 +152,6 @@ bool StoreScreen::IsPottedPlant(StoreItem theStoreItem)
     return theStoreItem == STORE_ITEM_POTTED_MARIGOLD_1 || theStoreItem == STORE_ITEM_POTTED_MARIGOLD_2 || theStoreItem == STORE_ITEM_POTTED_MARIGOLD_3;
 }
 
-//0x48A940
 bool StoreScreen::IsComingSoon(StoreItem theStoreItem)
 {
     if (theStoreItem == STORE_ITEM_WHEEL_BARROW)
@@ -166,7 +163,6 @@ bool StoreScreen::IsComingSoon(StoreItem theStoreItem)
     return false;
 }
 
-//0x48A9D0
 bool StoreScreen::IsItemSoldOut(StoreItem theStoreItem)
 {
     PlayerInfo* aPlayer = mApp->mPlayerInfo;
@@ -187,7 +183,6 @@ bool StoreScreen::IsItemSoldOut(StoreItem theStoreItem)
     unreachable();
 }
 
-//0x48AAD0
 bool StoreScreen::IsItemUnavailable(StoreItem theStoreItem)
 {
     if (mEasyBuyingCheat)
@@ -261,7 +256,6 @@ void StoreScreen::GetStorePosition(int theSpotIndex, int& thePosX, int& thePosY)
     }
 }
 
-//0x48AC50
 void StoreScreen::DrawItemIcon(Graphics* g, int theItemPosition, StoreItem theItemType, bool theIsForHighlight)
 {
     if (theIsForHighlight)
@@ -366,7 +360,6 @@ void StoreScreen::DrawItemIcon(Graphics* g, int theItemPosition, StoreItem theIt
     g->SetColorizeImages(false);
 }
 
-//0x48B170
 void StoreScreen::DrawItem(Graphics* g, int theItemPosition, StoreItem theItemType)
 {
     if (IsItemUnavailable(theItemType))
@@ -408,44 +401,48 @@ void StoreScreen::DrawItem(Graphics* g, int theItemPosition, StoreItem theItemTy
     }
 }
 
-//0x48B4C0
 void StoreScreen::Draw(Graphics* g)
 {
     g->SetLinearBlend(true);
     mDrawnOnce = true;
 
-    int aStoreSignPosY = TodAnimateCurve(50, 110, mStoreTime, -150, 0, CURVE_EASE_IN_OUT);
+    g->DrawImage(mApp->IsNight() ? Sexy::IMAGE_STORE_BACKGROUNDNIGHT : Sexy::IMAGE_STORE_BACKGROUND, 0, 0);
+
+    int aCarX = mShakeX + 196 + 133;
+    int aCarY = mShakeY + 138;
+    bool aIsHatchOpen = !mHatchTimer && mHatchOpen;
+
+    
     if (mApp->IsNight())
     {
-        g->DrawImage(Sexy::IMAGE_STORE_BACKGROUNDNIGHT, 0, 0);
+        g->DrawImage(Sexy::IMAGE_STORE_CAR_NIGHT, aCarX, aCarY);
     }
     else
     {
-        g->DrawImage(Sexy::IMAGE_STORE_BACKGROUND, 0, 0);
+        g->DrawImage(Sexy::IMAGE_STORE_CAR, aCarX, aCarY);
     }
 
-    if (!mHatchTimer && mHatchOpen)
+    if (aIsHatchOpen)
     {
-        g->DrawImage(Sexy::IMAGE_STORE_CAR, mShakeX + 196, mShakeY + 138);
-        g->DrawImage(Sexy::IMAGE_STORE_HATCHBACKOPEN, mShakeX + 299, mShakeY);
-        if (mApp->IsNight())
-        {
-            g->DrawImage(Sexy::IMAGE_STORE_CAR_NIGHT, mShakeX + 688, mShakeY + 193);
-        }
+        g->DrawImage(Sexy::IMAGE_STORE_HATCHBACKOPEN, mShakeX + 299 + 133, mShakeY);
     }
     else
     {
-        g->DrawImage(Sexy::IMAGE_STORE_CARCLOSED, mShakeX + 196, mShakeY + 138);
         if (mApp->IsNight())
         {
-            g->DrawImage(Sexy::IMAGE_STORE_CAR_NIGHT, mShakeX + 688, mShakeY + 193);
-            g->DrawImage(Sexy::IMAGE_STORE_CARCLOSED_NIGHT, mShakeX + 337, mShakeY + 187);
+            g->DrawImage(Sexy::IMAGE_STORE_CARCLOSED_NIGHT, aCarX, aCarY);
+        }
+        else
+        {
+            g->DrawImage(Sexy::IMAGE_STORE_CARCLOSED, aCarX, aCarY);
         }
     }
-    g->DrawImage(Sexy::IMAGE_STORE_SIGN, 285, aStoreSignPosY);
+
+    int aStoreSignPosY = TodAnimateCurve(50, 110, mStoreTime, -150, 0, CURVE_EASE_IN_OUT);
+    g->DrawImage(Sexy::IMAGE_STORE_SIGN, 285 + 133, aStoreSignPosY);
 
     Graphics gCrazyDave = Graphics(*g);
-    gCrazyDave.mTransX -= 42.0f;
+    gCrazyDave.mTransX += 91.0f;
     gCrazyDave.mTransY += 68.0f;
     mApp->DrawCrazyDave(&gCrazyDave);
 
@@ -483,7 +480,6 @@ void StoreScreen::Draw(Graphics* g)
     }
 }
 
-//0x48BA30
 void StoreScreen::DrawOverlay(Graphics* g)
 {
     Coin* aCoin = nullptr;
@@ -496,8 +492,6 @@ void StoreScreen::DrawOverlay(Graphics* g)
     }
 }
 
-//0x48BAA0
-// GOTY @Patoke: 0x4578F0
 void StoreScreen::SetBubbleText(int theCrazyDaveMessage, int theTime, bool theClickToContinue)
 {
     mApp->CrazyDaveTalkIndex(theCrazyDaveMessage);
@@ -505,7 +499,6 @@ void StoreScreen::SetBubbleText(int theCrazyDaveMessage, int theTime, bool theCl
     mBubbleClickToContinue = theClickToContinue;
 }
 
-//0x48BAD0
 void StoreScreen::UpdateMouse()
 {
     mMouseOverItem = STORE_ITEM_INVALID;
@@ -571,7 +564,6 @@ void StoreScreen::UpdateMouse()
     mApp->SetCursor(mBackButton->mIsOver || mPrevButton->mIsOver || mNextButton->mIsOver || aShowFinger ? CURSOR_HAND : CURSOR_POINTER);
 }
 
-//0x48BE30
 void StoreScreen::StorePreload()
 {
     ReanimatorEnsureDefinitionLoaded(REANIM_CRAZY_DAVE, true);
@@ -598,7 +590,6 @@ bool StoreScreen::CanInteractWithButtons()
     return mStoreTime >= 120 && !mBubbleClickToContinue && mHatchTimer <= 0 && !mWaitForDialog;
 }
 
-//0x48BF60
 void StoreScreen::Update()
 {
     mApp->mMusic->MakeSureMusicIsPlaying(MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
@@ -752,7 +743,6 @@ void StoreScreen::Update()
     }
 }
 
-//0x48C350
 void StoreScreen::AddedToManager(WidgetManager* theWidgetManager)
 {
     WidgetContainer::AddedToManager(theWidgetManager);
@@ -762,7 +752,6 @@ void StoreScreen::AddedToManager(WidgetManager* theWidgetManager)
     AddWidget(mOverlayWidget);
 }
 
-//0x48C3B0
 void StoreScreen::RemovedFromManager(WidgetManager* theWidgetManager)
 {
     WidgetContainer::RemovedFromManager(theWidgetManager);
@@ -773,14 +762,12 @@ void StoreScreen::RemovedFromManager(WidgetManager* theWidgetManager)
     mApp->CrazyDaveDie();
 }
 
-//0x48C410
 void StoreScreen::ButtonPress(int theId)
 {
     if (theId != StoreScreen::StoreScreen_Prev && theId != StoreScreen::StoreScreen_Next)
         mApp->PlaySample(Sexy::SOUND_BUTTONCLICK);
 }
 
-//0x48C440
 bool StoreScreen::IsPageShown(StorePages thePage)
 {
     // 一周目完成后，所有页全解锁
@@ -793,7 +780,6 @@ bool StoreScreen::IsPageShown(StorePages thePage)
     return thePage != STORE_PAGE_ZEN2;
 }
 
-//0x48C4D0
 void StoreScreen::ButtonDepress(int theId)
 {
     if (theId == StoreScreen::StoreScreen_Back)
@@ -827,13 +813,11 @@ void StoreScreen::ButtonDepress(int theId)
     }
 }
 
-//0x48C5F0
 void StoreScreen::KeyChar(char theChar)
 {
     if (mBubbleClickToContinue && (theChar == ' ' || theChar == '\r')) AdvanceCrazyDaveDialog();
 }
 
-//0x48C620
 int StoreScreen::GetItemCost(StoreItem theStoreItem)
 {
     if (theStoreItem == STORE_ITEM_BONUS_LAWN_MOWER)    return gLawnApp->mPlayerInfo->mPurchases[STORE_ITEM_BONUS_LAWN_MOWER] ? 500 : 200;
@@ -880,8 +864,6 @@ bool StoreScreen::CanAffordItem(StoreItem theStoreItem)
     return mApp->mPlayerInfo->mCoins >= GetItemCost(theStoreItem);
 }
 
-//0x48C740
-// GOTY @Patoke: 0x497340
 void StoreScreen::PurchaseItem(StoreItem theStoreItem)
 {
     mApp->SetCursor(CURSOR_POINTER);
@@ -889,7 +871,6 @@ void StoreScreen::PurchaseItem(StoreItem theStoreItem)
     mApp->CrazyDaveStopTalking();
     if (!CanAffordItem(theStoreItem))
     {
-        // @Patoke: fix locals
         Dialog* aDialog = mApp->DoDialog(DIALOG_NOT_ENOUGH_MONEY, true,
             __S("Not enough money"), 
             __S("You can't afford this item yet. Earn more coins by killing zombies!"), 
@@ -1010,7 +991,6 @@ void StoreScreen::PurchaseItem(StoreItem theStoreItem)
                 mApp->mSeedChooserScreen->UpdateAfterPurchase();
             }
 
-            // @Patoke: implemented
             bool aGiveAchievement = true;
             for (int i = STORE_ITEM_PLANT_GATLINGPEA; i <= STORE_ITEM_PLANT_IMITATER; i++) {
                 if (mApp->SeedTypeAvailable(SeedType(i)))
@@ -1018,9 +998,8 @@ void StoreScreen::PurchaseItem(StoreItem theStoreItem)
             }
 
             if (aGiveAchievement) {
-                ReportAchievement::GiveAchievement(mApp, Morticulturalist, aGiveAchievement); // @Patoke: add achievement
+                ReportAchievement::GiveAchievement(mApp, Morticulturalist, aGiveAchievement);
                 SetBubbleText(4000, 800, false);
-                // todo @Patoke: add these?
                 //*(a2 + 412) = 150;
                 //*(a2 + 416) = 0;
                 //*(a2 + 584) = 1;
@@ -1031,7 +1010,6 @@ void StoreScreen::PurchaseItem(StoreItem theStoreItem)
     }
 }
 
-//0x48CF50
 void StoreScreen::AdvanceCrazyDaveDialog()
 {
     if (!mBubbleClickToContinue)
@@ -1082,7 +1060,6 @@ void StoreScreen::AdvanceCrazyDaveDialog()
     }
 }
 
-//0x48D130
 void StoreScreen::MouseDown(int x, int y, int theClickCount)
 {
     (void)theClickCount;
@@ -1107,7 +1084,6 @@ void StoreScreen::MouseDown(int x, int y, int theClickCount)
     }
 }
 
-//0x48D2E0
 void StoreScreen::EnableButtons(bool theEnable)
 {
     if (mEasyBuyingCheat || IsPageShown(STORE_PAGE_PLANT_UPGRADES) || !theEnable)
@@ -1121,8 +1097,6 @@ void StoreScreen::EnableButtons(bool theEnable)
     mBackButton->SetDisabled(!theEnable);
 }
 
-//0x48D3A0
-// GOTY @Patoke: 0x498110
 void StoreScreen::SetupForIntro(int theDialogIndex)
 {
     mStartDialog = theDialogIndex;

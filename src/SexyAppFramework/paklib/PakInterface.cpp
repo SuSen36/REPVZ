@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include "../Common.h"
 #include "PakInterface.h"
-#include "SexyAppFramework/fcaseopen/fcaseopen.h"
+#include "SexyAppFramework/misc/fcaseopen.h"
 
 enum
 {
@@ -82,7 +82,6 @@ std::vector<std::string> PakInterface::GetPakFileNames() const
     return pakFileNames;
 }
 
-//0x5D84D0
 static void FixFileName(const char* theFileName, char* theUpperName)
 {
 	// 检测路径是否为从盘符开始的绝对路径
@@ -239,7 +238,6 @@ bool PakInterface::AddPakFile(const std::string& theFileName, int thePriority) {
     return true;
 }
 
-//0x5D85C0
 PFILE* PakInterface::FOpen(const char* theFileName, const char* anAccess)
 {
     // 处理读取模式
@@ -312,7 +310,6 @@ PFILE* PakInterface::FOpen(const char* theFileName, const char* anAccess)
 }
 
 
-//0x5D8780
 int PakInterface::FClose(PFILE* theFile)
 {
 	if (theFile->mRecord == NULL)
@@ -321,7 +318,6 @@ int PakInterface::FClose(PFILE* theFile)
 	return 0;
 }
 
-//0x5D87B0
 int PakInterface::FSeek(PFILE* theFile, slong theOffset, int theOrigin)
 {
 	if (theFile->mRecord != NULL)
@@ -341,7 +337,6 @@ int PakInterface::FSeek(PFILE* theFile, slong theOffset, int theOrigin)
 		return fseek(theFile->mFP, static_cast<slong>(theOffset), theOrigin);
 }
 
-//0x5D8830
 int PakInterface::FTell(PFILE* theFile)
 {
 	if (theFile->mRecord != NULL)
@@ -350,7 +345,6 @@ int PakInterface::FTell(PFILE* theFile)
 		return ftell(theFile->mFP);	
 }
 
-//0x5D8850
 size_t PakInterface::FRead(void* thePtr, int theElemSize, int theCount, PFILE* theFile)
 {
 	if (theFile->mRecord != NULL)

@@ -6,15 +6,14 @@
 #include "Sexy.TodLib/TodFoley.h"
 #include "Sexy.TodLib/Reanimator.h"
 
-//0x458000
 void LawnMower::LawnMowerInitialize(int theRow)
 {
     mApp = (LawnApp*)gSexyAppBase;
     mRow = theRow;
-    mPosX = -160.0f;
+    mPosX = -60.0f;
     mBoard = mApp->mBoard;
     mRenderOrder = Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_LAWN_MOWER, theRow, 0);
-    mPosY = mBoard->GetPosYBasedOnRow(mPosX + 40.0f, theRow) + 23.0f;
+    mPosY = mBoard->GetPosYBasedOnRow(mPosX + 40.0f, theRow) + (mBoard->StageHasRoof() ? -20.0f : 23.0f);
     mDead = false;
     mMowerState = LawnMowerState::MOWER_READY;
     mVisible = true;
@@ -64,11 +63,10 @@ void LawnMower::LawnMowerInitialize(int theRow)
     }
 }
 
-//0x4581E0
 void LawnMower::UpdatePool()
 {
     bool isPoolRange = false;
-    if (mPosX > 26.0f && mPosX < 660.0f)
+    if (mPosX > 246.0f && mPosX < 880.0f)
     {
         isPoolRange = true;
     }
@@ -121,7 +119,6 @@ void LawnMower::UpdatePool()
     }
 }
 
-//0x458540
 void LawnMower::MowZombie(Zombie* theZombie)
 {
     if (mMowerState == LawnMowerState::MOWER_READY)
@@ -157,7 +154,6 @@ void LawnMower::MowZombie(Zombie* theZombie)
     }
 }
 
-//0x4586E0
 void LawnMower::Update()
 {
     if (mMowerState == LawnMowerState::MOWER_SQUISHED)
@@ -173,7 +169,7 @@ void LawnMower::Update()
     if (mMowerState == LawnMowerState::MOWER_ROLLING_IN)
     {
         mRollingInCounter++;
-        mPosX = TodAnimateCurveFloat(0, 100, mRollingInCounter, -160.0f, -21.0f, TodCurves::CURVE_EASE_IN_OUT);
+        mPosX = TodAnimateCurveFloat(0, 100, mRollingInCounter, 60.0f, 199.0f, TodCurves::CURVE_EASE_IN_OUT);
         if (mRollingInCounter == 100)
         {
             mMowerState = LawnMowerState::MOWER_READY;
@@ -231,13 +227,13 @@ void LawnMower::Update()
         aSpeed = TodAnimateCurveFloat(50, 0, mChompCounter, aSpeed, 1.0f, TodCurves::CURVE_BOUNCE_SLOW_MIDDLE);
     }
     mPosX += aSpeed;
-    mPosY = mBoard->GetPosYBasedOnRow(mPosX + 40.0f, mRow) + 23.0f;
+    mPosY = mBoard->GetPosYBasedOnRow(mPosX + 40.0f, mRow) + (mBoard->StageHasRoof() ? -20.0f : 23.0f);
 
     if (mMowerType == LawnMowerType::LAWNMOWER_POOL)
     {
         UpdatePool();
     }
-    if (mMowerType == LawnMowerType::LAWNMOWER_LAWN && mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL && mPosX > 50.0f)
+    if (mMowerType == LawnMowerType::LAWNMOWER_LAWN && mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL && mPosX > 270.0f)
     {
         Reanimation* aSplashReanim = mApp->AddReanimation(mPosX, mPosY + 25.0f, mRenderOrder + 1, ReanimationType::REANIM_SPLASH);
         aSplashReanim->OverrideScale(1.2f, 0.8f);
@@ -254,7 +250,6 @@ void LawnMower::Update()
     mApp->ReanimationGet(mReanimID)->Update();
 }
 
-//0x458A80
 void LawnMower::Draw(Graphics* g)
 {
     if (!mVisible)
@@ -349,7 +344,6 @@ void LawnMower::Draw(Graphics* g)
     }
 }
 
-//0x458D10
 void LawnMower::Die()
 {
     mDead = true;
@@ -363,7 +357,6 @@ void LawnMower::Die()
     }
 }
 
-//0x458DA0
 void LawnMower::StartMower()
 {
     if (mMowerState == LawnMowerState::MOWER_TRIGGERED)
@@ -388,7 +381,6 @@ void LawnMower::StartMower()
     mMowerState = LawnMowerState::MOWER_TRIGGERED;
 }
 
-//0x458EB0
 void LawnMower::SquishMower()
 {
     Reanimation* aMowerReanim = mApp->ReanimationGet(mReanimID);
@@ -405,7 +397,6 @@ Rect LawnMower::GetLawnMowerAttackRect()
     return Rect(mPosX, mPosY, 50, 80);
 }
 
-//0x458F60
 void LawnMower::EnableSuperMower(bool theEnable) // Is theEnable being unused a bug?
 {
     (void)theEnable;

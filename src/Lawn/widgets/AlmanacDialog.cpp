@@ -1,4 +1,4 @@
-﻿#include "../Board.h"
+#include "../Board.h"
 #include "../Plant.h"
 #include "../Zombie.h"
 #include "GameButton.h"
@@ -16,7 +16,6 @@
 
 bool gZombieDefeated[NUM_ZOMBIE_TYPES]  = {false};
 
-//0x401010
 AlmanacDialog::AlmanacDialog(LawnApp* theApp) : LawnDialog(theApp, DIALOG_ALMANAC, true, __S("Almanac"), __S(""), __S(""), BUTTONS_NONE)
 {
 	mApp = (LawnApp*)gSexyAppBase;
@@ -42,7 +41,7 @@ AlmanacDialog::AlmanacDialog(LawnApp* theApp) : LawnDialog(theApp, DIALOG_ALMANA
 	Color aColor = Color(42, 42, 90);
 	mCloseButton->mColors[ButtonWidget::COLOR_LABEL] = aColor;
 	mCloseButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = aColor;
-	mCloseButton->Resize(676, 567, 89, 26);
+	mCloseButton->Resize(896, 567, 89, 26);
 	mCloseButton->mParentWidget = this;
 	mCloseButton->mTextOffsetX = -8;
 	mCloseButton->mTextOffsetY = 1;
@@ -70,13 +69,13 @@ AlmanacDialog::AlmanacDialog(LawnApp* theApp) : LawnDialog(theApp, DIALOG_ALMANA
 	mPlantButton->SetFont(Sexy::FONT_DWARVENTODCRAFT18YELLOW);
 	mPlantButton->mColors[ButtonWidget::COLOR_LABEL] = Color::White;
 	mPlantButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color::White;
-	mPlantButton->Resize(130, 345, 156, 42);
+	mPlantButton->Resize(263, 345, 156, 42);
 	mPlantButton->mTextOffsetY = -1;
 	mPlantButton->mParentWidget = this;
 
 	mZombieButton = new GameButton(AlmanacDialog::ALMANAC_BUTTON_ZOMBIE);
 	mZombieButton->SetLabel(__S("[VIEW_ZOMBIES]"));
-	mZombieButton->Resize(487, 345, 210, 48);
+	mZombieButton->Resize(620, 345, 210, 48);
 	mZombieButton->mDrawStoneButton = true;
 	mZombieButton->mParentWidget = this;
 
@@ -96,7 +95,6 @@ AlmanacDialog::~AlmanacDialog()
 	ClearPlantsAndZombies();
 }
 
-//0x401970
 void AlmanacDialog::ClearPlantsAndZombies()
 {
 	if (mPlant)
@@ -122,15 +120,12 @@ void AlmanacDialog::ClearPlantsAndZombies()
 	}
 }
 
-//0x401A10
 void AlmanacDialog::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	LawnDialog::RemovedFromManager(theWidgetManager);
 	ClearPlantsAndZombies();
 }
 
-//0x401A30
-// GOTY @Patoke: 0x402C50
 void AlmanacDialog::SetupPlant()
 {
 	ClearPlantsAndZombies();
@@ -151,8 +146,6 @@ void AlmanacDialog::SetupPlant()
 	mPlant->mY = aPosY;
 }
 
-//0x401B70
-// GOTY @Patoke: 0x402D90
 void AlmanacDialog::SetupZombie()
 {
 	ClearPlantsAndZombies();
@@ -164,7 +157,6 @@ void AlmanacDialog::SetupZombie()
 	mZombie->mPosY = ALMANAC_ZOMBIE_POSITION_Y;
 }
 
-//0x401BE0
 void AlmanacDialog::SetPage(AlmanacPage thePage)
 {
 	mOpenPage = thePage;
@@ -215,7 +207,6 @@ void AlmanacDialog::ShowZombie(ZombieType theZombieType)
 	SetPage(ALMANAC_PAGE_ZOMBIES);
 }
 
-//0x401D30
 void AlmanacDialog::Update()
 {
 	mCloseButton->Update();
@@ -253,7 +244,6 @@ ZombieType AlmanacDialog::GetZombieType(int theIndex)
 	return theIndex < NUM_ZOMBIE_TYPES ? (ZombieType)theIndex : ZOMBIE_INVALID;
 }
 
-//0x401E70
 void AlmanacDialog::DrawIndex(Graphics* g)
 {
 	g->DrawImage(Sexy::IMAGE_ALMANAC_INDEXBACK, 0, 0);
@@ -273,7 +263,6 @@ void AlmanacDialog::DrawIndex(Graphics* g)
 	}
 }
 
-//0x402060
 void AlmanacDialog::DrawPlants(Graphics* g)
 {
 	g->DrawImage(Sexy::IMAGE_ALMANAC_PLANTBACK, 0, 0);
@@ -305,13 +294,25 @@ void AlmanacDialog::DrawPlants(Graphics* g)
 		mSelectedSeed == SeedType::SEED_CATTAIL || mSelectedSeed == SeedType::SEED_SEASHROOM)
 	{
 		bool aNight = mSelectedSeed == SeedType::SEED_SEASHROOM;
-		g->DrawImage(aNight ? Sexy::IMAGE_ALMANAC_GROUNDNIGHTPOOL : Sexy::IMAGE_ALMANAC_GROUNDPOOL, 521, 107);
+		g->DrawImage(aNight ? Sexy::IMAGE_ALMANAC_GROUNDNIGHTPOOL : Sexy::IMAGE_ALMANAC_GROUNDPOOL, 654, 107);
 
-		g->SetClipRect(475, 0, 397, 500);
+		g->SetClipRect(608, 0, 200, 500);
 			g->mTransY -= 145;
 			mApp->mPoolEffect->PoolEffectDraw(g, aNight);
 			g->mTransY += 145;
 			g->ClearClipRect();
+	}
+	else
+	{
+		bool aRoof = mSelectedSeed == SeedType::SEED_FLOWERPOT;
+		bool aNight = mSelectedSeed == SeedType::SEED_PUFFSHROOM || mSelectedSeed == SeedType::SEED_SUNSHROOM || mSelectedSeed == SeedType::SEED_FUMESHROOM ||
+			mSelectedSeed == SeedType::SEED_GRAVEBUSTER || mSelectedSeed == SeedType::SEED_HYPNOSHROOM || mSelectedSeed == SeedType::SEED_SCAREDYSHROOM ||
+			mSelectedSeed == SeedType::SEED_ICESHROOM || mSelectedSeed == SeedType::SEED_DOOMSHROOM || mSelectedSeed == SeedType::SEED_MAGNETSHROOM;
+
+		if (aRoof)
+			g->DrawImage(Sexy::IMAGE_ALMANAC_GROUNDROOF, 654, 107);
+		else
+			g->DrawImage(aNight ? Sexy::IMAGE_ALMANAC_GROUNDNIGHT : Sexy::IMAGE_ALMANAC_GROUNDDAY, 654, 107);
 	}
 	
 	if (mPlant)
@@ -321,30 +322,28 @@ void AlmanacDialog::DrawPlants(Graphics* g)
 		mPlant->Draw(&aPlantGraphics);
 	}
 
-	g->DrawImage(Sexy::IMAGE_ALMANAC_PLANTCARD, 459, 86);
+	g->DrawImage(Sexy::IMAGE_ALMANAC_PLANTCARD, 592, 86);
 	PlantDefinition& aPlantDef = GetPlantDefinition(mSelectedSeed);
 	SexyString aName = Plant::GetNameString(mSelectedSeed, SEED_NONE);
 	SexyString aDescriptionName = StrFormat(__S("[%s_DESCRIPTION]"), aPlantDef.mPlantName);
-	TodDrawString(g, aName, 617, 288, Sexy::FONT_DWARVENTODCRAFT18YELLOW, Color::White, DS_ALIGN_CENTER);
-	TodDrawStringWrapped(g, aDescriptionName, Rect(485, 309, 258, 230), Sexy::FONT_BRIANNETOD12, Color(40, 50, 90), DS_ALIGN_LEFT);
+	TodDrawString(g, aName, 750, 288, Sexy::FONT_DWARVENTODCRAFT18YELLOW, Color::White, DS_ALIGN_CENTER);
+	TodDrawStringWrapped(g, aDescriptionName, Rect(618, 309, 258, 230), Sexy::FONT_BRIANNETOD12, Color(40, 50, 90), DS_ALIGN_LEFT);
 
 	if (mSelectedSeed != SeedType::SEED_IMITATER)
 	{
 		SexyString aCostStr = TodReplaceString(StrFormat(__S("{KEYWORD}{COST}:{STAT} %d"), aPlantDef.mSeedCost), __S("{COST}"), __S("[COST]"));
-		TodDrawStringWrapped(g, aCostStr, Rect(485, 520, 134, 50), Sexy::FONT_BRIANNETOD12, Color::White, DS_ALIGN_LEFT);
+		TodDrawStringWrapped(g, aCostStr, Rect(618, 520, 134, 50), Sexy::FONT_BRIANNETOD12, Color::White, DS_ALIGN_LEFT);
 
 		SexyString aRechargeStr = TodReplaceString(
 			__S("{KEYWORD}{WAIT_TIME}:{STAT}{WAIT_TIME_LENGTH}"), 
 			__S("{WAIT_TIME_LENGTH}"),
-			aPlantDef.mRefreshTime == 750 ? __S("[WAIT_TIME_SHORT]") : aPlantDef.mRefreshTime == 3000 ? __S("[WAIT_TIME_LONG]") : __S("[WAIT_TIME_VERY_LONG]") // @Patoke: fix typo XD
+			aPlantDef.mRefreshTime == 750 ? __S("[WAIT_TIME_SHORT]") : aPlantDef.mRefreshTime == 3000 ? __S("[WAIT_TIME_LONG]") : __S("[WAIT_TIME_VERY_LONG]")
 		);
 		aRechargeStr = TodReplaceString(aRechargeStr, __S("{WAIT_TIME}"), __S("[WAIT_TIME]"));
-		TodDrawStringWrapped(g, aRechargeStr, Rect(600, 520, 139, 50), Sexy::FONT_BRIANNETOD12, Color(40, 50, 90), DS_ALIGN_RIGHT);
+		TodDrawStringWrapped(g, aRechargeStr, Rect(733, 520, 139, 50), Sexy::FONT_BRIANNETOD12, Color(40, 50, 90), DS_ALIGN_RIGHT);
 	}
 }
 
-//0x402C00
-// GOTY @Patoke: 0x403DE0
 void AlmanacDialog::DrawZombies(Graphics* g)
 {
 	g->DrawImage(Sexy::IMAGE_ALMANAC_ZOMBIEBACK, 0, 0);
@@ -425,7 +424,7 @@ void AlmanacDialog::DrawZombies(Graphics* g)
 	}
 
 	g->DrawImage(mZombie->mZombieType == ZombieType::ZOMBIE_ZAMBONI || mZombie->mZombieType == ZombieType::ZOMBIE_BOBSLED ?
-		Sexy::IMAGE_ALMANAC_GROUNDICE : Sexy::IMAGE_ALMANAC_GROUNDDAY, 518, 110);
+		Sexy::IMAGE_ALMANAC_GROUNDICE : Sexy::IMAGE_ALMANAC_GROUNDDAY, 651, 110);
 	if (mZombie && !ZombieHasSilhouette(mZombie->mZombieType))
 	{
 		Graphics aZombieGraphics = Graphics(*g);
@@ -447,11 +446,11 @@ void AlmanacDialog::DrawZombies(Graphics* g)
 			mZombie->DrawShadow(&aZombieGraphics);
 		mZombie->Draw(&aZombieGraphics);
 	}
-	g->DrawImage(Sexy::IMAGE_ALMANAC_ZOMBIECARD, 455, 78);
+	g->DrawImage(Sexy::IMAGE_ALMANAC_ZOMBIECARD, 588, 78);
 
 	ZombieDefinition& aZombieDef = GetZombieDefinition(mSelectedZombie);
 	SexyString aName = ZombieHasSilhouette(mSelectedZombie) ? __S("???") : StrFormat(__S("[%s]"), aZombieDef.mZombieName);
-	TodDrawString(g, aName, 613, 362, Sexy::FONT_DWARVENTODCRAFT18GREENINSET, Color(190, 255, 235, 255), DS_ALIGN_CENTER);
+	TodDrawString(g, aName, 746, 362, Sexy::FONT_DWARVENTODCRAFT18GREENINSET, Color(190, 255, 235, 255), DS_ALIGN_CENTER);
 
 	SexyString aDescription;
 	DrawStringJustification aAlign;
@@ -481,12 +480,9 @@ void AlmanacDialog::DrawZombies(Graphics* g)
 			}
 		}
 	}
-	// todo @Patoke: fix stuff that have another formatter after them, ex: "{KEYWORD}Weakness:{STAT} fume-shroom{METAL} and magnet-shroom{KEYWORD}" (magnet-shroom will show with the {KEYWORD} colors)
-	// @Patoke: added extra check for the zamboni zombie
-	TodDrawStringWrapped(g, aDescription, Rect(484, mSelectedZombie == ZombieType::ZOMBIE_ZAMBONI ? 372 : 377, 258, 170), Sexy::FONT_BRIANNETOD12, Color(40, 50, 90), aAlign);
+	TodDrawStringWrapped(g, aDescription, Rect(617, mSelectedZombie == ZombieType::ZOMBIE_ZAMBONI ? 372 : 377, 258, 170), Sexy::FONT_BRIANNETOD12, Color(40, 50, 90), aAlign);
 }
 
-//0x403810
 void AlmanacDialog::Draw(Graphics* g)
 {
 	g->SetLinearBlend(true);
@@ -515,15 +511,14 @@ void AlmanacDialog::Draw(Graphics* g)
 void AlmanacDialog::GetSeedPosition(SeedType theSeedType, int& x, int& y)
 {
 	if (theSeedType == SeedType::SEED_IMITATER)
-		x = 20, y = 23;
+		x = 153, y = 23;
 	else
 	{
-		x = theSeedType % 8 * 52 + 26;
+		x = theSeedType % 8 * 52 + 159;
 		y = theSeedType / 8 * 78 + 92;
 	}
 }
 
-//0x403940
 SeedType AlmanacDialog::SeedHitTest(int x, int y)
 {
 	if (mMouseVisible && mOpenPage == AlmanacPage::ALMANAC_PAGE_PLANTS)
@@ -552,8 +547,6 @@ bool AlmanacDialog::ZombieHasSilhouette(ZombieType theZombieType)
 	return mApp->HasFinishedAdventure() || mApp->mPlayerInfo->GetLevel() > GetZombieDefinition(ZombieType::ZOMBIE_YETI).mStartingLevel;
 }
 
-//0x403A10
-// GOTY @Patoke: 0x404C50
 bool AlmanacDialog::ZombieIsShown(ZombieType theZombieType)
 {
 	// ����ѩ�˽�ʬ��Ҫ���������ˢ���г��֣��Ѿ���������ð��ģʽ����Ŀ 4-10 �ؿ�����
@@ -578,8 +571,6 @@ bool AlmanacDialog::ZombieIsShown(ZombieType theZombieType)
 	return false;
 }
 
-//0x403B30
-// GOTY @Patoke: 0x404D50
 bool AlmanacDialog::ZombieHasDescription(ZombieType theZombieType)
 {
 	int aLevel = mApp->mPlayerInfo->GetLevel();
@@ -607,16 +598,14 @@ bool AlmanacDialog::ZombieHasDescription(ZombieType theZombieType)
 void AlmanacDialog::GetZombiePosition(ZombieType theZombieType, int& x, int& y)
 {
 	if (theZombieType == ZombieType::ZOMBIE_BOSS)
-		x = 192, y = 486;
+		x = 325, y = 486;
 	else
 	{
-		x = theZombieType % 5 * 85 + 22;
+		x = theZombieType % 5 * 85 + 155;
 		y = theZombieType / 5 * 80 + 86;
 	}
 }
 
-//0x403BB0
-// GOTY @Patoke: 0x404DD0
 ZombieType AlmanacDialog::ZombieHitTest(int x, int y)
 {
 	if (mMouseVisible && mOpenPage == AlmanacPage::ALMANAC_PAGE_ZOMBIES)
@@ -624,7 +613,6 @@ ZombieType AlmanacDialog::ZombieHitTest(int x, int y)
 		for (int i = 0; i < NUM_ALMANAC_ZOMBIES; i++)
 		{
 			ZombieType aZombieType = GetZombieType(i);
-			// @Patoke: added IsShown check
 			if (aZombieType != ZombieType::ZOMBIE_INVALID && ZombieIsShown(aZombieType))
 			{
 				int aZombieX, aZombieY;
@@ -637,7 +625,6 @@ ZombieType AlmanacDialog::ZombieHitTest(int x, int y)
 	return ZombieType::ZOMBIE_INVALID;
 }
 
-//0x403C60
 void AlmanacDialog::MouseUp(int x, int y, int theClickCount)
 {
 	(void)x;(void)y;(void)theClickCount;
@@ -647,8 +634,6 @@ void AlmanacDialog::MouseUp(int x, int y, int theClickCount)
 	else if (mIndexButton->IsMouseOver())	SetPage(ALMANAC_PAGE_INDEX);
 }
 
-//0x403D00
-// GOTY @Patoke: 0x404F10
 void AlmanacDialog::MouseDown(int x, int y, int theClickCount)
 {
 	(void)theClickCount;

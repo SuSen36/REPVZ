@@ -3,12 +3,13 @@
 #include "TodStringFile.h"
 #include "SexyAppFramework/paklib/PakInterface.h"
 #include "SexyAppFramework/graphics/Font.h"
+#include "SexyAppFramework/SexyAppBase.h"
 
-int gTodStringFormatCount;               //[0x69DE4C]
-TodStringListFormat* gTodStringFormats;  //[0x69DA34]
+int gTodStringFormatCount;
+TodStringListFormat* gTodStringFormats;
 
 const int gLawnStringFormatCount = 12;
-TodStringListFormat gLawnStringFormats[12] = {    //0x6A5010 // GOTY @Patoke: 0x7248EC
+TodStringListFormat gLawnStringFormats[12] = {    //0x6A5010
 	{ "NORMAL",           nullptr,    Color(40,   50,     90,     255),       0,      0U },
 	{ "FLAVOR",           nullptr,    Color(143,  67,     27,     255),       0,      1U },
 	{ "KEYWORD",          nullptr,    Color(143,  67,     27,     255),       0,      0U },
@@ -20,7 +21,7 @@ TodStringListFormat gLawnStringFormats[12] = {    //0x6A5010 // GOTY @Patoke: 0x
 	{ "SHORTLINE",        nullptr,    Color(0,    0,      0,      0),         -9,     0U },
 	{ "EXTRASHORTLINE",   nullptr,    Color(0,    0,      0,      0),         -14,    0U },
 	{ "CREDITS1",         nullptr,    Color(0,    0,      0,      0),         3,      0U },
-	{ "CREDITS2",         nullptr,    Color(0,    0,      0,      0),         2,      0U } // @Patoke: wrong size (2 duplicates)
+	{ "CREDITS2",         nullptr,    Color(0,    0,      0,      0),         2,      0U }
 };
 
 TodStringListFormat::TodStringListFormat()
@@ -42,7 +43,6 @@ void TodStringListSetColors(TodStringListFormat* theFormats, int theCount)
 	gTodStringFormatCount = theCount;
 }
 
-//0x518E40
 bool TodStringListReadName(const char*& thePtr, std::string& theName)
 {
 	const char* aNameStart = strchr(thePtr, '[');
@@ -79,7 +79,6 @@ bool TodStringListReadName(const char*& thePtr, std::string& theName)
 	}
 }
 
-//0x518F60
 void TodStringRemoveReturnChars(std::string& theString)
 {
 	for (size_t i = 0; i < theString.size(); )
@@ -91,7 +90,6 @@ void TodStringRemoveReturnChars(std::string& theString)
 	}
 }
 
-//0x518FB0
 bool TodStringListReadValue(const char*& thePtr, std::string& theValue)
 {
 	const char* aValueEnd = strchr(thePtr, '[');
@@ -102,7 +100,6 @@ bool TodStringListReadValue(const char*& thePtr, std::string& theValue)
 	return true;
 }
 
-//0x519080
 bool TodStringListReadItems(const char* theFileText)
 {
 	const char* aPtr = theFileText;
@@ -123,7 +120,6 @@ bool TodStringListReadItems(const char* theFileText)
 	}
 }
 
-//0x519240
 bool TodStringListReadFile(const char* theFileName)
 {
 	PFILE* pFile = p_fopen(theFileName, "rb");
@@ -154,14 +150,12 @@ bool TodStringListReadFile(const char* theFileName)
 	return aSuccess;
 }
 
-//0x519390
 void TodStringListLoad(const char* theFileName)
 {
 	if (!TodStringListReadFile(theFileName))
 		TodErrorMessageBox(Sexy::StrFormat("Failed to load string list file '%s'", theFileName).c_str(), "Error");
 }
 
-//0x519410
 SexyString TodStringListFind(const SexyString& theName)
 {
 	std::string aNameString = Sexy::SexyStringToString(theName);
@@ -176,8 +170,6 @@ SexyString TodStringListFind(const SexyString& theName)
 	}
 }
 
-//0x519520
-// GOTY @Patoke: 0x523B90
 SexyString TodStringTranslate(const SexyString& theString)
 {
 	if (theString.size() >= 3 && theString[0] == '[')
@@ -188,7 +180,6 @@ SexyString TodStringTranslate(const SexyString& theString)
 	return theString;
 }
 
-//0x5195D0
 SexyString TodStringTranslate(const SexyChar* theString)
 {
 	if (theString != nullptr)
@@ -206,7 +197,6 @@ SexyString TodStringTranslate(const SexyChar* theString)
 		return "";
 }
 
-//0x5196C0
 bool TodStringListExists(const SexyString& theString)
 {
 	if (theString.size() >= 3 && theString[0] == '[')
@@ -217,8 +207,6 @@ bool TodStringListExists(const SexyString& theString)
 	return false;
 }
 
-//0x5197B0
-// GOTY @Patoke: 0x523E20
 void TodWriteStringSetFormat(const char* theFormat, TodStringListFormat& theCurrentFormat)
 {
 	for (int i = 0; i < gTodStringFormatCount; i++)
@@ -242,7 +230,6 @@ bool CharIsSpaceInFormat(char theChar, const TodStringListFormat& theCurrentForm
 	return theChar == ' ' || (TestBit(theCurrentFormat.mFormatFlags, TodStringFormatFlag::TOD_FORMAT_IGNORE_NEWLINES) && theChar == '\n');
 }
 
-//0x519870
 int TodWriteString(Graphics* g, const SexyString& theString, int theX, int theY, TodStringListFormat& theCurrentFormat, int theWidth, DrawStringJustification theJustification, bool drawString, int theOffset, int theLength)
 {
 	Font* aFont = *theCurrentFormat.mNewFont;
@@ -325,8 +312,6 @@ int TodWriteWordWrappedHelper(Graphics* g, const SexyString& theString, int theX
 	return TodWriteString(g, theString, theX, theY, theCurrentFormat, theWidth, theJustification, drawString, theOffset, theLength);
 }
 
-//0x519B50
-// GOTY @Patoke: 0x5241C0
 int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rect& theRect, Font* theFont, const Color& theColor, DrawStringJustification theJustification, bool drawString)
 {
 	int theMaxChars = theText.size();
@@ -474,8 +459,6 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 	return (*aCurrentFormat.mNewFont)->GetDescent() + aYOffset - aLineSpacing;
 }
 
-//0x51A040
-// GOTY @Patoke: 0x5246A0
 void TodDrawStringWrapped(Graphics* g, const SexyString& theText, const Rect& theRect, Font* theFont, const Color& theColor, DrawStringJustification theJustification)
 {
 	SexyString aTextFinal = TodStringTranslate(theText);

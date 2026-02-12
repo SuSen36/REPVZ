@@ -13,9 +13,9 @@ typedef std::map<SexyString, PlayerInfo, Sexy::StringLessNoCase> ProfileMap;
 class ProfileMgr
 {
 protected:
-	ProfileMap			mProfileMap;			//+0x4
-	ulong				mNextProfileId;			//+0x10
-	ulong				mNextProfileUseSeq;		//+0x14
+	ProfileMap			mProfileMap;
+	ulong				mNextProfileId;
+	ulong				mNextProfileUseSeq;
 
 protected:
 	void				SyncState(DataSync& theSync);
@@ -29,8 +29,8 @@ protected:
 	/*inline*/ void		DeleteProfile(ProfileMap::iterator theProfile);
 
 public:
-	ProfileMgr() { Clear(); }  //0x46A6E0
-	virtual ~ProfileMgr() { ; }  //0x46A780
+	ProfileMgr() { Clear(); }
+	virtual ~ProfileMgr() { ; }
 
 	/*inline*/ void		Clear();
 	void				Load();

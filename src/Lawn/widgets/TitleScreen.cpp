@@ -15,8 +15,6 @@
 #include "Lawn/system/Music.h"
 #include "SDL_timer.h"
 
-//0x48D4B0
-// GOTY @Patoke: 0x498220
 TitleScreen::TitleScreen(LawnApp* theApp)
 {
 	mCurBarWidth = 0.0f;
@@ -71,7 +69,6 @@ void TitleScreen::DrawToPreload(Graphics* g)
 	g->DrawImageF(IMAGE_PLANTSHADOW, 1000.0f, 0.0f);
 }
 
-//0x48D730
 void TitleScreen::Draw(Graphics* g)
 {
 	g->SetLinearBlend(true);
@@ -175,8 +172,6 @@ void TitleScreen::Draw(Graphics* g)
 	}
 }
 
-//0x48DCB0
-// GOTY @Patoke: 0x498A20
 void TitleScreen::Update()
 {
 	Widget::Update();
@@ -454,28 +449,24 @@ void TitleScreen::Resize(int theX, int theY, int theWidth, int theHeight)
 	Widget::Resize(theX, theY, theWidth, theHeight);
 }
 
-//0x48E5A0
 void TitleScreen::AddedToManager(Sexy::WidgetManager* theWidgetManager)
 {
 	Widget::AddedToManager(theWidgetManager);
 	theWidgetManager->AddWidget(mStartButton);
 }
 
-//0x48E5D0
 void TitleScreen::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
 {
 	Widget::RemovedFromManager(theWidgetManager);
 	theWidgetManager->RemoveWidget(mStartButton);
 }
 
-//0x48E600
 void TitleScreen::ButtonPress(int theId)
 {
 	(void)theId;
 	mApp->PlaySample(Sexy::SOUND_BUTTONCLICK);
 }
 
-//0x48E620
 void TitleScreen::ButtonDepress(int theId)
 {
 	switch (theId)
@@ -490,7 +481,6 @@ void TitleScreen::ButtonDepress(int theId)
 	}
 }
 
-//0x48E650
 void TitleScreen::MouseDown(int x, int y, int theClickCount)
 {
 	(void)x;(void)y;(void)theClickCount;
@@ -501,7 +491,6 @@ void TitleScreen::MouseDown(int x, int y, int theClickCount)
 	}
 }
 
-//0x48E690
 void TitleScreen::KeyDown(KeyCode theKey)
 {
 	if (mLoadingThreadComplete)

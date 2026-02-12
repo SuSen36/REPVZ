@@ -9,7 +9,6 @@ using namespace Sexy;
 static char gLogFileName[512];
 static char gDebugDataFolder[512];
 
-//0x514EA0
 void TodErrorMessageBox(const char* theMessage, const char* theTitle)
 {
     TodTraceAndLog("%s.%s", theMessage, theTitle);

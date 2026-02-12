@@ -62,31 +62,31 @@ class MusicFileData
 public:
 	unsigned int*				mFileData;
 };
-extern MusicFileData gMusicFileData[MusicFile::NUM_MUSIC_FILES];  //0x6A9ED0
+extern MusicFileData gMusicFileData[MusicFile::NUM_MUSIC_FILES];
 
 class Music
 {
 public:
-	LawnApp*					mApp;								//+0x0
-	Sexy::MusicInterface*		mMusicInterface;					//+0x4
-	MusicTune					mCurMusicTune;						//+0x8
-	MusicFile					mCurMusicFileMain;					//+0xC
-	MusicFile					mCurMusicFileDrums;					//+0x10
-	MusicFile					mCurMusicFileHihats;				//+0x14
-	int							mBurstOverride;						//+0x18
-	float						mBaseBPM;							//+0x1C
-	float						mBaseModSpeed;						//+0x20
-	MusicBurstState				mMusicBurstState;					//+0x24
-	int							mBurstStateCounter;					//+0x28
-	MusicDrumsState				mMusicDrumsState;					//+0x2C
-	int							mQueuedDrumTrackPackedOrder;		//+0x30
-	int							mDrumsStateCounter;					//+0x34
-	int							mPauseOffset;						//+0x38
-	int							mPauseOffsetDrums;					//+0x3C
-	bool						mPaused;							//+0x40
-	bool						mMusicDisabled;						//+0x41
-	int							mFadeOutCounter;					//+0x44
-	int							mFadeOutDuration;					//+0x48
+	LawnApp*					mApp;
+	Sexy::MusicInterface*		mMusicInterface;
+	MusicTune					mCurMusicTune;
+	MusicFile					mCurMusicFileMain;
+	MusicFile					mCurMusicFileDrums;
+	MusicFile					mCurMusicFileHihats;
+	int							mBurstOverride;
+	float						mBaseBPM;
+	float						mBaseModSpeed;
+	MusicBurstState				mMusicBurstState;
+	int							mBurstStateCounter;
+	MusicDrumsState				mMusicDrumsState;
+	int							mQueuedDrumTrackPackedOrder;
+	int							mDrumsStateCounter;
+	int							mPauseOffset;
+	int							mPauseOffsetDrums;
+	bool						mPaused;
+	bool						mMusicDisabled;
+	int							mFadeOutCounter;
+	int							mFadeOutDuration;
 
 public:
 	Music();

@@ -6,14 +6,14 @@ constexpr const double PI = 3.141592653589793;
 // ============================================================
 // ■ 常数
 // ============================================================
-const int			BOARD_WIDTH = 800;
+const int			BOARD_WIDTH = 1066;
 const int			BOARD_HEIGHT = 600;
-const int			WIDE_BOARD_WIDTH = 800;
-const int			BOARD_OFFSET = 220;
+const int			WIDE_BOARD_WIDTH = 1200;
+const int			BOARD_OFFSET = 0;
 const int			BOARD_EDGE = -100;
-const int			BOARD_IMAGE_WIDTH_OFFSET = 1180;
+const int			BOARD_IMAGE_WIDTH_OFFSET = 1200;
 const int           BOARD_ICE_START = 800;
-const int           LAWN_XMIN = 40;
+const int           LAWN_XMIN = 40+220;
 const int           LAWN_YMIN = 80;
 const int           HIGH_GROUND_HEIGHT = 30;
 
@@ -51,12 +51,12 @@ const int           SURVIVAL_HARD_FLAGS = 10;
 // ============================================================
 // ■ 商店相关
 // ============================================================
-const int           STORESCREEN_ITEMOFFSET_1_X = 422;
+const int           STORESCREEN_ITEMOFFSET_1_X = 422 + 133;
 const int           STORESCREEN_ITEMOFFSET_1_Y = 206;
-const int           STORESCREEN_ITEMOFFSET_2_X = 372;
+const int           STORESCREEN_ITEMOFFSET_2_X = 372 + 133;
 const int           STORESCREEN_ITEMOFFSET_2_Y = 310;
 const int           STORESCREEN_ITEMSIZE = 74;
-const int           STORESCREEN_COINBANK_X = 650;
+const int           STORESCREEN_COINBANK_X = 650 + 133 + 100;
 const int           STORESCREEN_COINBANK_Y = 559;
-const int           STORESCREEN_PAGESTRING_X = 470;
+const int           STORESCREEN_PAGESTRING_X = 470 + 133;
 const int           STORESCREEN_PAGESTRING_Y = 500;

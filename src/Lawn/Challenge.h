@@ -8,7 +8,7 @@
 
 #define BEGHOULED_MAX_GRIDSIZEX 8
 #define BEGHOULED_MAX_GRIDSIZEY 5
-#define ART_CHALLEGE_SIZE_X 8
+#define ART_CHALLEGE_SIZE_X 9
 #define MAX_PICK_GRID_SIZE 50
 
 constexpr const int BEGHOULED_WINNING_SCORE = 75;
@@ -47,30 +47,30 @@ struct BeghouledBoardState
 class Challenge
 {
 public:
-	LawnApp*				mApp;                                               //+0x0
-	Board*					mBoard;                                             //+0x4
-	int					mBeghouledMouseCapture;                             //+0x8
-    int                     mBeghouledMouseDownX;                               //+0xC
-    int                     mBeghouledMouseDownY;                               //+0x10
-    int                    mBeghouledEated[9][6];                              //+0x14
-    int                    mBeghouledPurcasedUpgrade[NUM_BEGHOULED_UPGRADES];  //+0x4A
-    int                     mBeghouledMatchesThisMove;                          //+0x50
-    ChallengeState          mChallengeState;                                    //+0x54
-    int                     mChallengeStateCounter;                             //+0x58
-    int                     mConveyorBeltCounter;                               //+0x5C
-    int                     mChallengeScore;                                    //+0x60
-    int                    mShowBowlingLine;                                   //+0x64
-    SeedType                mLastConveyorSeedType;                              //+0x68
-    int                     mSurvivalStage;                                     //+0x6C
-    int                     mSlotMachineRollCount;                              //+0x70
-    ReanimationID           mReanimChallenge;                                   //+0x74
-    ReanimationID           mReanimClouds[6];                                   //+0x78
-    int                     mCloudsCounter[6];                                  //+0x90
-    int                     mChallengeGridX;                                    //+0xA8
-    int                     mChallengeGridY;                                    //+0xAC
-    int                     mScaryPotterPots;                                   //+0xB0
-    int                     mRainCounter;                                       //+0xB4
-    int                     mTreeOfWisdomTalkIndex;                             //+0xB8
+	LawnApp*				mApp;
+	Board*					mBoard;
+	int					mBeghouledMouseCapture;
+    int                     mBeghouledMouseDownX;
+    int                     mBeghouledMouseDownY;
+    int                    mBeghouledEated[9][6];
+    int                    mBeghouledPurcasedUpgrade[NUM_BEGHOULED_UPGRADES];
+    int                     mBeghouledMatchesThisMove;
+    ChallengeState          mChallengeState;
+    int                     mChallengeStateCounter;
+    int                     mConveyorBeltCounter;
+    int                     mChallengeScore;
+    int                    mShowBowlingLine;
+    SeedType                mLastConveyorSeedType;
+    int                     mSurvivalStage;
+    int                     mSlotMachineRollCount;
+    ReanimationID           mReanimChallenge;
+    ReanimationID           mReanimClouds[6];
+    int                     mCloudsCounter[6];
+    int                     mChallengeGridX;
+    int                     mChallengeGridY;
+    int                     mScaryPotterPots;
+    int                     mRainCounter;
+    int                     mTreeOfWisdomTalkIndex;
 
 public:
     Challenge();
@@ -245,7 +245,7 @@ public:
     ZombieType                      mZombieType;
     int                             mAllowedOnLevel[50];
 };
-extern int gZombieWaves[NUM_LEVELS]; //0x6A34E8
-extern ZombieAllowedLevels gZombieAllowedLevels[NUM_ZOMBIE_TYPES];  //0x6A35B0
+extern int gZombieWaves[NUM_LEVELS];
+extern ZombieAllowedLevels gZombieAllowedLevels[NUM_ZOMBIE_TYPES];
 
 #endif

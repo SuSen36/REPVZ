@@ -35,7 +35,7 @@
 #include "SexyAppFramework/misc/AutoCrit.h"
 #include "SexyAppFramework/paklib/PakInterface.h"
 #include "sound/DummyMusicInterface.h"
-#include "SexyAppFramework/fcaseopen/fcaseopen.h"
+#include "SexyAppFramework/misc/fcaseopen.h"
 
 #include <unordered_set>
 
@@ -89,8 +89,8 @@ SexyAppBase::SexyAppBase()
 	mTitle = __S("SexyApp");
 	mShutdown = false;
 	mExitToTop = false;
-    mWidth = 640;
-    mHeight = 480;
+    mWidth = 1066;
+    mHeight = 600;
 	mFullscreenBits = 16;
 	mIsWindowed = true;
 	mIsPhysWindowed = true;

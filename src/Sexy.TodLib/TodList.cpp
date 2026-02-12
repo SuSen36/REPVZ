@@ -18,7 +18,6 @@ void TodAllocator::Dispose()
 	FreeAll();
 }
 
-//0x4438C0
 void TodAllocator::Grow()
 {
 	TOD_ASSERT(mGrowCount > 0);

@@ -1,5 +1,7 @@
 #include <memory>
+#include <stdexcept>
 #include "ResourceManager.h"
+#include "../SexyAppBase.h"
 #include "XMLParser.h"
 #include "SexyAppFramework/sound/SoundManager.h"
 #include "SexyAppFramework/graphics/GLImage.h"
@@ -299,9 +301,11 @@ bool ResourceManager::ParseImageResource(XMLElement &theElement)
 	aRes->mAutoFindAlpha = theElement.mAttributes.find(__S("noalpha")) == theElement.mAttributes.end();	
 
 	XMLParamMap::iterator anItr;
+	/*
 	anItr = theElement.mAttributes.find(__S("alphaimage"));
 	if (anItr != theElement.mAttributes.end())
 		aRes->mAlphaImage = mDefaultPath + SexyStringToStringFast(anItr->second);
+	*/
 
 	aRes->mAlphaColor = 0xFFFFFF;
 	anItr = theElement.mAttributes.find(__S("alphacolor"));
@@ -312,9 +316,11 @@ bool ResourceManager::ParseImageResource(XMLElement &theElement)
 	if (anItr != theElement.mAttributes.end())
 		aRes->mVariant = SexyStringToStringFast(anItr->second);
 
+	/*
 	anItr = theElement.mAttributes.find(__S("alphagrid"));
 	if (anItr != theElement.mAttributes.end())
 		aRes->mAlphaGridImage = mDefaultPath + SexyStringToStringFast(anItr->second);
+	*/
 
 	anItr = theElement.mAttributes.find(__S("rows"));
 	if (anItr != theElement.mAttributes.end())
@@ -623,114 +629,20 @@ bool ResourceManager::ReparseResourcesFile(const std::string& theFilename)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-bool ResourceManager::LoadAlphaGridImage(ImageRes *theRes, GLImage *theImage)
-{	
-	ImageLib::Image* anAlphaImage = ImageLib::GetImage(theRes->mAlphaGridImage,true);	
-	if (anAlphaImage==NULL)
-		return Fail(StrFormat("Failed to load image: %s",theRes->mAlphaGridImage.c_str()));
 
-	std::unique_ptr<ImageLib::Image> aDelAlphaImage(anAlphaImage);
+bool ResourceManager::DoLoadImage(ImageRes *theRes) {
+    // bool lookForAlpha = theRes->mAlphaImage.empty() && theRes->mAlphaGridImage.empty() && theRes->mAutoFindAlpha; //
+    // unused
 
-	int aNumRows = theRes->mRows;
-	int aNumCols = theRes->mCols;
+    ImageLib::gAlphaComposeColor = theRes->mAlphaColor;
 
-	int aCelWidth = theImage->mWidth/aNumCols;
-	int aCelHeight = theImage->mHeight/aNumRows;
+    SharedImageRef aSharedImageRef = gSexyAppBase->GetSharedImage(theRes->mPath, theRes->mVariant);
+    ImageLib::gAlphaComposeColor = 0xFFFFFF;
 
+    GLImage* aGLImage = (GLImage*) aSharedImageRef;
 
-	if (anAlphaImage->mWidth!=aCelWidth || anAlphaImage->mHeight!=aCelHeight)
-		return Fail(StrFormat("GridAlphaImage size mismatch between %s and %s",theRes->mPath.c_str(),theRes->mAlphaGridImage.c_str()));
-
-	uint32_t *aMasterRowPtr = theImage->mBits;
-	for (int i=0; i < aNumRows; i++)
-	{
-		uint32_t *aMasterColPtr = aMasterRowPtr;
-		for (int j=0; j < aNumCols; j++)
-		{
-			uint32_t* aRowPtr = aMasterColPtr;
-			uint32_t* anAlphaBits = anAlphaImage->mBits;
-			for (int y=0; y<aCelHeight; y++)
-			{
-				uint32_t *aDestPtr = aRowPtr;
-				for (int x=0; x<aCelWidth; x++)
-				{
-					*aDestPtr = (*aDestPtr & 0x00FFFFFF) | ((*anAlphaBits & 0xFF) << 24);
-					++anAlphaBits;
-					++aDestPtr;
-				}
-				aRowPtr += theImage->mWidth;
-			}
-
-			aMasterColPtr += aCelWidth;
-		}
-		aMasterRowPtr += aCelHeight*theImage->mWidth;
-	}
-
-	theImage->BitsChanged();
-	return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-bool ResourceManager::LoadAlphaImage(ImageRes *theRes, GLImage *theImage)
-{
-	ImageLib::Image* anAlphaImage = ImageLib::GetImage(theRes->mAlphaImage,true);
-
-	if (anAlphaImage==NULL)
-		return Fail(StrFormat("Failed to load image: %s",theRes->mAlphaImage.c_str()));
-
-	std::unique_ptr<ImageLib::Image> aDelAlphaImage(anAlphaImage);
-
-	if (anAlphaImage->mWidth!=theImage->mWidth || anAlphaImage->mHeight!=theImage->mHeight)
-		return Fail(StrFormat("AlphaImage size mismatch between %s and %s",theRes->mPath.c_str(),theRes->mAlphaImage.c_str()));
-
-	uint32_t* aBits1 = theImage->mBits;
-	uint32_t* aBits2 = anAlphaImage->mBits;
-	int aSize = theImage->mWidth*theImage->mHeight;
-
-	for (int i = 0; i < aSize; i++)
-	{
-		*aBits1 = (*aBits1 & 0x00FFFFFF) | ((*aBits2 & 0xFF) << 24);
-		++aBits1;
-		++aBits2;
-	}
-
-	theImage->BitsChanged();
-	return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-bool ResourceManager::DoLoadImage(ImageRes *theRes)
-{
-	//bool lookForAlpha = theRes->mAlphaImage.empty() && theRes->mAlphaGridImage.empty() && theRes->mAutoFindAlpha; // unused
-	
-	//ImageLib::Image *anImage = ImageLib::GetImage(theRes->mPath, lookForAlpha);
-
-	bool isNew;
-	ImageLib::gAlphaComposeColor = theRes->mAlphaColor;
-	SharedImageRef aSharedImageRef = gSexyAppBase->GetSharedImage(theRes->mPath, theRes->mVariant, &isNew);
-	ImageLib::gAlphaComposeColor = 0xFFFFFF;
-
-	GLImage* aGLImage = (GLImage*) aSharedImageRef;
-	
-	if (aGLImage == NULL)
-		return Fail(StrFormat("Failed to load image: %s",theRes->mPath.c_str()));
-
-	if (isNew)
-	{
-		if (!theRes->mAlphaImage.empty())
-		{
-			if (!LoadAlphaImage(theRes, aSharedImageRef))
-				return false;
-		}
-		
-		if (!theRes->mAlphaGridImage.empty())
-		{
-			if (!LoadAlphaGridImage(theRes, aSharedImageRef))
-				return false;
-		}
-	}
+    if (aGLImage == nullptr)
+        return Fail(StrFormat("Failed to load image: %s",theRes->mPath.c_str()));
 	
 	aGLImage->CommitBits();
 	theRes->mImage = aSharedImageRef;

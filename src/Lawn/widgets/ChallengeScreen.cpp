@@ -61,7 +61,7 @@ ChallengeDefinition gChallengeDefs[NUM_CHALLENGE_MODES] = {
 	{ GameMode::GAMEMODE_CHALLENGE_STORMY_NIGHT,               13,  ChallengePage::CHALLENGE_PAGE_LIMBO,       2,  1,  __S("[DARK_STORMY_NIGHT]") },
 	{ GameMode::GAMEMODE_CHALLENGE_BUNGEE_BLITZ,               9,   ChallengePage::CHALLENGE_PAGE_LIMBO,       2,  2,  __S("[BUNGEE_BLITZ]") },
 	{ GameMode::GAMEMODE_CHALLENGE_SQUIRREL,                   10,  ChallengePage::CHALLENGE_PAGE_LIMBO,       2,  3,  __S("Squirrel") },
-	{ GameMode::GAMEMODE_TREE_OF_WISDOM,                       10,  ChallengePage::CHALLENGE_PAGE_LIMBO,       2,  4,  __S("Tree of Wisdom") }, // @Patoke: replaced for english
+	{ GameMode::GAMEMODE_TREE_OF_WISDOM,                       10,  ChallengePage::CHALLENGE_PAGE_LIMBO,       2,  4,  __S("Tree of Wisdom") },
 	{ GameMode::GAMEMODE_SCARY_POTTER_1,                       10,  ChallengePage::CHALLENGE_PAGE_PUZZLE,      0,  0,  __S("[SCARY_POTTER_1]") },
 	{ GameMode::GAMEMODE_SCARY_POTTER_2,                       10,  ChallengePage::CHALLENGE_PAGE_PUZZLE,      0,  1,  __S("[SCARY_POTTER_2]") },
 	{ GameMode::GAMEMODE_SCARY_POTTER_3,                       10,  ChallengePage::CHALLENGE_PAGE_PUZZLE,      0,  2,  __S("[SCARY_POTTER_3]") },
@@ -86,8 +86,6 @@ ChallengeDefinition gChallengeDefs[NUM_CHALLENGE_MODES] = {
 	{ GameMode::GAMEMODE_INTRO,                                10,  ChallengePage::CHALLENGE_PAGE_LIMBO,       2,  3,  __S("Intro") }
 };
 
-//0x42DAE0
-// GOTY @Patoke: 0x430810
 ChallengeScreen::ChallengeScreen(LawnApp* theApp, ChallengePage thePage)
 {
 	mLockShakeX = 0;
@@ -140,9 +138,9 @@ ChallengeScreen::ChallengeScreen(LawnApp* theApp, ChallengePage thePage)
 		aChallengeButton->mDoFinger = true;
 		aChallengeButton->mFrameNoDraw = true;
 		if (aChlDef.mPage == CHALLENGE_PAGE_CHALLENGE || aChlDef.mPage == CHALLENGE_PAGE_LIMBO || aChlDef.mPage == CHALLENGE_PAGE_PUZZLE)
-			aChallengeButton->Resize(38 + aChlDef.mCol * 155, 93 + aChlDef.mRow * 119, 104, 115);
+			aChallengeButton->Resize(171 + aChlDef.mCol * 155, 93 + aChlDef.mRow * 119, 104, 115);
 		else
-			aChallengeButton->Resize(38 + aChlDef.mCol * 155, 125 + aChlDef.mRow * 145, 104, 115);
+			aChallengeButton->Resize(171 + aChlDef.mCol * 155, 125 + aChlDef.mRow * 145, 104, 115);
 		if (MoreTrophiesNeeded(aChallengeMode))
 		{
 			aChallengeButton->mDoFinger = false;
@@ -214,7 +212,6 @@ bool ChallengeScreen::IsIZombieLevel(GameMode theGameMode)
 	return theGameMode >= GAMEMODE_PUZZLE_I_ZOMBIE_1 && theGameMode <= GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS;
 }
 
-//0x42E3C0
 void ChallengeScreen::SetUnlockChallengeIndex(ChallengePage thePage, bool theIsIZombie)
 {
 	mUnlockState = UNLOCK_SHAKING;
@@ -236,7 +233,6 @@ void ChallengeScreen::SetUnlockChallengeIndex(ChallengePage thePage, bool theIsI
 	}
 }
 
-//0x42E440
 int ChallengeScreen::MoreTrophiesNeeded(int theChallengeIndex)
 {
 	ChallengeDefinition& aDef = GetChallengeDefinition(theChallengeIndex);
@@ -322,13 +318,11 @@ int ChallengeScreen::MoreTrophiesNeeded(int theChallengeIndex)
 	unreachable();
 }
 
-//0x42E6E0
 bool ChallengeScreen::ShowPageButtons()
 {
 	return mApp->mTodCheatKeys && mPageIndex != CHALLENGE_PAGE_SURVIVAL && mPageIndex != CHALLENGE_PAGE_PUZZLE;
 }
 
-//0x42E710
 void ChallengeScreen::UpdateButtons()
 {
 	for (int aChallengeMode = 0; aChallengeMode < NUM_CHALLENGE_MODES; aChallengeMode++)
@@ -349,7 +343,6 @@ void ChallengeScreen::UpdateButtons()
 	}
 }
 
-//0x42E8A0
 int ChallengeScreen::AccomplishmentsNeeded(int theChallengeIndex)
 {
 	int aTrophiesNeeded = MoreTrophiesNeeded(theChallengeIndex);
@@ -359,7 +352,6 @@ int ChallengeScreen::AccomplishmentsNeeded(int theChallengeIndex)
 	return mCheatEnableChallenges ? 0 : aTrophiesNeeded;
 }
 
-//0x42E920
 void ChallengeScreen::DrawButton(Graphics* g, int theChallengeIndex)
 {
 	ButtonWidget* aChallengeButton = mChallengeButtons[theChallengeIndex];
@@ -504,7 +496,6 @@ void ChallengeScreen::DrawButton(Graphics* g, int theChallengeIndex)
 	}
 }
 
-//0x42F160
 void ChallengeScreen::Draw(Graphics* g)
 {
 	g->SetLinearBlend(true);
@@ -513,16 +504,16 @@ void ChallengeScreen::Draw(Graphics* g)
 	SexyString aTitleString = 
 		mPageIndex == CHALLENGE_PAGE_SURVIVAL ? __S("[PICK_AREA]") : 
 		mPageIndex == CHALLENGE_PAGE_PUZZLE ? __S("[SCARY_POTTER]") : __S("[PICK_CHALLENGE]");
-	TodDrawString(g, aTitleString, 400, 58, Sexy::FONT_HOUSEOFTERROR28, Color(220, 220, 220), DS_ALIGN_CENTER);
+	TodDrawString(g, aTitleString, 533, 58, Sexy::FONT_HOUSEOFTERROR28, Color(220, 220, 220), DS_ALIGN_CENTER);
 
 	int aTrophiesGot = mApp->GetNumTrophies(mPageIndex);
 	int aTrophiesTotal = mPageIndex == CHALLENGE_PAGE_SURVIVAL ? 10 : mPageIndex == CHALLENGE_PAGE_CHALLENGE ? 20 : mPageIndex == CHALLENGE_PAGE_PUZZLE ? 18 : 0;
 	if (aTrophiesTotal > 0)
 	{
 		SexyString aTrophyString = StrFormat(__S("%d/%d"), aTrophiesGot, aTrophiesTotal);
-		TodDrawString(g, aTrophyString, 739, 73, Sexy::FONT_DWARVENTODCRAFT12, Color(255, 240, 0), DS_ALIGN_CENTER);
+		TodDrawString(g, aTrophyString, 872, 73, Sexy::FONT_DWARVENTODCRAFT12, Color(255, 240, 0), DS_ALIGN_CENTER);
 	}
-	TodDrawImageScaledF(g, Sexy::IMAGE_TROPHY, 718, 26, 0.5f, 0.5f);
+	TodDrawImageScaledF(g, Sexy::IMAGE_TROPHY, 851, 26, 0.5f, 0.5f);
 
 	for (int aChallengeMode = 0; aChallengeMode < NUM_CHALLENGE_MODES; aChallengeMode++)
 		DrawButton(g, aChallengeMode);
@@ -530,7 +521,6 @@ void ChallengeScreen::Draw(Graphics* g)
 	mToolTip->Draw(g);
 }
 
-//0x42F510
 void ChallengeScreen::Update()
 {
 	Widget::Update();
@@ -563,7 +553,6 @@ void ChallengeScreen::Update()
 	MarkDirty();
 }
 
-//0x42F640
 void ChallengeScreen::AddedToManager(WidgetManager* theWidgetManager)
 {
 	Widget::AddedToManager(theWidgetManager);
@@ -572,7 +561,6 @@ void ChallengeScreen::AddedToManager(WidgetManager* theWidgetManager)
 	for (ButtonWidget* aButton : mChallengeButtons) AddWidget(aButton);
 }
 
-//0x42F6B0
 void ChallengeScreen::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	Widget::RemovedFromManager(theWidgetManager);
@@ -581,14 +569,12 @@ void ChallengeScreen::RemovedFromManager(WidgetManager* theWidgetManager)
 	for (ButtonWidget* aButton : mChallengeButtons) RemoveWidget(aButton);
 }
 
-//0x42F720
 void ChallengeScreen::ButtonPress(int theId)
 {
 	(void)theId;
 	mApp->PlaySample(Sexy::SOUND_BUTTONCLICK);
 }
 
-//0x42F740
 void ChallengeScreen::ButtonDepress(int theId)
 {
 	if (theId == ChallengeScreen::ChallengeScreen_Back)
@@ -612,7 +598,6 @@ void ChallengeScreen::ButtonDepress(int theId)
 	}
 }
 
-//0x42F7E0
 void ChallengeScreen::UpdateToolTip()
 {
 	if (!mApp->mWidgetManager->mMouseIn || !mApp->mActive)

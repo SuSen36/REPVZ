@@ -202,7 +202,7 @@ bool                            TodParticleLoadADef(TodParticleDefinition* thePa
 void                            TodParticleLoadDefinitions(ParticleParams* theParticleParamArray, int theParticleParamArraySize);
 void                            TodParticleFreeDefinitions();
 
-extern ParticleParams gLawnParticleArray[(int)ParticleEffect::NUM_PARTICLES];  // 0x6A0FF0
+extern ParticleParams gLawnParticleArray[(int)ParticleEffect::NUM_PARTICLES];
 
 // ######################################################################################################################################################
 // ############################################################ 以下正式开始粒子系统相关声明 ############################################################
@@ -312,26 +312,26 @@ class TodTriangleGroup;
 class TodParticleEmitter
 {
 public:
-	TodEmitterDefinition*			mEmitterDef;													//+0x0
-	TodParticleSystem*				mParticleSystem;												//+0x4
-	TodList<ParticleID>				mParticleList;													//+0x8
-	float							mSpawnAccum;													//+0x18
-	Sexy::SexyVector2				mSystemCenter;													//+0x1C
-	int								mParticlesSpawned;												//+0x24
-	int								mSystemAge;														//+0x28
-	int								mSystemDuration;												//+0x2C
-	float							mSystemTimeValue;												//+0x30
-	float							mSystemLastTimeValue;											//+0x34
-	bool							mDead;															//+0x38
-	Sexy::Color						mColorOverride;													//+0x3C
-	bool							mExtraAdditiveDrawOverride;										//+0x4C
-	float							mScaleOverride;													//+0x50
-	Sexy::Image*					mImageOverride;													//+0x54
-	ParticleEmitterID				mCrossFadeEmitterID;											//+0x58
-	int								mEmitterCrossFadeCountDown;										//+0x5C
-	int								mFrameOverride;													//+0x60
-	float							mTrackInterp[ParticleSystemTracks::NUM_SYSTEM_TRACKS];			//+0x64
-	float							mSystemFieldInterp[MAX_PARTICLE_FIELDS][2];						//+0x8C
+	TodEmitterDefinition*			mEmitterDef;
+	TodParticleSystem*				mParticleSystem;
+	TodList<ParticleID>				mParticleList;
+	float							mSpawnAccum;
+	Sexy::SexyVector2				mSystemCenter;
+	int								mParticlesSpawned;
+	int								mSystemAge;
+	int								mSystemDuration;
+	float							mSystemTimeValue;
+	float							mSystemLastTimeValue;
+	bool							mDead;
+	Sexy::Color						mColorOverride;
+	bool							mExtraAdditiveDrawOverride;
+	float							mScaleOverride;
+	Sexy::Image*					mImageOverride;
+	ParticleEmitterID				mCrossFadeEmitterID;
+	int								mEmitterCrossFadeCountDown;
+	int								mFrameOverride;
+	float							mTrackInterp[ParticleSystemTracks::NUM_SYSTEM_TRACKS];
+	float							mSystemFieldInterp[MAX_PARTICLE_FIELDS][2];
 
 public:
 	void							TodEmitterInitialize(float theX, float theY, TodParticleSystem* theSystem, TodEmitterDefinition* theEmitterDef);
@@ -360,14 +360,14 @@ void								RenderParticle(Graphics* g, TodParticle* theParticle, const Color& t
 class TodParticleSystem
 {
 public:
-	ParticleEffect					mEffectType;					//+0x0
-    TodParticleDefinition*			mParticleDef;					//+0x4
-    TodParticleHolder*				mParticleHolder;				//+0x8
-    TodList<ParticleEmitterID>		mEmitterList;					//+0xC
-    bool							mDead;							//+0x1C
-    bool							mIsAttachment;					//+0x1D
-    int								mRenderOrder;					//+0x20
-    bool							mDontUpdate;					//+0x24
+	ParticleEffect					mEffectType;
+    TodParticleDefinition*			mParticleDef;
+    TodParticleHolder*				mParticleHolder;
+    TodList<ParticleEmitterID>		mEmitterList;
+    bool							mDead;
+    bool							mIsAttachment;
+    int								mRenderOrder;
+    bool							mDontUpdate;
 
 public:
     TodParticleSystem();

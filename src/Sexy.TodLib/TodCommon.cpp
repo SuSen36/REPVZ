@@ -15,13 +15,11 @@
 #include "SexyAppFramework/graphics/GLInterface.h"
 
 
-//0x5114E0
 SexyString TodGetCurrentLevelName()
 {
 	return __S("Unknown level");
 }
 
-//0x511510
 bool TodHasUsedCheatKeys()
 {
 	return false;
@@ -43,7 +41,6 @@ intptr_t TodPickFromWeightedArray(const TodWeightedArray* theArray, int theCount
 	return TodPickArrayItemFromWeightedArray(theArray, theCount)->mItem;
 }
 
-//0x511520
 TodWeightedArray* TodPickArrayItemFromWeightedArray(const TodWeightedArray* theArray, int theCount)
 {
 	if (theCount <= 0)
@@ -71,7 +68,6 @@ TodWeightedArray* TodPickArrayItemFromWeightedArray(const TodWeightedArray* theA
 	return nullptr;
 }
 
-//0x511570
 TodWeightedGridArray* TodPickFromWeightedGridArray(const TodWeightedGridArray* theArray, int theCount)
 {
 	if (theCount <= 0)
@@ -99,7 +95,6 @@ TodWeightedGridArray* TodPickFromWeightedGridArray(const TodWeightedGridArray* t
 	return nullptr;
 }
 
-//0x5115C0
 float TodCalcSmoothWeight(float aWeight, float aLastPicked, float aSecondLastPicked)
 {
 	if (aWeight < 1E-6f)
@@ -150,7 +145,6 @@ int TodPickFromSmoothArray(TodSmoothArray* theArray, int theCount)
 	return theArray[k].mItem;
 }
 
-//0x5117F0
 void TodUpdateSmoothArrayPick(TodSmoothArray* theArray, int theCount, int thePickIndex)
 {
 	for (int i = 0; i < theCount; i++)
@@ -176,13 +170,11 @@ float TodCurveInvQuad(float theTime)
 	return 2 * theTime - theTime * theTime;
 }
 
-//0x5118C0
 float TodCurveS(float theTime)
 {
 	return 3 * theTime * theTime - 2 * theTime * theTime * theTime;
 }
 
-//0x5118F0
 float TodCurveInvQuadS(float theTime)
 {
 	//float aVal = 2 * (theTime - theTime * theTime);
@@ -194,7 +186,6 @@ float TodCurveInvQuadS(float theTime)
 	return TodCurveQuad((theTime - 0.5f) * 2.0f) * 0.5f + 0.5f;
 }
 
-//0x511970
 float TodCurveBounce(float theTime)
 {
 	return 1 - fabs(2 * theTime - 1);
@@ -265,7 +256,6 @@ float TodCurveInvCircle(float theTime)
 	return (float)sqrt(1.0f - (theTime - 1.0f) * (theTime - 1.0f));
 }
 
-//0x5119B0
 float TodCurveEvaluate(float theTime, float thePositionStart, float thePositionEnd, TodCurves theCurve)
 {
 	float aWarpedTime = 0;
@@ -289,7 +279,6 @@ float TodCurveEvaluate(float theTime, float thePositionStart, float thePositionE
 	return (thePositionEnd - thePositionStart) * aWarpedTime + thePositionStart;
 }
 
-//0x511B30
 float TodCurveEvaluateClamped(float theTime, float thePositionStart, float thePositionEnd, TodCurves theCurve)
 {
 	if (theTime <= 0.0f)
@@ -316,14 +305,12 @@ float TodCurveEvaluateClamped(float theTime, float thePositionStart, float thePo
 	return TodCurveEvaluate(theTime, thePositionStart, thePositionEnd, theCurve);
 }
 
-//0x511BA0
 float TodAnimateCurveFloatTime(float theTimeStart, float theTimeEnd, float theTimeAge, float thePositionStart, float thePositionEnd, TodCurves theCurve)
 {
 	float aWarpedAge = (theTimeAge - theTimeStart) / (theTimeEnd - theTimeStart);
 	return TodCurveEvaluateClamped(aWarpedAge, thePositionStart, thePositionEnd, theCurve);
 }
 
-//0x511BF0
 float TodAnimateCurveFloat(int theTimeStart, int theTimeEnd, int theTimeAge, float thePositionStart, float thePositionEnd, TodCurves theCurve)
 {
 	//return TodAnimateCurveFloatTime(theTimeStart, theTimeEnd, theTimeAge, thePositionStart, thePositionEnd, theCurve);
@@ -332,8 +319,6 @@ float TodAnimateCurveFloat(int theTimeStart, int theTimeEnd, int theTimeAge, flo
 	return TodCurveEvaluateClamped(aWarpedAge, thePositionStart, thePositionEnd, theCurve);
 }
 
-//0x511C40
-// GOTY @Patoke: 0x51BEA0
 int TodAnimateCurve(int theTimeStart, int theTimeEnd, int theTimeAge, int thePositionStart, int thePositionEnd, TodCurves theCurve)
 {
 	return FloatRoundToInt(TodAnimateCurveFloat(theTimeStart, theTimeEnd, theTimeAge, thePositionStart, thePositionEnd, theCurve));
@@ -345,14 +330,12 @@ int RandRangeInt(int theMin, int theMax)
 	return Rand(theMax - theMin + 1) + theMin;
 }
 
-//0x511CB0
 float RandRangeFloat(float theMin, float theMax)
 {
 	TOD_ASSERT(theMin <= theMax);
 	return Rand(theMax - theMin) + theMin;
 }
 
-//0x511CE0
 void TodDrawString(Graphics* g, const SexyString& theText, int thePosX, int thePosY, Font* theFont, const Color& theColor, DrawStringJustification theJustification)
 {
 	SexyString aFinalString = TodStringTranslate(theText);
@@ -370,7 +353,6 @@ void TodDrawString(Graphics* g, const SexyString& theText, int thePosX, int theP
 	theFont->DrawString(g, aPosX, thePosY, aFinalString, theColor, g->mClipRect);
 }
 
-//0x511D90
 void TodDrawImageCelScaled(Graphics* g, Image* theImageStrip, int thePosX, int thePosY, int theCelCol, int theCelRow, float theScaleX, float theScaleY)
 {
 	TOD_ASSERT(theCelCol >= 0 && theCelCol < theImageStrip->mNumCols);
@@ -391,7 +373,6 @@ static RenderCommand gRenderCommandPool[POOL_SIZE];
 static RenderCommand* gRenderTail[256];
 static RenderCommand* gRenderHead[256];
 
-//0x511E50
 void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& theMatrix, const SexyString& theString, const Color& theColor)
 {
 	SexyString aFinalString = TodStringTranslate(theString);
@@ -553,8 +534,6 @@ void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& th
 	}
 }
 
-//0x512570
-// GOTY @Patoke: 0x51C863
 void TodDrawImageCelF(Graphics* g, Image* theImageStrip, float thePosX, float thePosY, int theCelCol, int theCelRow)
 {
 	TOD_ASSERT(theCelCol >= 0 && theCelCol < theImageStrip->mNumCols);
@@ -585,7 +564,6 @@ void TodScaleTransformMatrix(SexyMatrix3& m, float x, float y, float theScaleX, 
 	m.m22 = 1.0f;
 }
 
-//0x5125D0
 void TodScaleRotateTransformMatrix(SexyMatrix3& m, float x, float y, float rad, float theScaleX, float theScaleY)
 {
 	m.m00 = cos(rad) * theScaleX;
@@ -639,7 +617,6 @@ void TodSandImageIfNeeded(Image* theImage)
 	}
 }
 
-//0x512650
 void TodBltMatrix(Graphics* g, Image* theImage, const SexyMatrix3& theTransform, const Rect& theClipRect, const Color& theColor, int theDrawMode, const Rect& theSrcRect)
 {
 	float aOffsetX = 0.0f;
@@ -669,7 +646,6 @@ void TodBltMatrix(Graphics* g, Image* theImage, const SexyMatrix3& theTransform,
 	}
 }
 
-//0x5127C0
 void TodDrawImageCelCenterScaledF(Graphics* g, Image* theImageStrip, float thePosX, float thePosY, int theCelCol, float theScaleX, float theScaleY)
 {
 	TOD_ASSERT(theCelCol >= 0 && theCelCol < theImageStrip->mNumCols);
@@ -701,7 +677,6 @@ void TodDrawImageCelCenterScaledF(Graphics* g, Image* theImageStrip, float thePo
 	TodBltMatrix(g, theImageStrip, aTransform, g->mClipRect, aColor, g->mDrawMode, aSrcRect);
 }
 
-//0x512880
 void TodDrawImageCelScaledF(Graphics* g, Image* theImageStrip, float thePosX, float thePosY, int theCelCol, int theCelRow, float theScaleX, float theScaleY)
 {
 	(void)theCelRow;
@@ -734,8 +709,6 @@ void TodDrawImageCelScaledF(Graphics* g, Image* theImageStrip, float thePosX, fl
 	TodBltMatrix(g, theImageStrip, aTransform, g->mClipRect, aColor, g->mDrawMode, aSrcRect);
 }
 
-//0x512950
-// GOTY @Patoke: 0x51CC90
 void TodDrawImageScaledF(Graphics* g, Image* theImage, float thePosX, float thePosY, float theScaleX, float theScaleY)
 {
 	if (theScaleX == 1.0f && theScaleY == 1.0f)
@@ -763,7 +736,6 @@ void TodDrawImageScaledF(Graphics* g, Image* theImage, float thePosX, float theP
 	TodBltMatrix(g, theImage, aTransform, g->mClipRect, aColor, g->mDrawMode, aSrcRect);
 }
 
-//0x512A10
 void TodDrawImageCenterScaledF(Graphics* g, Image* theImage, float thePosX, float thePosY, float theScaleX, float theScaleY)
 {
 	if (theScaleX == 1.0f && theScaleY == 1.0f)
@@ -791,7 +763,6 @@ void TodDrawImageCenterScaledF(Graphics* g, Image* theImage, float thePosX, floa
 	TodBltMatrix(g, theImage, aTransform, g->mClipRect, aColor, g->mDrawMode, aSrcRect);
 }
 
-//0x512AC0
 uint32_t AverageNearByPixels(MemoryImage* theImage, uint32_t* thePixel, int x, int y)
 {
 	int aRed = 0;
@@ -834,7 +805,6 @@ uint32_t AverageNearByPixels(MemoryImage* theImage, uint32_t* thePixel, int x, i
 	return (aRed << 16) | (aGreen << 8) | (aBlue);
 }
 
-//0x512C60
 void FixPixelsOnAlphaEdgeForBlending(Image* theImage)
 {
 	MemoryImage* aImage = (MemoryImage*)theImage;
@@ -884,7 +854,6 @@ void SexyMatrix3Transpose(const SexyMatrix3& m, SexyMatrix3 &r)
 	}
 }
 
-//0x512D00
 void SexyMatrix3Inverse(const SexyMatrix3& m, SexyMatrix3 &r)
 {
 	float aDet = (m.m22 * m.m11 - m.m21 * m.m12) * m.m00- (m.m22 * m.m10 - m.m20 * m.m12) * m.m01 + (m.m21 * m.m10 - m.m20 * m.m11) * m.m02;
@@ -910,7 +879,6 @@ void SexyMatrix3Inverse(const SexyMatrix3& m, SexyMatrix3 &r)
 	}
 }
 
-//0x512E20
 void SexyMatrix3Multiply(SexyMatrix3& m, const SexyMatrix3& l, const SexyMatrix3& r)
 {
 	//SexyMatrix3 temp = l * r;
@@ -934,20 +902,16 @@ void SexyMatrix3Multiply(SexyMatrix3& m, const SexyMatrix3& l, const SexyMatrix3
 	}
 }
 
-//0x512F20
-// GOTY @Patoke: 0x51D2C0
 Color GetFlashingColor(int theCounter, int theFlashTime)
 {
 	int aTimeAge = theCounter % theFlashTime;
 	int aTimeInf = theFlashTime / 2;
 	//int aTimeDel = abs(aTimeInf - aTimeAge) / aTimeInf;
-	// @Patoke: order wasn't like in binaries
 	int aGrayness = std::clamp(200 * abs(aTimeInf - aTimeAge) / aTimeInf + 55, 0, 255);
 	//int aGrayness = std::clamp(55 + 200 * abs(aTimeInf - aTimeAge)/ aTimeInf, 0, 255);
 	return Color(aGrayness, aGrayness, aGrayness, 255);
 }
 
-//0x512F80
 Color ColorAdd(const Color& theColor1, const Color& theColor2)
 {
 	int r = theColor1.mRed + theColor2.mRed;
@@ -958,14 +922,11 @@ Color ColorAdd(const Color& theColor1, const Color& theColor2)
 	return Color(std::clamp(r, 0, 255), std::clamp(g, 0, 255), std::clamp(b, 0, 255), std::clamp(a, 0, 255));  // 线性减淡
 }
 
-//0x513020
-// GOTY @Patoke: 0x51D3C0
 int ColorComponentMultiply(int theColor1, int theColor2)
 {
 	return std::clamp(theColor1 * theColor2 / 255, 0, 255);  // 正片叠底
 }
 
-//0x513050
 Color ColorsMultiply(const Color& theColor1, const Color& theColor2)
 {
 	return Color(
@@ -976,15 +937,11 @@ Color ColorsMultiply(const Color& theColor1, const Color& theColor2)
 	);  // 正片叠底
 }
 
-//0x513120
-// GOTY @Patoke: inlined 0x51D4C0
 bool TodLoadResources(const std::string& theGroup)
 {
 	return ((TodResourceManager*)gSexyAppBase->mResourceManager)->TodLoadResources(theGroup);
 }
 
-//0x513140
-// GOTY @Patoke: 0x51D4C0
 bool TodResourceManager::TodLoadResources(const std::string& theGroup)
 {
 	if (IsGroupLoaded(theGroup))
@@ -1017,7 +974,6 @@ void TodAddImageToMap(SharedImageRef* theImage, const std::string& thePath)
 	((TodResourceManager*)gSexyAppBase->mResourceManager)->AddImageToMap(theImage, thePath);
 }
 
-//0x513230
 void TodResourceManager::AddImageToMap(SharedImageRef* theImage, const std::string& thePath)
 {
 	TOD_ASSERT(mImageMap.find(thePath) == mImageMap.end());
@@ -1033,7 +989,6 @@ bool TodLoadNextResource()
 	return ((TodResourceManager*)gSexyAppBase->mResourceManager)->TodLoadNextResource();
 }
 
-//0x513330
 bool TodResourceManager::TodLoadNextResource()
 {
 	//GetTickCount();
@@ -1111,7 +1066,6 @@ bool TodFindImagePath(Image* theImage, std::string* thePath)
 	return ((TodResourceManager*)gSexyAppBase->mResourceManager)->FindImagePath(theImage, thePath);
 }
 
-// @Patoke implemented
 bool TodFindFontPath(Font* theFont, std::string* thePath) {
 	return ((TodResourceManager*)gSexyAppBase->mResourceManager)->FindFontPath(theFont, thePath);
 }
@@ -1146,10 +1100,9 @@ bool TodResourceManager::FindImagePath(Image* theImage, std::string* thePath)
 	return false;
 }
 
-TodAllocator gGlobalAllocators[MAX_GLOBAL_ALLOCATORS];  //0x6A7B68
-int gNumGlobalAllocators = 0;  //[0x6A9EFC]
+TodAllocator gGlobalAllocators[MAX_GLOBAL_ALLOCATORS];
+int gNumGlobalAllocators = 0;
 
-//0x513570
 TodAllocator* FindGlobalAllocator(int theSize)
 {
 	for (int i = 0; i < gNumGlobalAllocators; i++)
@@ -1167,7 +1120,6 @@ TodAllocator* FindGlobalAllocator(int theSize)
 	return pAllocator;
 }
 
-//0x513600
 void FreeGlobalAllocators()
 {
 	for (int i = 0; i < gNumGlobalAllocators; i++)
@@ -1178,7 +1130,6 @@ void FreeGlobalAllocators()
 	gNumGlobalAllocators = 0;
 }
 
-//0x513660
 SexyString TodReplaceString(const SexyString& theText, const SexyChar* theStringToFind, const SexyString& theStringToSubstitute)
 {
 	SexyString aFinalString = TodStringTranslate(theText);
@@ -1192,7 +1143,6 @@ SexyString TodReplaceString(const SexyString& theText, const SexyChar* theString
 	return aFinalString;
 }
 
-//0x513720
 SexyString TodReplaceNumberString(const SexyString& theText, const SexyChar* theStringToFind, int theNumber)
 {
 	SexyString aFinalString = TodStringTranslate(theText);
@@ -1206,8 +1156,6 @@ SexyString TodReplaceNumberString(const SexyString& theText, const SexyChar* the
 	return aFinalString;
 }
 
-//0x5137F0
-// GOTY @Patoke: 0x51DB00
 bool TodIsPointInPolygon(const SexyVector2* thePolygonPoint, int theNumberPolygonPoints, const SexyVector2& theCheckPoint)
 {
 	TOD_ASSERT(theNumberPolygonPoints >= 3);

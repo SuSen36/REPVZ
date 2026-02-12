@@ -14,7 +14,7 @@
 #include "Sexy.TodLib/TodStringFile.h"
 #include "SDL_timer.h"
 
-static CreditsTiming gCreditsTiming[] = {  //0x6A1AD8
+static CreditsTiming gCreditsTiming[] = {
     {  128.5f,      CreditWordType::WORD_AW ,         0,     CreditBrainType::BRAIN_OFF       },
     {  133.0f,      CreditWordType::WORD_OH ,         0,     CreditBrainType::BRAIN_OFF       },
     {  136.5f,      CreditWordType::WORD_EE ,         0,     CreditBrainType::BRAIN_OFF       },
@@ -284,7 +284,7 @@ static CreditsTiming gCreditsTiming[] = {  //0x6A1AD8
     { 1029.0f,      CreditWordType::WORD_AA ,         0,     CreditBrainType::BRAIN_OFF       },
     { 1033.0f,      CreditWordType::WORD_OFF,         0,     CreditBrainType::BRAIN_OFF       }
 };
-static int gCreditsTimingCount = LENGTH(gCreditsTiming);  //0x6A2B98
+static int gCreditsTimingCount = LENGTH(gCreditsTiming);
 
 CreditsOverlay::CreditsOverlay(CreditScreen* theCreditScreen)
 {
@@ -298,8 +298,6 @@ void CreditsOverlay::Draw(Graphics* g)
 	mParent->DrawOverlay(g);
 }
 
-//0x433A70
-// GOTY @Patoke: 0x4367F0
 CreditScreen::CreditScreen(LawnApp* theApp)
 {
 	mApp = theApp;
@@ -325,7 +323,7 @@ CreditScreen::CreditScreen(LawnApp* theApp)
     mDrawBrain = false;
 
 	mMainMenuButton = MakeButton(CreditScreen::Credits_Button_MainMenu, this, __S("[CREDITS_MAIN_MENU_BUTTON]"));
-	mMainMenuButton->Resize(298, 554, 209, 46);
+	mMainMenuButton->Resize(298 + 133, 554, 209, 46);
 	mMainMenuButton->SetVisible(false);
 
 	mReplayButton = MakeNewButton(CreditScreen::Credits_Button_Replay, this, __S("[CREDITS_REPLAY_BUTTON]"), FONT_HOUSEOFTERROR16, IMAGE_CREDITS_PLAYBUTTON, nullptr, nullptr);
@@ -333,7 +331,7 @@ CreditScreen::CreditScreen(LawnApp* theApp)
 	mReplayButton->mTextDownOffsetY = 1;
 	mReplayButton->mColors[ButtonWidget::COLOR_LABEL] = Color(255, 255, 255);
 	mReplayButton->mColors[ButtonWidget::COLOR_LABEL_HILITE] = Color(213, 159, 43);
-	mReplayButton->Resize(10, 530, 125, 65);
+	mReplayButton->Resize(10 + 133, 530, 125, 65);
     mReplayButton->SetVisible(false);
 	mReplayButton->mTextOffsetX = 33;
 	mReplayButton->mTextOffsetY = -5;
@@ -357,7 +355,6 @@ CreditScreen::~CreditScreen()
 	delete mOverlayWidget;
 }
 
-//0x433EE0
 void CreditScreen::AddedToManager(WidgetManager* theWidgetManager)
 {
 	Widget::AddedToManager(theWidgetManager);
@@ -366,7 +363,6 @@ void CreditScreen::AddedToManager(WidgetManager* theWidgetManager)
 	AddWidget(mOverlayWidget);
 }
 
-//0x433F30
 void CreditScreen::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	Widget::RemovedFromManager(theWidgetManager);
@@ -375,7 +371,6 @@ void CreditScreen::RemovedFromManager(WidgetManager* theWidgetManager)
 	RemoveWidget(mOverlayWidget);
 }
 
-//0x433F80
 void CreditScreen::PreLoadCredits()
 {
     mPreloaded = true;
@@ -500,7 +495,6 @@ void CreditScreen::PreLoadCredits()
     }
 }
 
-//0x434C70
 void CreditScreen::GetTiming(CreditsTiming** theBeforeTiming, CreditsTiming** theAfterTiming, float* theFraction)
 {
     Reanimation* aCreditsReanim = mApp->ReanimationGet(mCreditsReanimID);
@@ -554,7 +548,6 @@ void CreditScreen::GetTiming(CreditsTiming** theBeforeTiming, CreditsTiming** th
     }
 }
 
-//0x434D60
 Reanimation* CreditScreen::PlayReanim(int aIndex)
 {
     Reanimation* aCreditsReanim = mApp->ReanimationTryToGet(mCreditsReanimID);
@@ -603,7 +596,6 @@ Reanimation* CreditScreen::PlayReanim(int aIndex)
 	return aCreditsReanim;
 }
 
-//0x434F20
 void DrawDisco(Graphics* g, float aCenterX, float aCenterY, float theTime)
 {
 
@@ -662,7 +654,6 @@ void DrawDisco(Graphics* g, float aCenterX, float aCenterY, float theTime)
     );
 }
 
-//0x4351E0
 void CreditScreen::DrawFogEffect(Graphics* g, float theTime)
 {
     Reanimation* aCreditsReanim = mApp->ReanimationGet(mCreditsReanimID);
@@ -677,7 +668,7 @@ void CreditScreen::DrawFogEffect(Graphics* g, float theTime)
             int aCelLook = x + (x + 17) * y;
             int aCelCol = aCelLook % 8;
             // 本格浓雾横坐标 = 列 * 80 + 浓雾偏移 - 15
-            float aPosX = x * 80 - 15.0f;
+            float aPosX = x * 80 - 15.0f + 133.0f;
             // 本格浓雾纵坐标 = 行 * 85 + 200
             float aPosY = y * 85 + 200.0f;
             // 开始计算周期变化的颜色，aAnimTime 为 MV 动画播放至当前时刻需要的时间（秒数）
@@ -700,7 +691,6 @@ void CreditScreen::DrawFogEffect(Graphics* g, float theTime)
     }
 }
 
-//0x4354E0
 void CreditScreen::DrawOverlay(Graphics* g)
 {
     if (mCreditsPhase == CreditsPhase::CREDITS_END)
@@ -714,24 +704,22 @@ void CreditScreen::DrawOverlay(Graphics* g)
     }
 }
 
-//0x435550
 void CreditScreen::DrawFinalCredits(Graphics* g)
 {
-    TodDrawString(g, __S("[CREDITS_GAMENAME]"), BOARD_WIDTH / 2, 60, FONT_HOUSEOFTERROR28, Color::White, DrawStringJustification::DS_ALIGN_CENTER);
+    TodDrawString(g, __S("[CREDITS_GAMENAME]"), BOARD_WIDTH / 2 + 133, 60, FONT_HOUSEOFTERROR28, Color::White, DrawStringJustification::DS_ALIGN_CENTER);
 
-    Rect aRectNames1(405, 90, 200, 200);
+    Rect aRectNames1(405 + 133, 90, 200, 200);
     TodDrawStringWrapped(g, __S("[CREDITS_NAMES1]"), aRectNames1, FONT_HOUSEOFTERROR16, Color::White, DrawStringJustification::DS_ALIGN_LEFT);
-    Rect aRectRoles1(190, 90, 200, 200);
+    Rect aRectRoles1(190 + 133, 90, 200, 200);
     TodDrawStringWrapped(g, __S("[CREDITS_ROLES1]"), aRectRoles1, FONT_HOUSEOFTERROR16, Color::White, DrawStringJustification::DS_ALIGN_RIGHT);
-    Rect aRectNames2(340, 280, 450, 250);
+    Rect aRectNames2(340 + 133, 280, 450, 250);
     TodDrawStringWrapped(g, __S("[CREDITS_NAMES2]"), aRectNames2, FONT_HOUSEOFTERROR16, Color::White, DrawStringJustification::DS_ALIGN_LEFT);
-    Rect aRectRoles2(30, 280, 300, 250);
+    Rect aRectRoles2(30 + 133, 280, 300, 250);
     TodDrawStringWrapped(g, __S("[CREDITS_ROLES2]"), aRectRoles2, FONT_HOUSEOFTERROR16, Color::White, DrawStringJustification::DS_ALIGN_RIGHT);
 
-    TodDrawString(g, __S("[CREDITS_THANKS]"), BOARD_WIDTH / 2, 530, FONT_HOUSEOFTERROR16, Color::White, DrawStringJustification::DS_ALIGN_CENTER);
+    TodDrawString(g, __S("[CREDITS_THANKS]"), BOARD_WIDTH / 2 + 133, 530, FONT_HOUSEOFTERROR16, Color::White, DrawStringJustification::DS_ALIGN_CENTER);
 }
 
-//0x435A90
 void DrawReanimToPreload(Graphics* g, ReanimationType theReanimType)
 {
     Reanimation aReanim;
@@ -740,7 +728,6 @@ void DrawReanimToPreload(Graphics* g, ReanimationType theReanimType)
     aReanim.Draw(g);
 }
 
-//0x435B60
 void CreditScreen::Draw(Graphics* g)
 {
     g->SetLinearBlend(true);
@@ -939,7 +926,9 @@ void CreditScreen::Draw(Graphics* g)
     {
         aBackground2G.DrawImage(IMAGE_BACKGROUND3_GAMEOVER_INTERIOR_OVERLAY, -171, 241);
     }
+    g->mTransX += 133;
     aCreditsReanim->Draw(g);
+    g->mTransX -= 133;
 
     if (aDrawDoorBottom)
     {
@@ -948,14 +937,16 @@ void CreditScreen::Draw(Graphics* g)
     if (aDrawDiscoLights)
     {
         float aDiscoTime = aCreditsReanim->mDefinition->mTracks.tracks->mTransforms.count * aCreditsReanim->mAnimTime / aCreditsReanim->mAnimRate;
-        DrawDisco(g, 600.0f, 450.0f, aDiscoTime);
-        DrawDisco(g, 200.0f, 450.0f, aDiscoTime);
+        DrawDisco(g, 600.0f + 133.0f, 450.0f, aDiscoTime);
+        DrawDisco(g, 200.0f + 133.0f, 450.0f, aDiscoTime);
     }
     if (aDrawFog)
     {
-        aBackground2G.DrawImage(IMAGE_REANIM_CREDITS_FOGMACHINE, 600, 200);
+        aBackground2G.DrawImage(IMAGE_REANIM_CREDITS_FOGMACHINE, 600 + 133, 200);
     }
+    g->mTransX += 133;
     aCreditsReanim->DrawRenderGroup(g, 2);
+    g->mTransX -= 133;
 
     if (aDrawDoorBottom)
     {
@@ -966,7 +957,9 @@ void CreditScreen::Draw(Graphics* g)
     {
         aBackground2G.DrawImage(IMAGE_BACKGROUND5_GAMEOVER_MASK, -220, 81);
     }
+    g->mTransX += 133;
     aCreditsReanim->DrawRenderGroup(g, 3);
+    g->mTransX -= 133;
 
     TodParticleSystem* aParticle = nullptr;
     while (mApp->mEffectSystem->mParticleHolder->mParticleSystems.IterateNext(aParticle))
@@ -982,11 +975,13 @@ void CreditScreen::Draw(Graphics* g)
         float aPercent = TodAnimateCurveFloatTime(aFrameFactor * 189.0f, aFrameFactor * 249.0f, aCreditsReanim->mAnimTime, 0.0f, 1.0f, TodCurves::CURVE_LINEAR);
         DrawFogEffect(&aBackground2G, aPercent);
     }
+    g->mTransX += 133;
     aCreditsReanim->DrawRenderGroup(g, 3);
+    g->mTransX -= 133;
 
     if (mDrawBrain)
     {
-        g->DrawImageF(IMAGE_BRAIN, mBrainPosX, mBrainPosY);
+        g->DrawImageF(IMAGE_BRAIN, mBrainPosX + 133.0f, mBrainPosY);
     }
 }
 
@@ -1011,7 +1006,6 @@ Reanimation* CreditScreen::FindSubReanim(Reanimation* theReanim, ReanimationType
     return nullptr;
 }
 
-//0x436940
 void CreditScreen::UpdateBlink()
 {
     mBlinkCountdown--;
@@ -1043,7 +1037,6 @@ void CreditScreen::UpdateBlink()
     }
 }
 
-//0x436A30
 void CreditScreen::Update()
 {
     Widget::Update();
@@ -1110,7 +1103,6 @@ void CreditScreen::Update()
     MarkDirty();
 }
 
-//0x436BE0
 void CreditScreen::UpdateMovie()
 {
     UpdateBlink();
@@ -1158,11 +1150,11 @@ void CreditScreen::UpdateMovie()
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 140.0f) ||
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 142.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2 + 133, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 136.5f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_RAYSWIPE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2 + 133, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_RAYSWIPE);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 330.0f))
         {
@@ -1211,7 +1203,7 @@ void CreditScreen::UpdateMovie()
 
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 120.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_ZOMBIEHEADWIPE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2 + 133, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDITS_ZOMBIEHEADWIPE);
         }
     }
     if (mCreditsPhase == CreditsPhase::CREDITS_MAIN2)
@@ -1253,11 +1245,11 @@ void CreditScreen::UpdateMovie()
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 239.5f) ||
             aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 243.5f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2 + 133, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 332.75f))
         {
-            mApp->AddTodParticle(678.0f, 352.0f, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_MELONSPLASH);
+            mApp->AddTodParticle(678.0f + 133.0f, 352.0f, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_MELONSPLASH);
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 336.0f))
         {
@@ -1272,7 +1264,7 @@ void CreditScreen::UpdateMovie()
         }
         if (aCreditsReanim->ShouldTriggerTimedEvent(aFrameFactor * 342.0f))
         {
-            mApp->AddTodParticle(BOARD_WIDTH / 2, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
+            mApp->AddTodParticle(BOARD_WIDTH / 2 + 133, BOARD_HEIGHT / 2, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_CREDIT_STROBE);
         }
 
         int aBackground2Index = aCreditsReanim->FindTrackIndex("Background2");
@@ -1416,7 +1408,6 @@ void CreditScreen::UpdateMovie()
     }
 }
 
-//0x437F20
 void CreditScreen::TurnOffTongues(Reanimation* theReanim, int aParentTrack)
 {
     for (int aTrackIndex = 0; aTrackIndex < theReanim->mDefinition->mTracks.count; aTrackIndex++)
@@ -1436,8 +1427,6 @@ void CreditScreen::TurnOffTongues(Reanimation* theReanim, int aParentTrack)
     }
 }
 
-//0x437FC0
-//0x438010
 void CreditScreen::JumpToFrame(CreditsPhase thePhase, float theFrame)
 {
     mMainMenuButton->SetVisible(false);
@@ -1634,7 +1623,6 @@ void CreditScreen::KeyChar(SexyChar theChar)
     }
 }
 
-//0x438430
 void CreditScreen::PauseCredits()
 {
     if (mCreditsPaused)
@@ -1663,7 +1651,6 @@ void CreditScreen::PauseCredits()
     mTimerSinceStart = SDL_GetTicks() - aDurationOnPause;
 }
 
-//0x438530
 void CreditScreen::KeyDown(KeyCode theKey)
 {
     if (mCreditsPaused)
@@ -1675,7 +1662,6 @@ void CreditScreen::KeyDown(KeyCode theKey)
     }
 }
 
-//0x438560
 void CreditScreen::ButtonPress(int theId)
 {
     if (theId == CreditScreen::Credits_Button_MainMenu)
@@ -1688,7 +1674,6 @@ void CreditScreen::ButtonPress(int theId)
     }
 }
 
-//0x4385A0
 void CreditScreen::ButtonDepress(int theId)
 {
     if (theId == CreditScreen::Credits_Button_MainMenu)

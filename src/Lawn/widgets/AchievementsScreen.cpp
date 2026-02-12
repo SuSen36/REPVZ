@@ -1,4 +1,3 @@
-// @Patoke: implement file
 #include "AchievementsScreen.h"
 #include "../Board.h"
 #include "GameButton.h"
@@ -43,25 +42,22 @@ AchievementItem gAchievementList[MAX_ACHIEVEMENTS] = {
 	{ "Mustache Mode", "Enable Mustache Mode" }
 };
 
-// GOTY @Patoke: 0x401000
 AchievementsWidget::AchievementsWidget(LawnApp* theApp) {
 	mApp = theApp;
-	mWidth = 800;
+	mWidth = mApp->mWidth;
 	mHeight = IMAGE_ACHEESEMENTS_CHINA->mHeight + IMAGE_SELECTORSCREEN_ACHIEVEMENTS_BG->mHeight + 15700;
 	mScrollDirection = -1;
 	mScrollValue = 0;
 	mDefaultScrollValue = 30;
 	mScrollDecay = 1;
 	mDidPressMoreButton = false;
-	mMoreRockRect = Rect(710, 470, IMAGE_ACHEESEMENTS_MORE_ROCK->mWidth - 25, IMAGE_ACHEESEMENTS_MORE_ROCK->mHeight - 50);
+	mMoreRockRect = Rect(710 + 133, 470, IMAGE_ACHEESEMENTS_MORE_ROCK->mWidth - 25, IMAGE_ACHEESEMENTS_MORE_ROCK->mHeight - 50);
 }
 
-// GOTY @Patoke: 0x4010E0
 AchievementsWidget::~AchievementsWidget() {
 
 }
 
-// GOTY @Patoke: 0x401A10
 void AchievementsWidget::Update() {
 	if (mScrollValue <= 0)
 		return;
@@ -91,7 +87,6 @@ void AchievementsWidget::Update() {
 		mScrollValue = 0;
 }
 
-// GOTY @Patoke: 0x401160
 void AchievementsWidget::Draw(Graphics* g) {
 	g->DrawImage(IMAGE_SELECTORSCREEN_ACHIEVEMENTS_BG, 0, 0);
 
@@ -99,12 +94,12 @@ void AchievementsWidget::Draw(Graphics* g) {
 	for (int i = 1; i <= 70; i++)
 		g->DrawImage(IMAGE_ACHEESEMENTS_HOLE_TILE, 0, aHeight * i);
 
-	g->DrawImage(IMAGE_ACHEESEMENTS_BOOKWORM, 0, 1125);
-	g->DrawImage(IMAGE_ACHEESEMENTS_BEJEWELED, 0, 2250);
-	g->DrawImage(IMAGE_ACHEESEMENTS_CHUZZLE, 0, 4500);
-	g->DrawImage(IMAGE_ACHEESEMENTS_PEGGLE, 0, 6750);
-	g->DrawImage(IMAGE_ACHEESEMENTS_PIPE, 0, 9000);
-	g->DrawImage(IMAGE_ACHEESEMENTS_ZUMA, 0, 11250);
+	g->DrawImage(IMAGE_ACHEESEMENTS_BOOKWORM, 133, 1125);
+	g->DrawImage(IMAGE_ACHEESEMENTS_BEJEWELED, 133, 2250);
+	g->DrawImage(IMAGE_ACHEESEMENTS_CHUZZLE, 133, 4500);
+	g->DrawImage(IMAGE_ACHEESEMENTS_PEGGLE, 133, 6750);
+	g->DrawImage(IMAGE_ACHEESEMENTS_PIPE, 133, 9000);
+	g->DrawImage(IMAGE_ACHEESEMENTS_ZUMA, 133, 11250);
 
 	g->DrawImage(IMAGE_ACHEESEMENTS_CHINA, 0, mHeight - IMAGE_ACHEESEMENTS_CHINA->mHeight - /*50*/ 650);
 	
@@ -117,7 +112,7 @@ void AchievementsWidget::Draw(Graphics* g) {
 		else aHasAchievement = false;
 
 		int aCurrAchievementOff = 57 * int(i / 2);
-		int aImageXPos = i % 2 == 0 ? 120 : 410;
+		int aImageXPos = (i % 2 == 0 ? 120 : 410) + 133;
 		int aImageYPos = 178 + aCurrAchievementOff;
 		int aTextXPos = aImageXPos + 70;
 		int aTextYPos = aImageYPos + 16;
@@ -147,18 +142,17 @@ void AchievementsWidget::Draw(Graphics* g) {
 		g->WriteWordWrapped(aPos, gAchievementList[i].description, 12);
 	}
 
-	g->DrawImage(IMAGE_ACHEESEMENTS_MORE_ROCK, 700, 450);
+	g->DrawImage(IMAGE_ACHEESEMENTS_MORE_ROCK, 700 + 133, 450);
 
 	bool aIsHighlight = mMoreRockRect.Contains(mWidgetManager->mLastMouseX - mX, mWidgetManager->mLastMouseY - mY);
 	if (mDidPressMoreButton) {
-		g->DrawImage(aIsHighlight ? IMAGE_ACHEESEMENTS_TOP_BUTTON_HIGHLIGHT : IMAGE_ACHEESEMENTS_TOP_BUTTON, 700, 450);
+		g->DrawImage(aIsHighlight ? IMAGE_ACHEESEMENTS_TOP_BUTTON_HIGHLIGHT : IMAGE_ACHEESEMENTS_TOP_BUTTON, 700 + 133, 450);
 	}
 	else {
-		g->DrawImage(aIsHighlight ? IMAGE_ACHEESEMENTS_MORE_BUTTON_HIGHLIGHT : IMAGE_ACHEESEMENTS_MORE_BUTTON, 700, 450);
+		g->DrawImage(aIsHighlight ? IMAGE_ACHEESEMENTS_MORE_BUTTON_HIGHLIGHT : IMAGE_ACHEESEMENTS_MORE_BUTTON, 700 + 133, 450);
 	}
 }
 
-// GOTY @Patoke: 0x4019D0
 void AchievementsWidget::KeyDown(KeyCode theKey) {
 	if (theKey == KEYCODE_UP) {
 		mScrollValue = mDefaultScrollValue;
@@ -170,7 +164,6 @@ void AchievementsWidget::KeyDown(KeyCode theKey) {
 	}
 }
 
-// GOTY @Patoke: 0x4017F0
 void AchievementsWidget::MouseDown(int x, int y, int theClickCount) {
 	(void)theClickCount;
 	if (aBackButtonRect.Contains(x, y))
@@ -180,7 +173,6 @@ void AchievementsWidget::MouseDown(int x, int y, int theClickCount) {
 		mApp->PlaySample(SOUND_GRAVEBUTTON);
 }
 
-// GOTY @Patoke: 0x401890
 void AchievementsWidget::MouseUp(int x, int y, int theClickCount) {
 	(void)theClickCount;
 	Point aPos = Point(x, y);
@@ -197,7 +189,6 @@ void AchievementsWidget::MouseUp(int x, int y, int theClickCount) {
 	}
 }
 
-// GOTY @Patoke: 0x4019A0
 void AchievementsWidget::MouseWheel(int theDelta) {
 	if (!mDidPressMoreButton && theDelta < 0) {
 		return;
@@ -211,7 +202,6 @@ void AchievementsWidget::MouseWheel(int theDelta) {
 		mScrollDirection = -1;
 }
 
-// GOTY @Patoke: 0x459670
 void ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, bool theForceGive) {
     if (!theApp || !theApp->mPlayerInfo)
         return;
@@ -242,7 +232,6 @@ void ReportAchievement::GiveAchievement(LawnApp* theApp, int theAchievement, boo
 }
 
 
-// GOTY @Patoke: 0x44D5B0
 void ReportAchievement::AchievementInitForPlayer(LawnApp* theApp) {
 	if (!theApp || !theApp->mPlayerInfo)
 		return;

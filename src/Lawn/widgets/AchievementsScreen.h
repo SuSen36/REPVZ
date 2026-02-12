@@ -1,6 +1,5 @@
 #ifndef __ACHIEVEMENTSSCREEN_H__
 #define __ACHIEVEMENTSSCREEN_H__
-// @Patoke: implement file
 
 #include "../../ConstEnums.h"
 #include "SexyAppFramework/widget/Widget.h"
@@ -33,7 +32,6 @@ enum AchievementId {
     MAX_ACHIEVEMENTS
 };
 
-// todo @Patoke: add these
 class AchievementItem {
 public:
     std::string name;
@@ -44,13 +42,13 @@ extern AchievementItem gAchievementList[MAX_ACHIEVEMENTS];
 
 class AchievementsWidget : public Widget {
 public:
-	LawnApp*	mApp;                       //+GOTY @Patoke: 0xA8
-	int			mScrollDirection;			//+GOTY @Patoke: 0xAC
-	Rect		mMoreRockRect;				//+GOTY @Patoke: 0xC0
-	int			mScrollValue;				//+GOTY @Patoke: 0xB0
-	int			mScrollDecay;				//+GOTY @Patoke: 0xB4
-	int			mDefaultScrollValue;		//+GOTY @Patoke: 0xB8
-	bool		mDidPressMoreButton;		//+GOTY @Patoke: 0xBC
+	LawnApp*	mApp;
+	int			mScrollDirection;
+	Rect		mMoreRockRect;
+	int			mScrollValue;
+	int			mScrollDecay;
+	int			mDefaultScrollValue;
+	bool		mDidPressMoreButton;
 
 	AchievementsWidget(LawnApp* theApp);
 	virtual ~AchievementsWidget();
