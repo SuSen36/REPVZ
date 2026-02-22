@@ -928,8 +928,8 @@ void RenderParticle(Graphics* g, TodParticle* theParticle, const Color& theColor
 	TodParticleEmitter* aEmitter = theParticle->mParticleEmitter;
 	TodEmitterDefinition* aEmitterDef = aEmitter->mEmitterDef;
 	Image* aImage = aEmitter->mImageOverride != nullptr ? aEmitter->mImageOverride : aEmitterDef->mImage;  // 优先使用覆写贴图，无覆写贴图则使用定义的贴图
-	if (aImage == nullptr)
-		return;  // 不存在贴图时，取消绘制
+	if (aImage == nullptr || aImage->mNumCols == 0 || aImage->mNumRows == 0)
+		return;  // 不存在贴图或贴图无效时，取消绘制
 
 	int aCelWidth = aImage->GetCelWidth();
 	int aCelHeight = aImage->GetCelHeight();

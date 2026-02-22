@@ -23,23 +23,23 @@
 #include <unistd.h>
 #include "SexyAppFramework/widget/Dialog.h"
 #include "SexyAppFramework/imagelib/ImageLib.h"
-#include "sound/BassSoundManager.h"
-#include "sound/BassSoundInstance.h"
+#include "SexyAppFramework/sound/SDLSoundManager.h"
+#include "SexyAppFramework/sound/SDLSoundInstance.h"
 #include "SexyAppFramework/misc/Rect.h"
 #include "SexyAppFramework/misc/PropertiesParser.h"
 #include "SexyAppFramework/misc/MTRand.h"
 #include "SexyAppFramework/misc/ModVal.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
 #include "SexyAppFramework/misc/ResourceManager.h"
-#include "sound/BassMusicInterface.h"
+#include "SexyAppFramework/sound/SDLMusicInterface.h"
 #include "SexyAppFramework/misc/AutoCrit.h"
 #include "SexyAppFramework/paklib/PakInterface.h"
-#include "sound/DummyMusicInterface.h"
 #include "SexyAppFramework/misc/fcaseopen.h"
 
 #include <unordered_set>
 
 #include "SexyAppFramework/misc/RegEmu.h"
+#include "SexyAppFramework/sound/DummyMusicInterface.h"
 
 #include <filesystem>
 
@@ -2195,7 +2195,7 @@ MusicInterface* SexyAppBase::CreateMusicInterface()
 	if (mNoSoundNeeded)
 		return new DummyMusicInterface();
 	else
-		return new BassMusicInterface(nullptr);
+		return new SDLMusicInterface();
 }
 
 void SexyAppBase::InitPropertiesHook()
@@ -2310,8 +2310,8 @@ void SexyAppBase::Init()
 
 	MakeWindow();
 
-	if (mSoundManager == NULL)
-		mSoundManager = new BassSoundManager(nullptr);
+	if (mSoundManager == nullptr)
+		mSoundManager = new SDLSoundManager();
 
 	SetSfxVolume(mSfxVolume);
 

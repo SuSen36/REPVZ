@@ -7270,7 +7270,7 @@ void Board::DrawDebugText(Graphics* g)
 			}
 			aText += StrFormat(__S("\n"));
 
-			/*
+
 			int aPackedOrderMain = mApp->mMusic->GetMusicOrder(mApp->mMusic->mCurMusicFileMain);
 			int aCurrentOrder = LOWORD(aPackedOrderMain);
 			aText += StrFormat(__S("Music order %02d row %02d\n"), LOWORD(aPackedOrderMain), HIWORD(aPackedOrderMain) / 4);
@@ -7291,16 +7291,10 @@ void Board::DrawDebugText(Graphics* g)
 					}
 				}
 
-				HMUSIC aMusicHandle1 = mApp->mMusic->GetBassMusicHandle(mApp->mMusic->mCurMusicFileMain);
-				HMUSIC aMusicHandle2 = mApp->mMusic->GetBassMusicHandle(mApp->mMusic->mCurMusicFileHihats);
-				HMUSIC aMusicHandle3 = mApp->mMusic->GetBassMusicHandle(mApp->mMusic->mCurMusicFileDrums);
-				float bpm1;
-				float bpm2;
-				float bpm3;
-				gBass->BASS_ChannelGetAttribute(aMusicHandle1, BASS_ATTRIB_MUSIC_BPM, &bpm1);
-				gBass->BASS_ChannelGetAttribute(aMusicHandle2, BASS_ATTRIB_MUSIC_BPM, &bpm2);
-				gBass->BASS_ChannelGetAttribute(aMusicHandle3, BASS_ATTRIB_MUSIC_BPM, &bpm3);
-				aText += StrFormat(__S("bpm1 %f bmp2 %f bpm3 %f\n"), bpm1, bpm2, bpm3);
+				//float bpm1 = mApp->mMusic->GetMusicBPM(mApp->mMusic->mCurMusicFileMain);
+				//float bpm2 = mApp->mMusic->GetMusicBPM(mApp->mMusic->mCurMusicFileHihats);
+				//float bpm3 = mApp->mMusic->GetMusicBPM(mApp->mMusic->mCurMusicFileDrums);
+				//aText += StrFormat(__S("bpm1 %f bmp2 %f bpm3 %f\n"), bpm1, bpm2, bpm3);
 			}
 			else if (mApp->mMusic->mCurMusicTune == MusicTune::MUSIC_TUNE_NIGHT_MOONGRAINS)
 			{
@@ -7312,7 +7306,6 @@ void Board::DrawDebugText(Graphics* g)
 					aText += StrFormat(__S("Drums unsynced %d"), aDiffDrums);
 				}
 			}
-			*/
 		}
 
 		break;

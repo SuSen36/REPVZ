@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -83,6 +83,7 @@ typedef struct _SDL_HIDAPI_Device
     SDL_bool is_bluetooth;
     SDL_JoystickType joystick_type;
     SDL_GameControllerType type;
+    int steam_virtual_gamepad_slot;
 
     struct _SDL_HIDAPI_DeviceDriver *driver;
     void *context;

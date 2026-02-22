@@ -12,7 +12,7 @@ orig_CFLAGS="$CFLAGS"
 dnl Set various version strings - taken gratefully from the GTk sources
 # See docs/release_checklist.md
 SDL_MAJOR_VERSION=2
-SDL_MINOR_VERSION=31
+SDL_MINOR_VERSION=33
 SDL_MICRO_VERSION=0
 SDL_VERSION=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION.$SDL_MICRO_VERSION
 
@@ -359,7 +359,7 @@ dnl Checks for library functions.
         AC_DEFINE(HAVE_MPROTECT, 1, [ ])
         ],[]),
     )
-    AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv bsearch qsort abs bcopy memset memcmp memcpy memmove wcslen wcslcpy wcslcat _wcsdup wcsdup wcsstr wcscmp wcsncmp wcscasecmp _wcsicmp wcsncasecmp _wcsnicmp strlen strlcpy strlcat _strrev _strupr _strlwr index rindex strchr strrchr strstr strtok_r itoa _ltoa _uitoa _ultoa strtod strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp strcasestr vsscanf vsnprintf fopen64 fseeko fseeko64 sigaction setjmp nanosleep sysconf sysctlbyname getauxval elf_aux_info poll memfd_create posix_fallocate _Exit)
+    AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv bsearch qsort abs bcopy memset memcmp memcpy memmove wcslen wcslcpy wcslcat _wcsdup wcsdup wcsstr wcscmp wcsncmp wcscasecmp _wcsicmp wcsncasecmp _wcsnicmp strlen strlcpy strlcat _strrev _strupr _strlwr index rindex strchr strrchr strstr strtok_r itoa _ltoa _uitoa _ultoa strtod strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp strcasestr vsscanf vsnprintf fopen64 fseeko fseeko64 sigaction sigtimedwait setjmp nanosleep sysconf sysctlbyname getauxval elf_aux_info poll memfd_create posix_fallocate _Exit)
 
     AC_CHECK_LIB(m, pow, [LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
     AC_CHECK_FUNCS(acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf exp expf fabs fabsf floor floorf trunc truncf fmod fmodf log logf log10 log10f lround lroundf pow powf round roundf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
@@ -698,8 +698,8 @@ dnl Check for various instruction support
     fi
 
     AC_ARG_ENABLE(3dnow,
-[AS_HELP_STRING([--enable-3dnow], [use 3DNow! assembly routines [default=yes]])],
-                  , enable_3dnow=yes)
+[AS_HELP_STRING([--enable-3dnow], [use 3DNow! assembly routines [default=no]])],
+                  , enable_3dnow=no)
     if test x$enable_3dnow = xyes; then
         save_CFLAGS="$CFLAGS"
         have_gcc_3dnow=no
@@ -906,37 +906,37 @@ dnl Check for various instruction support
     fi
 fi
 
-    AC_ARG_ENABLE(lsx,
+AC_ARG_ENABLE(lsx,
 [AS_HELP_STRING([--enable-lsx], [use LSX assembly routines [default=yes]])],
                   , enable_lsx=yes)
-    if test x$enable_lsx = xyes; then
-        save_CFLAGS="$CFLAGS"
-        have_gcc_lsx=no
-        AC_MSG_CHECKING(for GCC -mlsx option)
-        lsx_CFLAGS="-mlsx"
-        CFLAGS="$save_CFLAGS $lsx_CFLAGS"
+if test x$enable_lsx = xyes; then
+    save_CFLAGS="$CFLAGS"
+    have_gcc_lsx=no
+    AC_MSG_CHECKING(for GCC -mlsx option)
+    lsx_CFLAGS="-mlsx"
+    CFLAGS="$save_CFLAGS $lsx_CFLAGS"
 
-        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-        #ifndef __loongarch_sx
-        #error Assembler CPP flag not enabled
-        #endif
-        ]], [])], [have_gcc_lsx=yes], [])
-        AC_MSG_RESULT($have_gcc_lsx)
-        CFLAGS="$save_CFLAGS"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    #ifndef __loongarch_sx
+    #error Assembler CPP flag not enabled
+    #endif
+    ]], [])], [have_gcc_lsx=yes], [])
+    AC_MSG_RESULT($have_gcc_lsx)
+    CFLAGS="$save_CFLAGS"
 
-        if test x$have_gcc_lsx = xyes; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS $lsx_CFLAGS"
-            SUMMARY_math="${SUMMARY_math} lsx"
-        fi
+    if test x$have_gcc_lsx = xyes; then
+       EXTRA_CFLAGS="$EXTRA_CFLAGS $lsx_CFLAGS"
+       SUMMARY_math="${SUMMARY_math} lsx"
     fi
+fi
 
-    AC_MSG_CHECKING(for lsxintrin.h)
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <lsxintrin.h>]])],
-       [have_lsxintrin_h_hdr=yes],[have_lsxintrin_h_hdr=no])
-    AC_MSG_RESULT($have_lsxintrin_h_hdr)
-    if test x$have_lsxintrin_h_hdr = xyes; then
-        AC_DEFINE(HAVE_LSXINTRIN_H, 1, [ ])
-    fi
+AC_MSG_CHECKING(for lsxintrin.h)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <lsxintrin.h>]])],
+   [have_lsxintrin_h_hdr=yes],[have_lsxintrin_h_hdr=no])
+AC_MSG_RESULT($have_lsxintrin_h_hdr)
+if test x$have_lsxintrin_h_hdr = xyes; then
+   AC_DEFINE(HAVE_LSXINTRIN_H, 1, [ ])
+fi
 
 dnl See if the OSS audio interface is supported
 CheckOSS()
@@ -1247,7 +1247,6 @@ CheckNAS()
             have_nas=yes
             NAS_CFLAGS="-I/usr/X11R6/include/"
             NAS_LIBS="-L/usr/X11R6/lib -laudio -lXt"
-
         fi
 
         AC_MSG_RESULT($have_nas)
@@ -3485,7 +3484,7 @@ CheckUSBHID()
                 AC_MSG_CHECKING(for usbhid)
                 have_usbhid=no
                 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-                  #include <sys/types.h>
+                  #include <stdint.h>
                   #if defined(HAVE_USB_H)
                   #include <usb.h>
                   #endif
@@ -3514,7 +3513,7 @@ CheckUSBHID()
                     AC_MSG_CHECKING(for ucr_data member of usb_ctl_report)
                     have_usbhid_ucr_data=no
                     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-                      #include <sys/types.h>
+                      #include <stdint.h>
                       #if defined(HAVE_USB_H)
                       #include <usb.h>
                       #endif
@@ -3544,7 +3543,7 @@ CheckUSBHID()
                     AC_MSG_CHECKING(for new usbhid API)
                     have_usbhid_new=no
                     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-                      #include <sys/types.h>
+                      #include <stdint.h>
                       #if defined(HAVE_USB_H)
                       #include <usb.h>
                       #endif
@@ -3636,7 +3635,7 @@ CheckHIDAPI()
 
         if test x$hidapi_support = xyes; then
             if test x$have_libusb_h = xyes; then
-                AC_DEFINE(HAVE_LIBUSB)
+                AC_DEFINE(HAVE_LIBUSB, 1, [ ])
                 EXTRA_CFLAGS="$EXTRA_CFLAGS $LIBUSB_CFLAGS"
                 if test x$require_hidapi_libusb = xyes; then
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LIBUSB_LIBS"
@@ -3869,10 +3868,14 @@ case "$host" in
         if test x$enable_audio = xyes; then
           case $ARCH in
             sysv5|solaris|hpux)
-                AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO, 1, [ ])
-                SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
-                SUMMARY_audio="${SUMMARY_audio} sun"
-                have_audio=yes
+                # Newer Solaris-based systems, like OpenIndiana, don't have this interface anymore. Check for the header first.
+                AC_CHECK_HEADER(sys/audioio.h, have_sys_audioio_h=yes, have_sys_audioio_h=no)
+                if test x$have_sys_audioio_h = xyes; then
+                    AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO, 1, [ ])
+                    SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
+                    SUMMARY_audio="${SUMMARY_audio} sun"
+                    have_audio=yes
+                fi
             ;;
             netbsd)  # Don't use this on OpenBSD, it's busted.
                 AC_DEFINE(SDL_AUDIO_DRIVER_NETBSD, 1, [ ])

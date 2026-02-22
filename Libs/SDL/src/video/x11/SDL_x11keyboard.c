@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -114,7 +114,7 @@ X11_KeyCodeToSym(_THIS, KeyCode keycode, unsigned char group)
                 if (group >= num_groups) {
                     group = 0;
                 }
-            } else if (action == Xkbstd::clampoRange) {
+            } else if (action == XkbClampIntoRange) {
                 group = num_groups - 1;
             } else {
                 group %= num_groups;

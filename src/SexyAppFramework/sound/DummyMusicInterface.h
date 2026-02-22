@@ -1,53 +1,33 @@
-#ifndef __DUMMY_MUSIC_INTERFACE_H__
-#define __DUMMY_MUSIC_INTERFACE_H__
-
 #include "MusicInterface.h"
+#include "SexyAppFramework/SexyAppBase.h"
 
 using namespace Sexy;
 
-class DummyMusicInterface : public MusicInterface {
+class DummyMusicInterface : public MusicInterface
+{
 public:
-    DummyMusicInterface() {}
+	DummyMusicInterface() {}
+	virtual ~DummyMusicInterface() {};
 
-    ~DummyMusicInterface() override{};
-
-    bool LoadMusic(int, const std::string &) override { return false; }
-
-    void PlayMusic(int, int, bool) override {}
-
-    void StopMusic(int) override {}
-
-    void PauseMusic(int) override {}
-
-    void ResumeMusic(int) override {}
-
-    void StopAllMusic() override {}
-
-    void UnloadMusic(int) override {}
-
-    void UnloadAllMusic() override {}
-
-    void PauseAllMusic() override {}
-
-    void ResumeAllMusic() override {}
-
-    void FadeIn(int, int, double, bool) override {}
-
-    void FadeOut(int, bool, double) override {}
-
-    void FadeOutAll(bool, double) override {}
-
-    void SetSongVolume(int, double) override {}
-
-    void SetSongMaxVolume(int, double) override {}
-
-    bool IsPlaying(int) override { return false; };
-
-    void SetVolume(double) override {}
-
-    void SetMusicAmplify(int, double) override {}
-
-    void Update() override {}
+	virtual bool			LoadMusic(int, const std::string&){return false;}
+	virtual void 			PlayMusic(int, int, bool){}
+	virtual void 			StopMusic(int){}
+	virtual void 			PauseMusic(int){}
+	virtual void 			ResumeMusic(int){}
+	virtual void 			StopAllMusic(){}
+	virtual void 			UnloadMusic(int){}
+	virtual void 			UnloadAllMusic(){}
+	virtual void 			PauseAllMusic(){}
+	virtual void 			ResumeAllMusic(){}
+	virtual void 			FadeIn(int, int, double, bool){}
+	virtual void 			FadeOut(int, bool, double){}
+	virtual void 			FadeOutAll(bool, double){}
+	virtual void 			SetSongVolume(int, double){}
+	virtual void 			SetSongMaxVolume(int, double){}
+	virtual bool			IsPlaying(int){return false;};
+	
+	virtual void			SetVolume(double){}
+	virtual void			SetMusicAmplify(int, double){}
+	virtual void			Update(){}
+    virtual int				GetFreeMusicId(){return -1;}
 };
-
-#endif // __DUMMY_MUSIC_INTERFACE_H__

@@ -4,6 +4,7 @@
 #include "../SexyAppBase.h"
 #include "XMLParser.h"
 #include "SexyAppFramework/sound/SoundManager.h"
+#include "SexyAppFramework/sound/MusicInterface.h"
 #include "SexyAppFramework/graphics/GLImage.h"
 #include "SexyAppFramework/graphics/GLInterface.h"
 #include "SexyAppFramework/graphics/ImageFont.h"
@@ -28,6 +29,16 @@ void ResourceManager::SoundRes::DeleteResource()
 		gSexyAppBase->mSoundManager->ReleaseSound(mSoundId);
 
 	mSoundId = -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void ResourceManager::MusicRes::DeleteResource()
+{
+	if (mMusicId >= 0 && gSexyAppBase->mMusicInterface)
+		gSexyAppBase->mMusicInterface->UnloadMusic(mMusicId);
+
+	mMusicId = -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +111,7 @@ void ResourceManager::DeleteResources(const std::string &theGroup)
 {
 	DeleteResources(mImageMap,theGroup);
 	DeleteResources(mSoundMap,theGroup);
+	DeleteResources(mMusicMap,theGroup);
 	DeleteResources(mFontMap,theGroup);
 	mLoadedGroups.erase(theGroup);
 }
@@ -224,6 +236,47 @@ bool ResourceManager::ParseSoundResource(XMLElement &theElement)
 			mHasFailed = false;
 			SoundRes *oldRes = aRes;
 			aRes = (SoundRes*)mSoundMap[oldRes->mId];
+			aRes->mPath = oldRes->mPath;
+			aRes->mXMLAttributes = oldRes->mXMLAttributes;
+			delete oldRes;
+		}
+		else			
+		{
+			delete aRes;
+			return false;
+		}
+	}
+	
+	XMLParamMap::iterator anItr;
+
+	anItr = theElement.mAttributes.find(__S("volume"));
+	if (anItr != theElement.mAttributes.end())
+		sexysscanf(anItr->second.c_str(),__S("%lf"),&aRes->mVolume);
+
+	anItr = theElement.mAttributes.find(__S("pan"));
+	if (anItr != theElement.mAttributes.end())
+		sexysscanf(anItr->second.c_str(),__S("%d"),&aRes->mPanning);
+
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+bool ResourceManager::ParseMusicResource(XMLElement &theElement)
+{
+	MusicRes *aRes = new MusicRes;
+	aRes->mMusicId = -1;
+	aRes->mVolume = -1;
+	aRes->mPanning = 0;
+
+	if (!ParseCommonResource(theElement, aRes, mMusicMap))
+	{
+		if (mHadAlreadyDefinedError && mAllowAlreadyDefinedResources)
+		{
+			mError = "";
+			mHasFailed = false;
+			MusicRes *oldRes = aRes;
+			aRes = (MusicRes*)mMusicMap[oldRes->mId];
 			aRes->mPath = oldRes->mPath;
 			aRes->mXMLAttributes = oldRes->mXMLAttributes;
 			delete oldRes;
@@ -494,6 +547,17 @@ bool ResourceManager::ParseResources()
 				if (aXMLElement.mType != XMLElement::TYPE_END)
 					return Fail("Unexpected element found.");
 			}
+			else if (aXMLElement.mValue == __S("Music"))
+			{
+				if (!ParseMusicResource(aXMLElement))
+					return false;
+
+				if (!mXMLParser->NextElement(&aXMLElement))
+					return false;
+
+				if (aXMLElement.mType != XMLElement::TYPE_END)
+					return Fail("Unexpected element found.");
+			}
 			else if (aXMLElement.mValue == __S("Font"))
 			{
 				if (!ParseFontResource(aXMLElement))
@@ -677,6 +741,36 @@ bool ResourceManager::DoLoadImage(ImageRes *theRes) {
 	if (aGLImage->mPurgeBits)
 		aGLImage->PurgeBits();
 
+	ResourceLoadedHook(theRes);
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+bool ResourceManager::DoLoadMusic(MusicRes* theRes)
+{
+	MusicRes *aRes = theRes;
+
+	int aMusicId = -1;
+	if (mApp->mMusicInterface)
+		aMusicId = mApp->mMusicInterface->GetFreeMusicId();
+	
+	if (aMusicId < 0)
+		return Fail("Out of free music ids");
+    
+	if (mApp->mMusicInterface) {
+		if (!mApp->mMusicInterface->LoadMusic(aMusicId, aRes->mPath))
+			return Fail(StrFormat("Failed to load music: %s", aRes->mPath.c_str()));
+	}
+    
+	if (aRes->mVolume >= 0 && mApp->mMusicInterface)
+		mApp->mMusicInterface->SetSongVolume(aMusicId, aRes->mVolume);
+	
+	// Note: Panning is not currently supported by MusicInterface
+	// if (aRes->mPanning != 0)
+	// 	mApp->mMusicInterface->SetSongPan(aMusicId, aRes->mPanning);
+    
+	aRes->mMusicId = aMusicId;
 	ResourceLoadedHook(theRes);
 	return true;
 }
@@ -876,6 +970,15 @@ bool ResourceManager::LoadNextResource()
 
 				return DoLoadFont(aFontRes);
 			}
+
+			case ResType_Music:
+			{
+				MusicRes *aMusicRes = (MusicRes*)aRes;
+				if (aMusicRes->mMusicId != -1)
+					continue;
+
+				return DoLoadMusic(aMusicRes);
+			}
 		}
 	}
 
@@ -921,6 +1024,8 @@ void ResourceManager::DumpCurResGroup(std::string& theDestStr)
 			theDestStr += std::string("     res is a sound\r\n");
 		else if (br->mType == ResType_Font)
 			theDestStr += std::string("     res is a font\r\n");
+		else if (br->mType == ResType_Music)
+			theDestStr += std::string("     res is a music\r\n");
 
 		if (it == mCurResGroupListItr)
 			theDestStr += std::string("iterator has reached mCurResGroupItr\r\n");
@@ -984,6 +1089,13 @@ int	ResourceManager::GetNumSounds(const std::string &theGroup)
 	
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+int ResourceManager::GetNumMusic(const std::string &theGroup)
+{
+	return GetNumResources(theGroup, mMusicMap);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 int ResourceManager::GetNumFonts(const std::string &theGroup)
 {
 	return GetNumResources(theGroup, mFontMap);
@@ -993,7 +1105,7 @@ int ResourceManager::GetNumFonts(const std::string &theGroup)
 ///////////////////////////////////////////////////////////////////////////////
 int	ResourceManager::GetNumResources(const std::string &theGroup)
 {
-	return GetNumImages(theGroup) + GetNumSounds(theGroup) + GetNumFonts(theGroup);
+	return GetNumImages(theGroup) + GetNumSounds(theGroup) + GetNumMusic(theGroup) + GetNumFonts(theGroup);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1057,7 +1169,7 @@ int	ResourceManager::GetSoundThrow(const std::string &theId)
 	if (anItr != mSoundMap.end())
 	{
 		SoundRes *aRes = (SoundRes*)anItr->second;
-		if (aRes->mSoundId!=-1)
+		if (aRes->mSoundId!=-1 || theId.find("MUSIC_") == 0)
 			return aRes->mSoundId;
 
 		if (mAllowMissingProgramResources && aRes->mFromProgram)
@@ -1067,6 +1179,25 @@ int	ResourceManager::GetSoundThrow(const std::string &theId)
 
 	Fail(StrFormat("Sound resource not found: %s",theId.c_str()));
 	throw ResourceManagerException(GetErrorText());		
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+int ResourceManager::GetMusicThrow(const std::string &theId)
+{
+	ResMap::iterator anItr = mMusicMap.find(theId);
+	if (anItr != mMusicMap.end())
+	{
+		MusicRes *aRes = (MusicRes*)anItr->second;
+		if (aRes->mMusicId != -1)
+			return aRes->mMusicId;
+
+		if (mAllowMissingProgramResources && aRes->mFromProgram)
+			return -1;
+	}
+
+	Fail(StrFormat("Music resource not found: %s", theId.c_str()));
+	throw ResourceManagerException(GetErrorText());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1099,7 +1230,6 @@ void ResourceManager::SetAllowMissingProgramImages(bool allow)
 ///////////////////////////////////////////////////////////////////////////////
 bool ResourceManager::ReplaceImage(const std::string &theId, Image *theImage)
 {
-
 	ResMap::iterator anItr = mImageMap.find(theId);
 	if (anItr != mImageMap.end())
 	{
@@ -1108,8 +1238,8 @@ bool ResourceManager::ReplaceImage(const std::string &theId, Image *theImage)
 		((ImageRes*)anItr->second)->mImage.mOwnsUnshared = true;
 		return true;
 	}
-	else
-		return false;
+
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1119,12 +1249,29 @@ bool ResourceManager::ReplaceSound(const std::string &theId, int theSound)
 	ResMap::iterator anItr = mSoundMap.find(theId);
 	if (anItr != mSoundMap.end())
 	{
-		anItr->second->DeleteResource();
-		((SoundRes*)anItr->second)->mSoundId = theSound;
+		SoundRes *aRes = (SoundRes*)anItr->second;
+		aRes->DeleteResource();
+		aRes->mSoundId = theSound;
 		return true;
 	}
-	else
-		return false;
+
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+bool ResourceManager::ReplaceMusic(const std::string &theId, int theMusic)
+{
+	ResMap::iterator anItr = mMusicMap.find(theId);
+	if (anItr != mMusicMap.end())
+	{
+		MusicRes *aRes = (MusicRes*)anItr->second;
+		aRes->DeleteResource();
+		aRes->mMusicId = theMusic;
+		return true;
+	}
+
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

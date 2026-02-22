@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -193,58 +193,59 @@ typedef enum
 /**
  * A signed 8-bit integer type.
  */
+typedef int8_t Sint8;
 #define SDL_MAX_SINT8   ((Sint8)0x7F)           /* 127 */
 #define SDL_MIN_SINT8   ((Sint8)(~0x7F))        /* -128 */
-typedef int8_t Sint8;
 
 /**
  * An unsigned 8-bit integer type.
  */
+typedef uint8_t Uint8;
 #define SDL_MAX_UINT8   ((Uint8)0xFF)           /* 255 */
 #define SDL_MIN_UINT8   ((Uint8)0x00)           /* 0 */
-typedef uint8_t Uint8;
 
 /**
  * A signed 16-bit integer type.
  */
+typedef int16_t Sint16;
 #define SDL_MAX_SINT16  ((Sint16)0x7FFF)        /* 32767 */
 #define SDL_MIN_SINT16  ((Sint16)(~0x7FFF))     /* -32768 */
-typedef int16_t Sint16;
 
 /**
  * An unsigned 16-bit integer type.
  */
+typedef uint16_t Uint16;
 #define SDL_MAX_UINT16  ((Uint16)0xFFFF)        /* 65535 */
 #define SDL_MIN_UINT16  ((Uint16)0x0000)        /* 0 */
-typedef uint16_t Uint16;
 
 /**
  * A signed 32-bit integer type.
  */
+typedef int32_t Sint32;
 #define SDL_MAX_SINT32  ((Sint32)0x7FFFFFFF)    /* 2147483647 */
 #define SDL_MIN_SINT32  ((Sint32)(~0x7FFFFFFF)) /* -2147483648 */
-typedef int32_t Sint32;
 
 /**
  * An unsigned 32-bit integer type.
  */
+typedef uint32_t Uint32;
 #define SDL_MAX_UINT32  ((Uint32)0xFFFFFFFFu)   /* 4294967295 */
 #define SDL_MIN_UINT32  ((Uint32)0x00000000)    /* 0 */
-typedef uint32_t Uint32;
 
 /**
  * A signed 64-bit integer type.
  */
+typedef int64_t Sint64;
 #define SDL_MAX_SINT64  ((Sint64)0x7FFFFFFFFFFFFFFFll)      /* 9223372036854775807 */
 #define SDL_MIN_SINT64  ((Sint64)(~0x7FFFFFFFFFFFFFFFll))   /* -9223372036854775808 */
-typedef int64_t Sint64;
 
 /**
  * An unsigned 64-bit integer type.
  */
+typedef uint64_t Uint64;
 #define SDL_MAX_UINT64  ((Uint64)0xFFFFFFFFFFFFFFFFull)     /* 18446744073709551615 */
 #define SDL_MIN_UINT64  ((Uint64)(0x0000000000000000ull))   /* 0 */
-typedef uint64_t Uint64;
+
 
 /* @} *//* Basic data types */
 
@@ -267,9 +268,9 @@ typedef uint64_t Uint64;
 #ifndef SDL_PRIs64
 #if defined(__WIN32__) || defined(__GDK__)
 #define SDL_PRIs64 "I64d"
-#elif defined(PRIs64)
-#define SDL_PRIs64 PRIs64
-#elif defined(__LP64__) && !defined(__APPLE__)
+#elif defined(PRId64)
+#define SDL_PRIs64 PRId64
+#elif defined(__LP64__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__)
 #define SDL_PRIs64 "ld"
 #else
 #define SDL_PRIs64 "lld"
@@ -466,6 +467,11 @@ typedef void (SDLCALL *SDL_free_func)(void *mem);
 /**
  * Get the original set of SDL memory functions
  *
+ * \param malloc_func filled with malloc function.
+ * \param calloc_func filled with calloc function.
+ * \param realloc_func filled with realloc function.
+ * \param free_func filled with free function.
+ *
  * \since This function is available since SDL 2.24.0.
  */
 extern DECLSPEC void SDLCALL SDL_GetOriginalMemoryFunctions(SDL_malloc_func *malloc_func,
@@ -475,6 +481,11 @@ extern DECLSPEC void SDLCALL SDL_GetOriginalMemoryFunctions(SDL_malloc_func *mal
 
 /**
  * Get the current set of SDL memory functions
+ *
+ * \param malloc_func filled with malloc function.
+ * \param calloc_func filled with calloc function.
+ * \param realloc_func filled with realloc function.
+ * \param free_func filled with free function.
  *
  * \since This function is available since SDL 2.0.7.
  */
@@ -486,6 +497,13 @@ extern DECLSPEC void SDLCALL SDL_GetMemoryFunctions(SDL_malloc_func *malloc_func
 /**
  * Replace SDL's memory allocation functions with a custom set
  *
+ * \param malloc_func custom malloc function.
+ * \param calloc_func custom calloc function.
+ * \param realloc_func custom realloc function.
+ * \param free_func custom free function.
+ * \returns 0 on success or -1 on failure; call SDL_GetError() for more
+ *          information.
+ *
  * \since This function is available since SDL 2.0.7.
  */
 extern DECLSPEC int SDLCALL SDL_SetMemoryFunctions(SDL_malloc_func malloc_func,
@@ -495,6 +513,8 @@ extern DECLSPEC int SDLCALL SDL_SetMemoryFunctions(SDL_malloc_func malloc_func,
 
 /**
  * Get the number of outstanding (unfreed) allocations
+ *
+ * \returns number of unfreed allocations.
  *
  * \since This function is available since SDL 2.0.7.
  */
@@ -564,6 +584,7 @@ SDL_FORCE_INLINE void SDL_memset4(void *dst, Uint32 val, size_t dwords)
         return;
     }
     switch (dwords % 4) {
+        default:
         case 0: do {    *_p++ = _val;   SDL_FALLTHROUGH;
         case 3:         *_p++ = _val;   SDL_FALLTHROUGH;
         case 2:         *_p++ = _val;   SDL_FALLTHROUGH;
@@ -714,6 +735,12 @@ extern DECLSPEC size_t SDLCALL SDL_iconv(SDL_iconv_t cd, const char **inbuf,
  * This function converts a buffer or string between encodings in one pass,
  * returning a string that must be freed with SDL_free() or NULL on error.
  *
+ * \param tocode the character encoding of the output string.
+ * \param fromcode the character encoding of data in `inbuf`.
+ * \param inbuf the string to convert to a different encoding.
+ * \param inbytesleft the size of the input string _in bytes_.
+ * \returns a new string, converted to the new encoding, or NULL on error.
+ *
  * \since This function is available since SDL 2.0.0.
  */
 extern DECLSPEC char *SDLCALL SDL_iconv_string(const char *tocode,
@@ -747,6 +774,13 @@ size_t wcslcpy(wchar_t *dst, const wchar_t *src, size_t size);
 
 #ifndef HAVE_WCSLCAT
 size_t wcslcat(wchar_t *dst, const wchar_t *src, size_t size);
+#endif
+
+#ifndef _WIN32
+/* strdup is not ANSI but POSIX, and its prototype might be hidden... */
+/* not for windows: might conflict with string.h where strdup may have
+ * dllimport attribute: https://github.com/libsdl-org/SDL/issues/12948 */
+char *strdup(const char *str);
 #endif
 
 /* Starting LLVM 16, the analyser errors out if these functions do not have
@@ -798,6 +832,11 @@ SDL_FORCE_INLINE void *SDL_memcpy4(SDL_OUT_BYTECAP(dwords*4) void *dst, SDL_IN_B
  *
  * Otherwise store a * b via ret and return 0.
  *
+ * \param a the multiplicand.
+ * \param b the multiplier.
+ * \param ret on non-overflow output, stores the multiplication result.
+ * \returns -1 on overflow, 0 if result is multiplied without overflow.
+ *
  * \since This function is available since SDL 2.24.0.
  */
 SDL_FORCE_INLINE int SDL_size_mul_overflow (size_t a,
@@ -828,6 +867,11 @@ SDL_FORCE_INLINE int _SDL_size_mul_overflow_builtin (size_t a,
  * If a + b would overflow, return -1.
  *
  * Otherwise store a + b via ret and return 0.
+ *
+ * \param a the first addend.
+ * \param b the second addend.
+ * \param ret on non-overflow output, stores the addition result.
+ * \returns false on overflow, true if result is added without overflow.
  *
  * \since This function is available since SDL 2.24.0.
  */

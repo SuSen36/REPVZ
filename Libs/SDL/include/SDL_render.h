@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -30,6 +30,7 @@
  * - single pixel lines
  * - filled rectangles
  * - texture images
+ * - 2D polygons
  *
  * The primitives may be drawn in opaque, blended, or additive modes.
  *
@@ -38,7 +39,7 @@
  * may also be stretched with linear interpolation.
  *
  * This API is designed to accelerate simple 2D operations. You may want more
- * functionality such as polygons and particle effects and in that case you
+ * functionality such as 3D polygons and particle effects and in that case you
  * should use SDL's OpenGL/Direct3D support or one of the many good 3D
  * engines.
  *
@@ -244,7 +245,7 @@ extern DECLSPEC SDL_Renderer * SDLCALL SDL_CreateRenderer(SDL_Window * window,
  * \since This function is available since SDL 2.0.0.
  *
  * \sa SDL_CreateRenderer
- * \sa SDL_CreateWindowRenderer
+ * \sa SDL_CreateWindowAndRenderer
  * \sa SDL_DestroyRenderer
  */
 extern DECLSPEC SDL_Renderer * SDLCALL SDL_CreateSoftwareRenderer(SDL_Surface * surface);
@@ -787,7 +788,7 @@ extern DECLSPEC int SDLCALL SDL_SetRenderTarget(SDL_Renderer *renderer,
  * Get the current render target.
  *
  * The default render target is the window for which the renderer was created,
- * and is reported a NULL here.
+ * and is reported as NULL here.
  *
  * \param renderer the rendering context.
  * \returns the current render target or NULL for the default render target.

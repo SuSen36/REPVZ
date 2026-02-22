@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -426,20 +426,6 @@ extern "C" {
  * activated.
  */
 #define SDL_HINT_ENABLE_SCREEN_KEYBOARD "SDL_ENABLE_SCREEN_KEYBOARD"
-
-/**
- * A variable that controls whether Steam Controllers should be exposed using
- * the SDL joystick and game controller APIs
- *
- * The variable can be set to the following values:
- *
- * - "0": Do not scan for Steam Controllers
- * - "1": Scan for Steam Controllers (the default)
- *
- * The default value is "1". This hint must be set before initializing the
- * joystick subsystem.
- */
-#define SDL_HINT_ENABLE_STEAM_CONTROLLERS "SDL_ENABLE_STEAM_CONTROLLERS"
 
 /**
  * A variable controlling verbosity of the logging of SDL events pushed onto
@@ -1276,8 +1262,8 @@ extern "C" {
  *
  * This variable can be set to the following values:
  *
- * - "0": RAWINPUT drivers are not used
- * - "1": RAWINPUT drivers are used (the default)
+ * - "0": RAWINPUT drivers are not used (the default)
+ * - "1": RAWINPUT drivers are used
  */
 #define SDL_HINT_JOYSTICK_RAWINPUT "SDL_JOYSTICK_RAWINPUT"
 
@@ -1436,6 +1422,27 @@ extern "C" {
  * This variable is currently only used by the Linux joystick driver.
  */
 #define SDL_HINT_JOYSTICK_DEVICE "SDL_JOYSTICK_DEVICE"
+
+
+/**
+ * A variable containing a list of devices and their desired number of haptic
+ * (force feedback) enabled axis.
+ *
+ * The format of the string is a comma separated list of USB VID/PID pairs in
+ * hexadecimal form plus the number of desired axes, e.g.
+ *
+ * `0xAAAA/0xBBBB/1,0xCCCC/0xDDDD/3`
+ *
+ * This hint supports a "wildcard" device that will set the number of haptic
+ * axes on all initialized haptic devices which were not defined explicitly in
+ * this hint.
+ *
+ * `0xFFFF/0xFFFF/1`
+ *
+ * This hint should be set before a controller is opened. The number of haptic
+ * axes won't exceed the number of real axes found on the device.
+ */
+#define SDL_HINT_JOYSTICK_HAPTIC_AXES "SDL_JOYSTICK_HAPTIC_AXES"
 
 /**
  * A variable controlling whether joysticks on Linux will always treat 'hat'
@@ -2018,6 +2025,37 @@ extern "C" {
 #define SDL_HINT_ROG_GAMEPAD_MICE_EXCLUDED "SDL_ROG_GAMEPAD_MICE_EXCLUDED"
 
 /**
+ * Variable controlling the width of the PS2's framebuffer in pixels
+ *
+ * By default, this variable is "640"
+ */
+#define SDL_HINT_PS2_GS_WIDTH    "SDL_PS2_GS_WIDTH"
+
+/**
+ * Variable controlling the height of the PS2's framebuffer in pixels
+ *
+ * By default, this variable is "448"
+ */
+#define SDL_HINT_PS2_GS_HEIGHT    "SDL_PS2_GS_HEIGHT"
+
+/**
+ * Variable controlling whether the signal is interlaced or progressive
+ *
+ * - "0": Image is interlaced. (default)
+ * - "1": Image is progressive
+ */
+#define SDL_HINT_PS2_GS_PROGRESSIVE    "SDL_PS2_GS_PROGRESSIVE"
+
+/**
+ * Variable controlling the video mode of the console
+ *
+ * - "": Console-native. (default)
+ * - "NTSC": 60hz region
+ * - "PAL": 50hz region
+ */
+#define SDL_HINT_PS2_GS_MODE    "SDL_PS2_GS_MODE"
+
+/**
  * A variable controlling if VSYNC is automatically disable if doesn't reach
  * the enough FPS
  *
@@ -2297,7 +2335,7 @@ extern "C" {
 
 /**
  * A variable controlling whether the libdecor Wayland backend is preferred
- * over native decrations.
+ * over native decorations.
  *
  * When this hint is set, libdecor will be used to provide window decorations,
  * even if xdg-decoration is available. (Note that, by default, libdecor will
@@ -2620,7 +2658,7 @@ extern "C" {
  * Force SDL to use Critical Sections for mutexes on Windows.
  *
  * On Windows 7 and newer, Slim Reader/Writer Locks are available. They offer
- * better performance, allocate no kernel ressources and use less memory. SDL
+ * better performance, allocate no kernel resources and use less memory. SDL
  * will fall back to Critical Sections on older OS versions or if forced to by
  * this hint.
  *

@@ -188,7 +188,6 @@ void TitleScreen::Update()
 
 	if (mTitleState == TitleState::TITLESTATE_WAITING_FOR_FIRST_DRAW)
 	{
-		mApp->mMusic->MusicTitleScreenInit();
 		mApp->StartLoadingThread();
 
 		mTitleState = TitleState::TITLESTATE_POPCAP_LOGO;
@@ -247,6 +246,7 @@ void TitleScreen::Update()
 	if (mNeedToInit)
 	{
 		mNeedToInit = false;
+		mApp->mMusic->MusicTitleScreenInit();
 
 		mStartButton->mLabel = TodStringTranslate(__S("[LOADING]"));
 		mStartButton->SetFont(FONT_BRIANNETOD16);

@@ -25,6 +25,38 @@
   <Sound id="BUTTONCLICK" path="buttonclick" />
   <Sound id="LOADINGBAR_FLOWER" path="loadingbar_flower" />
   <Sound id="LOADINGBAR_ZOMBIE" path="loadingbar_zombie" />
+
+  <SetDefaults path="sounds/music" idprefix="MUSIC_" />
+  <Music id="CREDITS_ZOMBIES_ON_YOUR_LAWN" path="ZombiesOnYourLawn" />
+  <Music id="CHOOSE_YOUR_SEEDS" path="choose_your_seeds" />
+  <Music id="CHOOSE_YOUR_SEEDS_HIHATS" path="choose_your_seeds_hihats" />
+  <Music id="CONVEYER" path="conveyer" />
+  <Music id="CONVEYER_HIHATS" path="conveyer_hihats" />
+  <Music id="DAY_GRASSWALK" path="day_grasswalk" />
+  <Music id="DAY_GRASSWALK_DRUMS" path="grass_drums" />
+  <Music id="DAY_GRASSWALK_HIHATS" path="day_grasswalk_hihats" />
+  <Music id="FINAL_BOSS_BRAINIAC_MANIAC" path="final_boss_brainiac_maniac" />
+  <Music id="FINAL_BOSS_BRAINIAC_MANIAC_HIHATS" path="final_boss_brainiac_maniac_hihats" />
+  <Music id="FOG_RIGORMORMIST" path="fog_rigormormist" />
+  <Music id="FOG_RIGORMORMIST_DRUMS" path="fog_drums" />
+  <Music id="FOG_RIGORMORMIST_HIHATS" path="fog_rigormormist_hihats" />
+  <Music id="MINIGAME_LOONBOON" path="minigame_loonboon" />
+  <Music id="MINIGAME_LOONBOON_HIHATS" path="minigame_loonboon_hihats" />
+  <Music id="NIGHT_MOONGRAINS" path="night_moongrains" />
+  <Music id="NIGHT_MOONGRAINS_DRUMS" path="night_drums" />
+  <Music id="NIGHT_MOONGRAINS_HIHATS" path="night_moongrains_hihats" />
+  <Music id="POOL_WATERYGRAVES" path="pool_waterygraves" />
+  <Music id="POOL_WATERYGRAVES_DRUMS" path="pool_drums" />
+  <Music id="POOL_WATERYGRAVES_HIHATS" path="pool_waterygraves_hihats" />
+  <Music id="PUZZLE_CEREBRAWL" path="puzzle_cerebrawl" />
+  <Music id="PUZZLE_CEREBRAWL_HIHATS" path="puzzle_cerebrawl_hihats" />
+  <Music id="ROOF_GRAZETHEROOF" path="roof_grazetheroof" />
+  <Music id="ROOF_GRAZETHEROOF_DRUMS" path="roof_drums" />
+  <Music id="ROOF_GRAZETHEROOF_HIHATS" path="roof_grazetheroof_hihats" />
+  <Music id="TITLE_CRAZY_DAVE_MAIN_THEME" path="title_crazy_dave_main_theme" />
+  <Music id="TITLE_CRAZY_DAVE_MAIN_THEME_HIHATS" path="title_crazy_dave_main_theme_hihats" />
+  <Music id="ZEN_GARDEN" path="zen_garden" />
+  <Music id="ZEN_GARDEN_HIHATS" path="zen_garden_hihats" />
 </Resources>
   
 <Resources id="LoadingFonts">

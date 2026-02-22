@@ -141,9 +141,7 @@ public:
     const char*         mDirectory;                     ///前缀对应的贴图所在文件夹，如“images\”
 };
 
-SexyString /**/  DefinitionGetCompiledFilePathFromXMLFilePath(const SexyString& theXMLFilePath);
-bool                    IsFileInPakFile(const SexyString& theFilePath);
-bool                    DefinitionReadCompiledFile(const SexyString& theCompiledFilePath, DefMap* theDefMap, void* theDefinition);
+
 void                    DefinitionFillWithDefaults(DefMap* theDefMap, void* theDefinition);
 void                    DefinitionXmlError(XMLParser* theXmlParser, char* theFormat, ...);
 bool                    DefSymbolValueFromString(DefSymbol* theSymbolMap, const char* theName, int* theResultValue);
@@ -159,37 +157,9 @@ bool                    DefinitionReadFlagField(XMLParser* theXmlParser, const S
 bool                    DefinitionReadImageField(XMLParser* theXmlParser, Image** theImage);
 bool                    DefinitionReadFontField(XMLParser* theXmlParser, Font** theFont);
 bool                    DefinitionReadField(XMLParser* theXmlParser, DefMap* theDefMap, void* theDefinition, bool* theDone);
-bool                    DefinitionWriteCompiledFile(const SexyString& theCompiledFilePath, DefMap* theDefMap, void* theDefinition);
-bool                    DefinitionCompileFile(const SexyString theXMLFilePath, const SexyString& theCompiledFilePath, DefMap* theDefMap, void* theDefinition);
 
-void                    DefMapWriteToCache(void*& theWritePtr, DefMap* theDefMap, void* theDefinition);
-void                    DefWriteToCacheString(void*& theWritePtr, char** theValue);
-void                    DefWriteToCacheArray(void*& theWritePtr, DefinitionArrayDef* theValue, DefMap* theDefMap);
-void                    DefWriteToCacheFloatTrack(void*& theWritePtr, FloatParameterTrack* theValue);
-void                    DefWriteToCacheImage(void*& theWritePtr, Image** theValue);
-void                    DefWriteToCacheFont(void*& theWritePtr, Font** theValue);
+void*                   DefinitionAlloc(int theSize);
 
-void*                   DefinitionCompressCompiledBuffer(void* theBuffer, unsigned int theBufferSize, unsigned int* theResultSize);
-
-/*inline*/ unsigned int DefGetSizeString(char** theValue);
-/*inline*/ unsigned int DefinitionGetArraySize(DefinitionArrayDef* theValue, DefMap* theDefMap);
-/*inline*/ unsigned int DefGetSizeFloatTrack(FloatParameterTrack* theValue);
-/*inline*/ unsigned int DefGetSizeImage(Image** theValue);
-/*inline*/ unsigned int DefGetSizeFont(Font** theValue);
-
-/*inline*/ unsigned int DefinitionGetDeepSize(DefMap* theDefMap, void* theDefinition);
-/*inline*/ unsigned int DefinitionGetSize(DefMap* theDefMap, void* theDefinition);
-/*inline*/ void*        DefinitionAlloc(int theSize);
-void*                   DefinitionUncompressCompiledBuffer(void* theCompressedBuffer, size_t theCompressedBufferSize, size_t& theUncompressedSize, const SexyString& theCompiledFilePath);
-uint /**/        DefinitionCalcHashSymbolMap(int aSchemaHash, DefSymbol* theSymbolMap);
-uint /**/        DefinitionCalcHashDefMap(int aSchemaHash, DefMap* theDefMap, TodList<DefMap*>& theProgressMaps);
-uint /**/        DefinitionCalcHash(DefMap* theDefMap);
-inline bool             DefReadFromCacheString(void*& theReadPtr, char** theString);
-inline bool             DefReadFromCacheArray(void*& theReadPtr, DefinitionArrayDef* theArray, DefMap* theDefMap);
-inline bool             DefReadFromCacheImage(void*& theReadPtr, Image** theImage);
-inline bool             DefReadFromCacheFont(void*& theReadPtr, Font** theFont);
-inline bool             DefReadFromCacheFloatTrack(void*& theReadPtr, FloatParameterTrack* theTrack);
-bool                    DefMapReadFromCache(void*& theReadPtr, DefMap* theDefMap, void* theDefinition);
 bool                    DefinitionCompileAndLoad(const SexyString& theXMLFilePath, DefMap* theDefMap, void* theDefinition);
 bool                    DefinitionLoadMap(XMLParser* theXmlParser, DefMap* theDefMap, void* theDefinition);
 bool                    DefinitionLoadImage(Image** theImage, const SexyString& theName);

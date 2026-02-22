@@ -34,7 +34,8 @@ public:
 	{
 		ResType_Image,
 		ResType_Sound,
-		ResType_Font
+		ResType_Font,
+		ResType_Music
 	};
 
 
@@ -83,6 +84,16 @@ public:
 		virtual void DeleteResource();
 	};
 
+	struct MusicRes : public BaseRes
+	{
+		int mMusicId;
+		double mVolume;
+		int mPanning;
+
+		MusicRes() { mType = ResType_Music; }
+		virtual void DeleteResource();
+	};
+
 	struct FontRes : public BaseRes
 	{
 		Font *mFont;
@@ -111,6 +122,7 @@ public:
 
 	ResMap					mImageMap;
 	ResMap					mSoundMap;
+	ResMap					mMusicMap;
 	ResMap					mFontMap;
 
 	XMLParser*				mXMLParser;
@@ -133,6 +145,7 @@ public:
 
 	virtual bool			ParseCommonResource(XMLElement &theElement, BaseRes *theRes, ResMap &theMap);
 	virtual bool			ParseSoundResource(XMLElement &theElement);
+	virtual bool			ParseMusicResource(XMLElement &theElement);
 	virtual bool			ParseImageResource(XMLElement &theElement);
 	virtual bool			ParseFontResource(XMLElement &theElement);
 	virtual bool			ParseSetDefaults(XMLElement &theElement);
@@ -145,6 +158,7 @@ public:
 	virtual bool			DoLoadImage(ImageRes *theRes);
 	virtual bool			DoLoadFont(FontRes* theRes);
 	virtual bool			DoLoadSound(SoundRes* theRes);
+	virtual bool			DoLoadMusic(MusicRes* theRes);
 
 	int						GetNumResources(const std::string &theGroup, ResMap &theMap);
 
@@ -161,6 +175,7 @@ public:
 
 	int						GetNumImages(const std::string &theGroup);
 	int						GetNumSounds(const std::string &theGroup);
+	int						GetNumMusic(const std::string &theGroup);
 	int						GetNumFonts(const std::string &theGroup);
 	int						GetNumResources(const std::string &theGroup);
 
@@ -172,6 +187,7 @@ public:
 
 	bool					ReplaceImage(const std::string &theId, Image *theImage);
 	bool					ReplaceSound(const std::string &theId, int theSound);
+	bool					ReplaceMusic(const std::string &theId, int theMusic);
 	bool					ReplaceFont(const std::string &theId, Font *theFont);
 
 	void					DeleteImage(const std::string &theName);
@@ -182,6 +198,7 @@ public:
 
 	SharedImageRef			GetImage(const std::string &theId);
 	int						GetSound(const std::string &theId);
+	int						GetMusic(const std::string &theId);
 	Font*					GetFont(const std::string &theId);
 	
 	// Returns all the XML attributes associated with the image
@@ -190,6 +207,7 @@ public:
 	// These throw a ResourceManagerException if the resource is not found
 	virtual SharedImageRef	GetImageThrow(const std::string &theId);
 	virtual int				GetSoundThrow(const std::string &theId);
+	virtual int				GetMusicThrow(const std::string &theId);
 	virtual Font*			GetFontThrow(const std::string &theId);
 
 	void					SetAllowMissingProgramImages(bool allow);

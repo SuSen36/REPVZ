@@ -1562,6 +1562,8 @@ void LawnApp::LoadingThreadProc()
 	if (!TodLoadResources("LoaderBar"))
 		return;
 
+	mMusic->MusicInit();
+
 	TodStringListLoad("Properties/LawnStrings.txt");
 
 	if (mTitleScreen)
@@ -1590,8 +1592,6 @@ void LawnApp::LoadingThreadProc()
 
 	aHesitationResources.EndBracket();
 
-	mMusic->MusicInit();
-
 	mPoolEffect = new PoolEffect();
 	mPoolEffect->PoolEffectInitialize();
 	mZenGarden = new ZenGarden();
@@ -1609,6 +1609,7 @@ void LawnApp::LoadingThreadProc()
 
 	GetNumPreloadingTasks();
 	LoadGroup("LoadingSounds", 54);
+	mMusic->MusicInit();
 	TodHesitationTrace("finished loading");
 }
 

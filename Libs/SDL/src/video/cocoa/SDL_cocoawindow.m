@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -490,11 +490,14 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
     isMoving = NO;
     isDragAreaRunning = NO;
     pendingWindowWarpX = pendingWindowWarpY = INT_MAX;
+    liveResizeTimer = nil;
 
     center = [NSNotificationCenter defaultCenter];
 
     if ([window delegate] != nil) {
         [center addObserver:self selector:@selector(windowDidExpose:) name:NSWindowDidExposeNotification object:window];
+        [center addObserver:self selector:@selector(windowWillStartLiveResize:) name:NSWindowWillStartLiveResizeNotification object:window];
+        [center addObserver:self selector:@selector(windowDidEndLiveResize:) name:NSWindowDidEndLiveResizeNotification object:window];
         [center addObserver:self selector:@selector(windowDidMove:) name:NSWindowDidMoveNotification object:window];
         [center addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:window];
         [center addObserver:self selector:@selector(windowDidMiniaturize:) name:NSWindowDidMiniaturizeNotification object:window];
@@ -628,6 +631,8 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
 
     if ([window delegate] != self) {
         [center removeObserver:self name:NSWindowDidExposeNotification object:window];
+        [center removeObserver:self name:NSWindowWillStartLiveResizeNotification object:window];
+        [center removeObserver:self name:NSWindowDidEndLiveResizeNotification object:window];
         [center removeObserver:self name:NSWindowDidMoveNotification object:window];
         [center removeObserver:self name:NSWindowDidResizeNotification object:window];
         [center removeObserver:self name:NSWindowDidMiniaturizeNotification object:window];
@@ -738,6 +743,36 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
     SDL_SendWindowEvent(_data.window, SDL_WINDOWEVENT_EXPOSED, 0, 0);
 }
 
+- (void)onLiveResizeTimerFire:(id)sender
+{
+    SDL_OnWindowLiveResizeUpdate(_data.window);
+}
+
+- (void)windowWillStartLiveResize:(NSNotification *)aNotification
+{
+    // We'll try to maintain 60 FPS during live resizing
+    const NSTimeInterval interval = 1.0 / 60.0;
+
+    NSMethodSignature *invocationSig = [Cocoa_WindowListener
+        instanceMethodSignatureForSelector:@selector(onLiveResizeTimerFire:)];
+    NSInvocation *invocation = [NSInvocation
+        invocationWithMethodSignature:invocationSig];
+    [invocation setTarget:self];
+    [invocation setSelector:@selector(onLiveResizeTimerFire:)];
+
+    liveResizeTimer = [NSTimer scheduledTimerWithTimeInterval:interval
+                                                      invocation:invocation
+                                                      repeats:TRUE];
+
+    [[NSRunLoop currentRunLoop] addTimer:liveResizeTimer forMode:NSRunLoopCommonModes];
+}
+
+- (void)windowDidEndLiveResize:(NSNotification *)aNotification
+{
+    [liveResizeTimer invalidate];
+    liveResizeTimer = nil;
+}
+
 - (void)windowWillMove:(NSNotification *)aNotification
 {
     if ([_data.nswindow isKindOfClass:[SDLWindow class]]) {
@@ -819,6 +854,11 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
        or resizing from a corner */
     SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, x, y);
     SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED, w, h);
+
+    /* The OS can resize the window automatically if the display density
+       changes while the window is miniaturized or hidden */
+    if (![nswindow isVisible])
+        return;
 
     /* isZoomed always returns true if the window is not resizable */
     if ((window->flags & SDL_WINDOW_RESIZABLE) && [nswindow isZoomed]) {
@@ -1774,12 +1814,12 @@ int Cocoa_CreateWindow(_THIS, SDL_Window * window)
     }
 #endif
 
-    if (videodata.allow_spaces) {
+    /* resizable windows are Spaces-friendly: they get the "go fullscreen" toggle button on their titlebar. */
+    if ((window->flags & SDL_WINDOW_RESIZABLE) && videodata.allow_spaces) {
         /* we put FULLSCREEN_DESKTOP windows in their own Space, without a toggle button or menubar, later */
-        if (window->flags & SDL_WINDOW_RESIZABLE) {
-            /* resizable windows are Spaces-friendly: they get the "go fullscreen" toggle button on their titlebar. */
-            [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
-        }
+        [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+    } else {
+        [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenNone];
     }
 
     if (window->flags & SDL_WINDOW_ALWAYS_ON_TOP) {
@@ -2084,13 +2124,11 @@ void Cocoa_SetWindowResizable(_THIS, SDL_Window * window, SDL_bool resizable)
     if (![listener isInFullscreenSpace]) {
         SetWindowStyle(window, GetWindowStyle(window));
     }
-    if (videodata.allow_spaces) {
-        if (resizable) {
-            /* resizable windows are Spaces-friendly: they get the "go fullscreen" toggle button on their titlebar. */
-            [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
-        } else {
-            [nswindow setCollectionBehavior:NSWindowCollectionBehaviorManaged];
-        }
+    if (resizable && videodata.allow_spaces) {
+        /* resizable windows are Spaces-friendly: they get the "go fullscreen" toggle button on their titlebar. */
+        [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+    } else {
+        [nswindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenNone];
     }
 }}
 

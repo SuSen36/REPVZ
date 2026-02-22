@@ -2,14 +2,13 @@
 #define __MUSIC_H__
 
 #include <string>
-#include "SexyAppFramework/Common.h"
-#include <bass.h>
+#include <SDL_mixer_ext/SDL_mixer_ext.h>
 
 class LawnApp;
 namespace Sexy
 {
 	class MusicInterface;
-};
+}
 
 enum MusicTune
 {
@@ -33,10 +32,46 @@ enum MusicTune
 enum MusicFile
 {
 	MUSIC_FILE_NONE = -1,
-	MUSIC_FILE_MAIN_MUSIC = 1,
+	MUSIC_FILE_MAIN_MUSIC,
 	MUSIC_FILE_DRUMS,
 	MUSIC_FILE_HIHATS,
 	MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN,
+	MUSIC_FILE_ZEN_GARDEN,
+	MUSIC_FILE_ZEN_GARDEN_DRUMS,
+	MUSIC_FILE_ZEN_GARDEN_HIHATS,
+	MUSIC_FILE_ROOF,
+	MUSIC_FILE_ROOF_DRUMS,
+	MUSIC_FILE_ROOF_HIHATS,
+	MUSIC_FILE_POOL,
+	MUSIC_FILE_POOL_DRUMS,
+	MUSIC_FILE_POOL_HIHATS,
+	MUSIC_FILE_NIGHT,
+	MUSIC_FILE_NIGHT_DRUMS,
+	MUSIC_FILE_NIGHT_HIHATS,
+	MUSIC_FILE_LOONBOON,
+	MUSIC_FILE_LOONBOON_DRUMS,
+	MUSIC_FILE_LOONBOON_HIHATS,
+	MUSIC_FILE_FOG,
+	MUSIC_FILE_FOG_DRUMS,
+	MUSIC_FILE_FOG_HIHATS,
+	MUSIC_FILE_DAY,
+	MUSIC_FILE_DAY_DRUMS,
+	MUSIC_FILE_DAY_HIHATS,
+	MUSIC_FILE_CRAZY_DAVE,
+	MUSIC_FILE_CRAZY_DAVE_DRUMS,
+	MUSIC_FILE_CRAZY_DAVE_HIHATS,
+	MUSIC_FILE_CONVEYOR,
+	MUSIC_FILE_CONVEYOR_DRUMS,
+	MUSIC_FILE_CONVEYOR_HIHATS,
+	MUSIC_FILE_CHOOSE_YOUR_SEEDS,
+	MUSIC_FILE_CHOOSE_YOUR_SEEDS_DRUMS,
+	MUSIC_FILE_CHOOSE_YOUR_SEEDS_HIHATS,
+	MUSIC_FILE_CEREBRAWL,
+	MUSIC_FILE_CEREBRAWL_DRUMS,
+	MUSIC_FILE_CEREBRAWL_HIHATS,
+	MUSIC_FILE_BOSS,
+	MUSIC_FILE_BOSS_DRUMS,
+	MUSIC_FILE_BOSS_HIHATS,
 	NUM_MUSIC_FILES
 };
 
@@ -57,13 +92,6 @@ enum MusicDrumsState
 	MUSIC_DRUMS_FADING
 };
 
-class MusicFileData
-{
-public:
-	unsigned int*				mFileData;
-};
-extern MusicFileData gMusicFileData[MusicFile::NUM_MUSIC_FILES];
-
 class Music
 {
 public:
@@ -79,38 +107,40 @@ public:
 	MusicBurstState				mMusicBurstState;
 	int							mBurstStateCounter;
 	MusicDrumsState				mMusicDrumsState;
-	int							mQueuedDrumTrackPackedOrder;
+	double						mQueuedDrumTrackPackedOrder;
 	int							mDrumsStateCounter;
-	int							mPauseOffset;
-	int							mPauseOffsetDrums;
+	double						mPauseOffset;
+	double						mPauseOffsetDrums;
 	bool						mPaused;
 	bool						mMusicDisabled;
 	int							mFadeOutCounter;
 	int							mFadeOutDuration;
+    int                         mMusicMap[MusicFile::NUM_MUSIC_FILES];
 
 public:
 	Music();
 
 	void						MusicInit();
-	void						MusicDispose() { ; }
+	void						MusicDispose() { }
 	void						MusicUpdate();
 	void						StopAllMusic();
-	/*inline*/ void				PlayMusic(MusicTune theMusicTune, int theOffset = -1, int theDrumsOffset = -1);
-    /*inline*/ HMUSIC 		    GetMusicHandle(MusicFile theMusicFile);
+	/*inline*/ void				PlayMusic(MusicTune theMusicTune, double theOffset = -1.0, double theDrumsOffset = -1.0);
+    /*inline*/ Mix_Music* 		GetMusicHandle(MusicFile theMusicFile);
     void						StartGameMusic();
 	/*inline*/ void				LoadSong(MusicFile theMusicFile, const std::string& theFileName);
 	void						MusicResync();
 	void						UpdateMusicBurst();
 	/*inline*/ void				StartBurst();
 	void						GameMusicPause(bool thePause);
-	void						PlayFromOffset(MusicFile theMusicFile, int theOffset, double theVolume);
+	void						PlayFromOffset(MusicFile theMusicFile, double theOffset, double theVolume);
+	void						PlayMusicNoOffset(MusicFile theMusicFile, double theVolume);
 	void						MusicResyncChannel(MusicFile theMusicFileToMatch, MusicFile theMusicFileToSync);
 	bool						TodLoadMusic(MusicFile theMusicFile, const std::string& theFileName);
 	void						MusicTitleScreenInit();
 	/*inline*/ void				MakeSureMusicIsPlaying(MusicTune theMusicTune);
 	/*inline*/ void				FadeOut(int theFadeOutDuration);
 	void						SetupMusicFileForTune(MusicFile theMusicFile, MusicTune theMusicTune);
-	ulong						GetMusicOrder(MusicFile theMusicFile);
+	double						GetMusicOrder(MusicFile theMusicFile);
 	void						MusicCreditScreenInit();
 	int							GetNumLoadingTasks();
 };

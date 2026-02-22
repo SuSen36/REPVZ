@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -31,6 +31,7 @@
 #include "SDL_waylandwindow.h"
 #include "SDL_waylandvideo.h"
 #include "SDL_waylandtouch.h"
+#include "SDL_waylandshmbuffer.h"
 #include "SDL_hints.h"
 #include "../../SDL_hints_c.h"
 #include "SDL_events.h"
@@ -41,6 +42,7 @@
 #include "xdg-activation-v1-client-protocol.h"
 #include "viewporter-client-protocol.h"
 #include "fractional-scale-v1-client-protocol.h"
+#include "xdg-toplevel-icon-v1-client-protocol.h"
 
 #ifdef HAVE_LIBDECOR_H
 #include <libdecor.h>
@@ -536,6 +538,13 @@ static void handle_configure_xdg_toplevel(void *data,
              */
             width = wind->floating_width;
             height = wind->floating_height;
+
+            /* Clamp resizable windows to the toplevel bounds when mapping, if any were sent. */
+            if ((window->flags & (SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE)) &&
+                wind->toplevel_bounds_width && wind->toplevel_bounds_height) {
+                width = SDL_min(width, wind->toplevel_bounds_width);
+                height = SDL_min(height, wind->toplevel_bounds_height);
+            }
         }
 
         /* xdg_toplevel spec states that this is a suggestion.
@@ -612,9 +621,28 @@ static void handle_close_xdg_toplevel(void *data, struct xdg_toplevel *xdg_tople
     SDL_SendWindowEvent(window->sdlwindow, SDL_WINDOWEVENT_CLOSE, 0, 0);
 }
 
+static void handle_xdg_toplevel_configure_bounds(void *data,
+                                                 struct xdg_toplevel *xdg_toplevel,
+                                                 int32_t width,
+                                                 int32_t height)
+{
+    SDL_WindowData *window = (SDL_WindowData *)data;
+    window->toplevel_bounds_width = width;
+    window->toplevel_bounds_height = height;
+}
+
+static void handle_xdg_toplevel_wm_capabilities(void *data,
+                                                struct xdg_toplevel *xdg_toplevel,
+                                                struct wl_array *capabilities)
+{
+    /* NOP */
+}
+
 static const struct xdg_toplevel_listener toplevel_listener_xdg = {
     handle_configure_xdg_toplevel,
-    handle_close_xdg_toplevel
+    handle_close_xdg_toplevel,
+    handle_xdg_toplevel_configure_bounds,
+    handle_xdg_toplevel_wm_capabilities
 };
 
 static void handle_configure_xdg_popup(void *data,
@@ -1273,6 +1301,12 @@ void Wayland_ShowWindow(_THIS, SDL_Window *window)
         } else {
             libdecor_frame_set_app_id(data->shell_surface.libdecor.frame, c->classname);
             libdecor_frame_map(data->shell_surface.libdecor.frame);
+
+            if (c->xdg_toplevel_icon_manager_v1 && data->xdg_toplevel_icon_v1) {
+                xdg_toplevel_icon_manager_v1_set_icon(c->xdg_toplevel_icon_manager_v1,
+                                                      libdecor_frame_get_xdg_toplevel(data->shell_surface.libdecor.frame),
+                                                      data->xdg_toplevel_icon_v1);
+            }
         }
     } else
 #endif
@@ -1317,6 +1351,12 @@ void Wayland_ShowWindow(_THIS, SDL_Window *window)
             xdg_toplevel_set_app_id(data->shell_surface.xdg.roleobj.toplevel, c->classname);
             xdg_toplevel_add_listener(data->shell_surface.xdg.roleobj.toplevel, &toplevel_listener_xdg, data);
 
+            if (c->xdg_toplevel_icon_manager_v1 && data->xdg_toplevel_icon_v1) {
+                xdg_toplevel_icon_manager_v1_set_icon(c->xdg_toplevel_icon_manager_v1,
+                                                      data->shell_surface.xdg.roleobj.toplevel,
+                                                      data->xdg_toplevel_icon_v1);
+            }
+
             SetMinMaxDimensions(window, SDL_FALSE);
         }
     }
@@ -1344,6 +1384,12 @@ void Wayland_ShowWindow(_THIS, SDL_Window *window)
     } else
 #endif
         if (c->shell.xdg) {
+        /* Create the window decorations */
+        if (data->shell_surface_type != WAYLAND_SURFACE_XDG_POPUP && data->shell_surface.xdg.roleobj.toplevel && c->decoration_manager) {
+            data->server_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(c->decoration_manager, data->shell_surface.xdg.roleobj.toplevel);
+            zxdg_toplevel_decoration_v1_add_listener(data->server_decoration, &decoration_listener, window);
+        }
+
         /* Unlike libdecor we need to call this explicitly to prevent a deadlock.
          * libdecor will call this as part of their configure event!
          * -flibit
@@ -1354,14 +1400,6 @@ void Wayland_ShowWindow(_THIS, SDL_Window *window)
                 WAYLAND_wl_display_flush(c->display);
                 WAYLAND_wl_display_dispatch(c->display);
             }
-        }
-
-        /* Create the window decorations */
-        if (data->shell_surface_type != WAYLAND_SURFACE_XDG_POPUP && data->shell_surface.xdg.roleobj.toplevel && c->decoration_manager) {
-            data->server_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(c->decoration_manager, data->shell_surface.xdg.roleobj.toplevel);
-            zxdg_toplevel_decoration_v1_add_listener(data->server_decoration,
-                                                     &decoration_listener,
-                                                     window);
         }
     } else {
         /* Nothing to see here, just commit. */
@@ -2172,6 +2210,46 @@ void Wayland_SetWindowTitle(_THIS, SDL_Window *window)
     WAYLAND_wl_display_flush(viddata->display);
 }
 
+void Wayland_SetWindowIcon(SDL_VideoDevice *_this, SDL_Window *window, SDL_Surface *icon)
+{
+    SDL_WindowData *wind = window->driverdata;
+    SDL_VideoData *viddata = _this->driverdata;
+    struct xdg_toplevel *toplevel = NULL;
+
+    if (!viddata->xdg_toplevel_icon_manager_v1) {
+        SDL_SetError("wayland: cannot set icon; xdg_toplevel_icon_v1 protocol not supported");
+        return;
+    }
+    if (icon->w != icon->h) {
+        SDL_SetError("wayland: icon width and height must be equal, got %ix%i", icon->w, icon->h);
+        return;
+    }
+    if (wind->xdg_toplevel_icon_v1) {
+        xdg_toplevel_icon_v1_destroy(wind->xdg_toplevel_icon_v1);
+        wind->xdg_toplevel_icon_v1 = NULL;
+    }
+
+    Wayland_ReleaseSHMBuffer(&wind->icon);
+    if (Wayland_AllocSHMBuffer(icon->w, icon->h, &wind->icon) != 0) {
+        SDL_SetError("wayland: failed to allocate SHM buffer for the icon");
+        return;
+    }
+    SDL_PremultiplyAlpha(icon->w, icon->h, icon->format->format, icon->pixels, icon->pitch, SDL_PIXELFORMAT_ARGB8888, wind->icon.shm_data, icon->w * 4);
+    wind->xdg_toplevel_icon_v1 = xdg_toplevel_icon_manager_v1_create_icon(viddata->xdg_toplevel_icon_manager_v1);
+    xdg_toplevel_icon_v1_add_buffer(wind->xdg_toplevel_icon_v1, wind->icon.wl_buffer, 1);
+#ifdef HAVE_LIBDECOR_H
+    if (wind->shell_surface_type == WAYLAND_SURFACE_LIBDECOR && wind->shell_surface.libdecor.frame) {
+        toplevel = libdecor_frame_get_xdg_toplevel(wind->shell_surface.libdecor.frame);
+    } else
+#endif
+        if (wind->shell_surface_type == WAYLAND_SURFACE_XDG_TOPLEVEL && wind->shell_surface.xdg.roleobj.toplevel) {
+            toplevel = wind->shell_surface.xdg.roleobj.toplevel;
+        }
+    if (toplevel) {
+        xdg_toplevel_icon_manager_v1_set_icon(viddata->xdg_toplevel_icon_manager_v1, toplevel, wind->xdg_toplevel_icon_v1);
+    }
+}
+
 void Wayland_SuspendScreenSaver(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
@@ -2239,6 +2317,12 @@ void Wayland_DestroyWindow(_THIS, SDL_Window *window)
         if (wind->fractional_scale) {
             wp_fractional_scale_v1_destroy(wind->fractional_scale);
         }
+
+        if (wind->xdg_toplevel_icon_v1) {
+            xdg_toplevel_icon_v1_destroy(wind->xdg_toplevel_icon_v1);
+        }
+
+        Wayland_ReleaseSHMBuffer(&wind->icon);
 
         SDL_free(wind->outputs);
 
