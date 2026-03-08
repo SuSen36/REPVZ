@@ -1,5 +1,5 @@
 #include "SharedImage.h"
-#include "SexyAppFramework/graphics/GLImage.h"
+#include "SexyAppFramework/graphics/MemoryImage.h"
 #include "../SexyAppBase.h"
 
 using namespace Sexy;
@@ -67,7 +67,8 @@ SharedImageRef&	SharedImageRef::operator=(SharedImage* theSharedImage)
 {
 	Release();
 	mSharedImage = theSharedImage;
-	mSharedImage->mRefCount++;
+	if (mSharedImage != NULL)
+		mSharedImage->mRefCount++;
 	return *this;
 }
 
@@ -86,21 +87,20 @@ MemoryImage* SharedImageRef::operator->()
 
 SharedImageRef::operator Image*()
 {	
-	return (MemoryImage*) *this;
+	if (mUnsharedImage != NULL)
+		return (Image*)mUnsharedImage;
+	else if (mSharedImage != NULL)
+		return mSharedImage->mImage;
+	else
+		return NULL;
 }
 
 SharedImageRef::operator MemoryImage*()
 {
 	if (mUnsharedImage != NULL)
 		return mUnsharedImage;
-	else
-		return (GLImage*) *this;
-}
-
-SharedImageRef::operator GLImage*()
-{
-	if (mSharedImage != NULL)
-		return mSharedImage->mImage;
+	else if (mSharedImage != NULL)
+		return dynamic_cast<MemoryImage*>(mSharedImage->mImage);
 	else
 		return NULL;
 }

@@ -28,42 +28,8 @@ file(GLOB SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Lawn/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Lawn/widgets/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Lawn/system/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/glad/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/zlib/*.c
 )
-
-# these files are included and must not be built in the project
-list(REMOVE_ITEM SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Sexy.TodLib/TodDrawTriangle.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Sexy.TodLib/TodDrawTriangleInc.cpp
-)
-
-
-if(ANDROID)
-	list(APPEND SOURCES
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/Window.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android/Input.cpp
-	)
-	list(APPEND PLAT_INCLUDES
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/android
-	)
-elseif (EMSCRIPTEN)
-    list(APPEND SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/emscripten/Window.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/emscripten/Input.cpp
-    )
-    list(APPEND PLAT_INCLUDES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/emscripten
-    )
-else()
-	list(APPEND SOURCES
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/pc/Window.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/pc/Input.cpp
-	)
-	list(APPEND PLAT_INCLUDES
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SexyAppFramework/platform/pc
-	)
-endif()
 
 # SDL_image Configuration
 option(LINK_SDL_STATIC "Link SDL libraries statically" ON)
@@ -104,6 +70,7 @@ if(NOT EMSCRIPTEN)
     add_subdirectory(Libs/SDL)
     add_subdirectory(Libs/SDL_image)
     add_subdirectory(Libs/SDL_mixer_x)
+    add_subdirectory(ck/PvZ-Quality-of-the-Lawn/Libs/SDL_ttf)
 endif()
 
 include(FetchContent)
@@ -127,7 +94,7 @@ target_include_directories(xp-plants-vs-zombies PRIVATE
 	${PROJECT_SOURCE_DIR}/Libs/SDL/include
 	${PROJECT_SOURCE_DIR}/Libs/SDL_image/include
 	${PROJECT_SOURCE_DIR}/Libs/SDL_mixer_x/include
-	${PLAT_INCLUDES}
+	${PROJECT_SOURCE_DIR}/ck/PvZ-Quality-of-the-Lawn/Libs/SDL_ttf
 )
 
 #target_compile_definitions(xp-plants-vs-zombies PRIVATE _DEBUG)
@@ -140,6 +107,7 @@ if (NOT EMSCRIPTEN)
              SDL2::SDL2main
              SDL2_image::SDL2_image-static 
              SDL2_mixer_ext_Static
+             SDL2_ttf
          )
      else()
          target_link_libraries(xp-plants-vs-zombies 
@@ -147,6 +115,7 @@ if (NOT EMSCRIPTEN)
              SDL2::SDL2main
              SDL2_image::SDL2_image 
              SDL2_mixer_ext
+             SDL2_ttf
          )
      endif()
 else()

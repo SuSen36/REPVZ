@@ -5,8 +5,7 @@
 #include "XMLParser.h"
 #include "SexyAppFramework/sound/SoundManager.h"
 #include "SexyAppFramework/sound/MusicInterface.h"
-#include "SexyAppFramework/graphics/GLImage.h"
-#include "SexyAppFramework/graphics/GLInterface.h"
+#include "SexyAppFramework/graphics/MemoryImage.h"
 #include "SexyAppFramework/graphics/ImageFont.h"
 //#include "SexyAppFramework/graphics/SysFont.h"
 #include "SexyAppFramework/imagelib/ImageLib.h"
@@ -703,43 +702,43 @@ bool ResourceManager::DoLoadImage(ImageRes *theRes) {
     SharedImageRef aSharedImageRef = gSexyAppBase->GetSharedImage(theRes->mPath, theRes->mVariant);
     ImageLib::gAlphaComposeColor = 0xFFFFFF;
 
-    GLImage* aGLImage = (GLImage*) aSharedImageRef;
+    MemoryImage* aMemoryImage = (MemoryImage*) (Image*) aSharedImageRef;
 
-    if (aGLImage == nullptr)
+    if (aMemoryImage == nullptr)
         return Fail(StrFormat("Failed to load image: %s",theRes->mPath.c_str()));
 	
-	aGLImage->CommitBits();
+	aMemoryImage->CommitBits();
 	theRes->mImage = aSharedImageRef;
-	aGLImage->mPurgeBits = theRes->mPurgeBits;
+	aMemoryImage->mPurgeBits = theRes->mPurgeBits;
 
 	if (theRes->mDDSurface)
 	{
-		aGLImage->CommitBits();
+		aMemoryImage->CommitBits();
 				
-		if (!aGLImage->mHasAlpha)
+		if (!aMemoryImage->mHasAlpha)
 		{
-			//aGLImage->mWantDDSurface = true;
-			aGLImage->mPurgeBits = true;			
+			//aMemoryImage->mWantDDSurface = true;
+			aMemoryImage->mPurgeBits = true;			
 		}
 	}	
 
 	//if (theRes->mA4R4G4B4)
-	//	aGLImage->mD3DFlags |= D3DImageFlag_UseA4R4G4B4;
+	//	aMemoryImage->mD3DFlags |= D3DImageFlag_UseA4R4G4B4;
     //
 	//if (theRes->mA8R8G8B8)
-	//	aGLImage->mD3DFlags |= D3DImageFlag_UseA8R8G8B8;
+	//	aMemoryImage->mD3DFlags |= D3DImageFlag_UseA8R8G8B8;
     //
 	//if (theRes->mMinimizeSubdivisions)
-	//	aGLImage->mD3DFlags |= D3DImageFlag_MinimizeNumSubdivisions;
+	//	aMemoryImage->mD3DFlags |= D3DImageFlag_MinimizeNumSubdivisions;
 
 	if (theRes->mAnimInfo.mAnimType != AnimType_None)
-		aGLImage->mAnimInfo = new AnimInfo(theRes->mAnimInfo);
+		aMemoryImage->mAnimInfo = new AnimInfo(theRes->mAnimInfo);
 
-	aGLImage->mNumRows = theRes->mRows;
-	aGLImage->mNumCols = theRes->mCols;
+	aMemoryImage->mNumRows = theRes->mRows;
+	aMemoryImage->mNumCols = theRes->mCols;
 
-	if (aGLImage->mPurgeBits)
-		aGLImage->PurgeBits();
+	if (aMemoryImage->mPurgeBits)
+		aMemoryImage->PurgeBits();
 
 	ResourceLoadedHook(theRes);
 	return true;
@@ -791,7 +790,7 @@ SharedImageRef ResourceManager::LoadImage(const std::string &theName)
 		return NULL;
 
 	ImageRes *aRes = (ImageRes*)anItr->second;
-	if ((GLImage*) aRes->mImage != NULL)
+	if ((Image*) aRes->mImage != NULL)
 		return aRes->mImage;
 
 	if (aRes->mFromProgram)
@@ -947,7 +946,7 @@ bool ResourceManager::LoadNextResource()
 			case ResType_Image: 
 			{
 				ImageRes *anImageRes = (ImageRes*)aRes;
-				if ((GLImage*)anImageRes->mImage!=NULL)
+				if ((Image*)anImageRes->mImage!=NULL)
 					continue;
 
 				return DoLoadImage(anImageRes); 

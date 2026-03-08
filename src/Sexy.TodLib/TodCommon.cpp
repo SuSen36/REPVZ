@@ -8,11 +8,10 @@
 #include "TodStringFile.h"
 #include "GameConstants.h"
 #include "SexyAppFramework/graphics/Font.h"
-#include "SexyAppFramework/graphics/GLImage.h"
+#include "SexyAppFramework/graphics/MemoryImage.h"
 #include "SexyAppFramework/graphics/Graphics.h"
 #include "SexyAppFramework/graphics/ImageFont.h"
 #include "SexyAppFramework/misc/SexyMatrix.h"
-#include "SexyAppFramework/graphics/GLInterface.h"
 
 
 SexyString TodGetCurrentLevelName()
@@ -633,12 +632,6 @@ void TodBltMatrix(Graphics* g, Image* theImage, const SexyMatrix3& theTransform,
 	{
 		g->mDestImage->BltMatrix(theImage, aOffsetX, aOffsetY, theTransform, theClipRect, theColor, theDrawMode, theSrcRect, g->mLinearBlend);
 	}
-	else if (GLImage::Check3D(g->mDestImage))
-	{
-		theImage->mDrawn = true;
-		GLInterface* aInterface = ((GLImage*)g->mDestImage)->mGLInterface;
-		aInterface->BltTransformed(theImage, nullptr, theColor, theDrawMode, theSrcRect, theTransform, g->mLinearBlend, aOffsetX, aOffsetY, true);
-	}
 	else
 	{
 		Rect aBufFixClipRect(0, 0, BOARD_WIDTH + 1, BOARD_HEIGHT + 1);
@@ -1005,7 +998,7 @@ bool TodResourceManager::TodLoadNextResource()
 		case ResType_Image:
 		{
 			ImageRes* anImageRes = (ImageRes*)aRes;
-			if ((GLImage*)anImageRes->mImage != nullptr)
+			if ((Image*)anImageRes->mImage != nullptr)
 			{
 				mCurResGroupListItr++;
 				continue;

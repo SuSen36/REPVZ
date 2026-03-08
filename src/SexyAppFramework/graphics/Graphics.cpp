@@ -1,12 +1,11 @@
 #include "Graphics.h"
 #include "Image.h"
 #include "Font.h"
-#include "GLImage.h"
 #include "MemoryImage.h"
 #include "../misc/Rect.h"
 #include "../misc/SexyMatrix.h"
 #include "Sexy.TodLib/TodDebug.h"
-#include <math.h>
+#include <cmath>
 
 using namespace Sexy;
 
@@ -65,7 +64,7 @@ Graphics::Graphics(Image* theDestImage)
 	}
 	else
 	{
-		mIs3D = GLImage::Check3D(theDestImage);
+		mIs3D = false; // 软件渲染模式下，强制关闭 3D 渲染
 	}
 
 	mClipRect = Rect(0, 0, mDestImage->GetWidth(), mDestImage->GetHeight());
@@ -842,7 +841,7 @@ void Graphics::DrawImageMatrix(Image* theImage, const SexyMatrix3 &theMatrix, co
 
 void Graphics::DrawImageTransformHelper(Image* theImage, const Transform &theTransform, const Rect &theSrcRect, float x, float y, bool useFloat)
 {
-	if (theTransform.mComplex || (GLImage::Check3D(mDestImage) && useFloat))
+	if (theTransform.mComplex || (false && useFloat))
 	{
 		DrawImageMatrix(theImage,theTransform.GetMatrix(),theSrcRect,x,y);
 		return;

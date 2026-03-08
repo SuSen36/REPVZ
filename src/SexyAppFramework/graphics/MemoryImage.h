@@ -2,10 +2,10 @@
 #define __MEMORYIMAGE_H__
 
 #include "Image.h"
+#include <SDL.h>
 
 #define OPTIMIZE_SOFTWARE_DRAWING
 #ifdef OPTIMIZE_SOFTWARE_DRAWING
-extern bool gOptimizeSoftwareDrawing;
 #endif
 
 namespace Sexy
@@ -21,6 +21,7 @@ class MemoryImage : public Image
 public:
 	uint32_t*				mBits;
 	int						mBitsChangedCount;
+    SDL_Texture*            mTexture;
 	void*					mD3DData;
 	DWORD					mD3DFlags;	// see D3DInterface.h for possible values
 
@@ -58,6 +59,7 @@ public:
 	virtual void			CommitBits();
 	
 	virtual void			DeleteNativeData();	
+    virtual SDL_Texture*    GetTexture();
 
 	void					NormalBlt(Image* theImage, int theX, int theY, const Rect& theSrcRect, const Color& theColor);
 	void					AdditiveBlt(Image* theImage, int theX, int theY, const Rect& theSrcRect, const Color& theColor);
@@ -93,6 +95,7 @@ public:
 	virtual uint32_t*		GetBits();	
 	
 	virtual void			FillRect(const Rect& theRect, const Color& theColor, int theDrawMode);
+	virtual void			DrawRect(const Rect& theRect, const Color& theColor, int theDrawMode);
 	virtual void			ClearRect(const Rect& theRect);
 	virtual void			DrawLine(double theStartX, double theStartY, double theEndX, double theEndY, const Color& theColor, int theDrawMode);
 	virtual void			DrawLineAA(double theStartX, double theStartY, double theEndX, double theEndY, const Color& theColor, int theDrawMode);
@@ -103,6 +106,8 @@ public:
 	virtual void			StretchBlt(Image* theImage, const Rect& theDestRect, const Rect& theSrcRect, const Rect& theClipRect, const Color& theColor, int theDrawMode, bool fastStretch);
 	virtual void			BltMatrix(Image* theImage, float x, float y, const SexyMatrix3 &theMatrix, const Rect& theClipRect, const Color& theColor, int theDrawMode, const Rect &theSrcRect, bool blend);
 	virtual void			BltTrianglesTex(Image *theTexture, const TriVertex theVertices[][3], int theNumTriangles, const Rect& theClipRect, const Color &theColor, int theDrawMode, float tx, float ty, bool blend);
+    virtual void			BltMirror(Image* theImage, int theX, int theY, const Rect& theSrcRect, const Color& theColor, int theDrawMode);
+    virtual void			StretchBltMirror(Image* theImage, const Rect& theDestRect, const Rect& theSrcRect, const Rect& theClipRect, const Color& theColor, int theDrawMode, bool fastStretch);
 
 	virtual void			SetImageMode(bool hasTrans, bool hasAlpha);
 	virtual void			SetVolatile(bool isVolatile);	

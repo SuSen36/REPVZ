@@ -3,7 +3,6 @@
 #include "Image.h"
 #include "../SexyAppBase.h"
 #include "MemoryImage.h"
-#include "SexyAppFramework/graphics/GLImage.h"
 #include "../misc/AutoCrit.h"
 #include "SexyAppFramework/misc/fcaseopen.h"
 
@@ -595,8 +594,10 @@ bool FontData::HandleCommand(const ListDataElement& theParams)
 
 				if ((Image*)anImage != NULL)
 				{
+/*
 					if (isNew)
 						anImage->Palletize();
+*/
 					aLayer->mImage = anImage;
 				}
 				else
@@ -1383,6 +1384,7 @@ void ImageFont::GenerateActiveFontLayers()
 					}
 
 
+/*
 					if (mForceScaledImagesWhite)
 					{
 						int aCount = aMemoryImage->mWidth * aMemoryImage->mHeight;
@@ -1396,6 +1398,7 @@ void ImageFont::GenerateActiveFontLayers()
 					}
 
 					aMemoryImage->Palletize();
+*/
 				}
 
 				int aLayerAscent = (aFontLayer->mAscent * aPointSize) / aLayerPointSize;

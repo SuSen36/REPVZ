@@ -17,13 +17,15 @@ namespace ImageLib
 	class Image;
 };
 
+struct SDL_Renderer;
+
 namespace Sexy
 {
 
+extern SDL_Renderer* gRenderer;
+
 class WidgetManager;
-class GLInterface;
 class Image;
-class GLImage;
 class Widget;
 class SoundManager;
 class MusicInterface;
@@ -149,7 +151,6 @@ public:
 	// When false: Uses traditional mouse/keyboard input (PC mode).
 	// Android/iOS platforms default to true, PC platforms default to false.
 	bool					mTabletPC;
-	GLInterface*			mGLInterface;
 	bool					mAlphaDisabled;
 	MusicInterface*			mMusicInterface;	
 	bool					mReadFromRegistry;
@@ -360,8 +361,8 @@ public:
 	void					SetCursor(int theCursorNum);
 	int						GetCursor();
 	void					EnableCustomCursors(bool enabled);	
-	virtual GLImage*		GetImage(const std::string& theFileName, bool commitBits = true);	
-	virtual SharedImageRef	SetSharedImage(const std::string& theFileName, const std::string& theVariant, GLImage* theImage, bool* isNew);
+	virtual Image*			GetImage(const std::string& theFileName, bool commitBits = true);	
+	virtual SharedImageRef	SetSharedImage(const std::string& theFileName, const std::string& theVariant, Image* theImage, bool* isNew);
 	virtual SharedImageRef	GetSharedImage(const std::string& theFileName, const std::string& theVariant = "", bool* isNew = NULL);
 
 	void					CleanSharedImages();
@@ -370,11 +371,11 @@ public:
 	void					PrecacheNative(MemoryImage* theImage);
 	void					SetCursorImage(int theCursorNum, Image* theImage);
 
-	GLImage*				CreateCrossfadeImage(Image* theImage1, const Rect& theRect1, Image* theImage2, const Rect& theRect2, double theFadeFactor);
+	Image*					CreateCrossfadeImage(Image* theImage1, const Rect& theRect1, Image* theImage2, const Rect& theRect2, double theFadeFactor);
 	void					ColorizeImage(Image* theImage, const Color& theColor);
-	GLImage*				CreateColorizedImage(Image* theImage, const Color& theColor);
-	GLImage*				CopyImage(Image* theImage, const Rect& theRect);
-	GLImage*				CopyImage(Image* theImage);
+	Image*					CreateColorizedImage(Image* theImage, const Color& theColor);
+	Image*					CopyImage(Image* theImage, const Rect& theRect);
+	Image*					CopyImage(Image* theImage);
 	void					MirrorImage(Image* theImage);
 	void					FlipImage(Image* theImage);
 	void					RotateImageHue(Sexy::MemoryImage *theImage, int theDelta);
@@ -468,7 +469,7 @@ public:
 	virtual void			DoMainLoop();
 	virtual bool			UpdateAppStep(bool* updated);
 	virtual bool			UpdateApp();
-	int						InitGLInterface();
+	int						InitGraphics();
 	void					ClearUpdateBacklog(bool relaxForASecond = false);
 	virtual bool			AppCanRestore();
 };

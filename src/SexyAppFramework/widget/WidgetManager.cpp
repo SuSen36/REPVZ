@@ -3,7 +3,7 @@
 #include "SexyAppFramework/graphics/Graphics.h"
 #include "SexyAppFramework/graphics/Image.h"
 #include "../misc/KeyCodes.h"
-#include "SexyAppFramework/graphics/GLImage.h"
+#include "SexyAppFramework/graphics/MemoryImage.h"
 #include "../SexyAppBase.h"
 
 using namespace Sexy;

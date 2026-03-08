@@ -6,14 +6,14 @@
 namespace Sexy
 {
 
-class Image;
-class GLImage;
 class MemoryImage;
+class Graphics;
+class Image;
 
 class SharedImage
 {
 public:
-	GLImage*				mImage;
+	Image*					mImage;
 	int						mRefCount;		
 
 	SharedImage();
@@ -42,7 +42,6 @@ public:
 	MemoryImage*			operator->();
 	operator Image*();
 	operator MemoryImage*();
-	operator GLImage*();
 };
 
 }

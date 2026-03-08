@@ -1,12 +1,11 @@
-﻿#include "PoolEffect.h"
+#include "PoolEffect.h"
 #include "LawnApp.h"
 #include "../Board.h"
 #include "../../Resources.h"
 #include "GameConstants.h"
 #include "Sexy.TodLib/TodDebug.h"
-#include "SexyAppFramework/graphics/GLImage.h"
+#include "SexyAppFramework/graphics/MemoryImage.h"
 #include "SexyAppFramework/graphics/Graphics.h"
-#include "SexyAppFramework/graphics/GLInterface.h"
 //#include "SexyAppFramework/graphics/D3DInterface.h"
 
 void PoolEffect::PoolEffectInitialize()
@@ -212,12 +211,7 @@ void PoolEffect::PoolEffectDraw(Sexy::Graphics* g, bool theIsNight)
     }
 
     UpdateWaterEffect();
-    //GLInterface* anInterface = ((GLImage*)g->mDestImage)->mGLInterface;
-    //anInterface->CheckDXError(anInterface->mD3DDevice->SetTextureStageState(0, D3DTEXTURESTAGESTATETYPE::D3DTSS_ADDRESSU, D3DTEXTUREADDRESS::D3DTADDRESS_WRAP), "DrawPool");
-    //anInterface->CheckDXError(anInterface->mD3DDevice->SetTextureStageState(0, D3DTEXTURESTAGESTATETYPE::D3DTSS_ADDRESSV, D3DTEXTUREADDRESS::D3DTADDRESS_WRAP), "DrawPool");
     g->DrawTrianglesTex(mCausticImage, aVertArray[2], 150);
-    //anInterface->CheckDXError(anInterface->mD3DDevice->SetTextureStageState(0, D3DTEXTURESTAGESTATETYPE::D3DTSS_ADDRESSU, D3DTEXTUREADDRESS::D3DTADDRESS_CLAMP), "DrawPool");
-    //anInterface->CheckDXError(anInterface->mD3DDevice->SetTextureStageState(0, D3DTEXTURESTAGESTATETYPE::D3DTSS_ADDRESSV, D3DTEXTUREADDRESS::D3DTADDRESS_CLAMP), "DrawPool");
 }
 
 void PoolEffect::PoolEffectUpdate()
