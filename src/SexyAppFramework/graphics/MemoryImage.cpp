@@ -244,16 +244,6 @@ void MemoryImage::DrawLine(double theStartX, double theStartY, double theEndX, d
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
 }
 
-void MemoryImage::NormalDrawLineAA(double theStartX, double theStartY, double theEndX, double theEndY, const Color& theColor)
-{
-	DrawLine(theStartX, theStartY, theEndX, theEndY, theColor, Graphics::DRAWMODE_NORMAL);
-}
-
-void MemoryImage::AdditiveDrawLineAA(double theStartX, double theStartY, double theEndX, double theEndY, const Color& theColor)
-{
-	DrawLine(theStartX, theStartY, theEndX, theEndY, theColor, Graphics::DRAWMODE_ADDITIVE);
-}
-
 void MemoryImage::CommitBits()
 {
 	//if (gDebug)
@@ -921,90 +911,6 @@ void MemoryImage::BltF(Image* theImage, float theX, float theY, const Rect& theS
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-bool MemoryImage::BltRotatedClipHelper(float &theX, float &theY, const Rect &theSrcRect, const Rect &theClipRect, double theRot, FRect &theDestRect, float theRotCenterX, float theRotCenterY)
-{
-	// Clipping Code (this used to be in Graphics::DrawImageRotated)
-	float aCos = cosf(theRot);
-	float aSin = sinf(theRot);
-
-	// Map the four corners and find the bounding rectangle
-	float px[4] = { 0, (float)theSrcRect.mWidth, (float)theSrcRect.mWidth, 0 };
-	float py[4] = { 0, 0, (float)theSrcRect.mHeight, (float)theSrcRect.mHeight };
-	float aMinX = 10000000;
-	float aMaxX = -10000000;
-	float aMinY = 10000000;
-	float aMaxY = -10000000;
-
-	for (int i=0; i<4; i++)
-	{
-		float ox = px[i] - theRotCenterX;
-		float oy = py[i] - theRotCenterY;
-
-		px[i] = (theRotCenterX + ox*aCos + oy*aSin) + theX;
-		py[i] = (theRotCenterY + oy*aCos - ox*aSin) + theY;
-
-		if (px[i] < aMinX)
-			aMinX = px[i];
-		if (px[i] > aMaxX)
-			aMaxX = px[i];
-		if (py[i] < aMinY)
-			aMinY = py[i];
-		if (py[i] > aMaxY)
-			aMaxY = py[i];
-	}
-
-
-
-	FRect aClipRect(theClipRect.mX,theClipRect.mY,theClipRect.mWidth,theClipRect.mHeight);
-
-	FRect aDestRect = FRect(aMinX, aMinY, aMaxX-aMinX, aMaxY-aMinY).Intersection(aClipRect);	
-	if ((aDestRect.mWidth <= 0) || (aDestRect.mHeight <= 0)) // nothing to draw
-		return false;
-
-	theDestRect = aDestRect;
-	return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-bool MemoryImage::StretchBltClipHelper(const Rect &theSrcRect, const Rect &theClipRect, const Rect &theDestRect, FRect &theSrcRectOut, Rect &theDestRectOut)
-{
-	theDestRectOut = Rect(theDestRect.mX , theDestRect.mY, theDestRect.mWidth, theDestRect.mHeight).Intersection(theClipRect);	
-
-	double aXFactor = theSrcRect.mWidth / (double) theDestRect.mWidth;
-	double aYFactor = theSrcRect.mHeight / (double) theDestRect.mHeight;
-
-	theSrcRectOut = FRect(theSrcRect.mX + (theDestRectOut.mX - theDestRect.mX)*aXFactor, 
-				   theSrcRect.mY + (theDestRectOut.mY - theDestRect.mY)*aYFactor, 
-				   theSrcRect.mWidth + (theDestRectOut.mWidth - theDestRect.mWidth)*aXFactor, 
-				   theSrcRect.mHeight + (theDestRectOut.mHeight - theDestRect.mHeight)*aYFactor);
-
-	return theSrcRectOut.mWidth>0 && theSrcRectOut.mHeight>0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-bool MemoryImage::StretchBltMirrorClipHelper(const Rect &theSrcRect, const Rect &theClipRect, const Rect &theDestRect, FRect &theSrcRectOut, Rect &theDestRectOut)
-{
-	theDestRectOut = Rect(theDestRect.mX, theDestRect.mY, theDestRect.mWidth, theDestRect.mHeight).Intersection(theClipRect);	
-
-	double aXFactor = theSrcRect.mWidth / (double) theDestRect.mWidth;
-	double aYFactor = theSrcRect.mHeight / (double) theDestRect.mHeight;
-
-	int aTotalClip = theDestRect.mWidth - theDestRectOut.mWidth;
-	int aLeftClip = theDestRectOut.mX - theDestRect.mX;
-	int aRightClip = aTotalClip-aLeftClip;
-
-	theSrcRectOut = FRect(theSrcRect.mX + (aRightClip)*aXFactor, 
-				   theSrcRect.mY + (theDestRectOut.mY - theDestRect.mY)*aYFactor, 
-				   theSrcRect.mWidth + (theDestRectOut.mWidth - theDestRect.mWidth)*aXFactor, 
-				   theSrcRect.mHeight + (theDestRectOut.mHeight - theDestRect.mHeight)*aYFactor);
-
-	return theSrcRectOut.mWidth>0 && theSrcRectOut.mHeight>0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 void MemoryImage::BltRotated(Image* theImage, float theX, float theY, const Rect &theSrcRect, const Rect& theClipRect, const Color& theColor, int theDrawMode, double theRot, float theRotCenterX, float theRotCenterY)
 {
     theImage->mDrawn = true;
@@ -1113,12 +1019,6 @@ void MemoryImage::SlowStretchBlt(Image* theImage, const Rect& theDestRect, const
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
 }
 
-//TODO: Make the special version
-void MemoryImage::FastStretchBlt(Image* theImage, const Rect& theDestRect, const FRect& theSrcRect, const Color& theColor, int theDrawMode)
-{
-    SlowStretchBlt(theImage, theDestRect, theSrcRect, theColor, theDrawMode);
-}
-
 void MemoryImage::StretchBlt(Image* theImage, const Rect& theDestRect, const Rect& theSrcRect, const Rect& theClipRect, const Color& theColor, int theDrawMode, bool fast)
 {
     theImage->mDrawn = true;
@@ -1145,39 +1045,6 @@ void MemoryImage::StretchBlt(Image* theImage, const Rect& theDestRect, const Rec
 
     SDL_RenderCopyF(Sexy::gRenderer, aSrcTexture, &srcRect, &destRect);
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
-}
-
-void MemoryImage::BltMatrixHelper(Image* theImage, float x, float y, const SexyMatrix3 &theMatrix, const Rect& theClipRect, const Color& theColor, int theDrawMode, const Rect &theSrcRect, void *theSurface, int theBytePitch, int thePixelFormat, bool blend)
-{
-	MemoryImage *anImage = dynamic_cast<MemoryImage*>(theImage);
-	if (anImage==NULL)
-		return;
- 
-	float w2 = theSrcRect.mWidth/2.0f;
-	float h2 = theSrcRect.mHeight/2.0f;
-
-	float u0 = (float)theSrcRect.mX/theImage->mWidth;
-	float u1 = (float)(theSrcRect.mX + theSrcRect.mWidth)/theImage->mWidth;
-	float v0 = (float)theSrcRect.mY/theImage->mHeight;
-	float v1 = (float)(theSrcRect.mY + theSrcRect.mHeight)/theImage->mHeight;
-
-	SWHelper::XYZStruct aVerts[4] =
-	{
-		{ -w2,	-h2,	u0, v0, static_cast<ulong>(0xFFFFFFFF) },
-		{ w2,	-h2,	u1,	v0,	static_cast<ulong>(0xFFFFFFFF) },
-		{ -w2,	h2,		u0,	v1,	static_cast<ulong>(0xFFFFFFFF) },
-		{ w2,	h2,		u1,	v1,	static_cast<ulong>(0xFFFFFFFF) }
-	};
-
-	for (int i=0; i<4; i++)
-	{
-		SexyVector3 v(aVerts[i].mX, aVerts[i].mY, 1);
-		v = theMatrix*v;
-		aVerts[i].mX = v.x + x - 0.5f;
-		aVerts[i].mY = v.y + y - 0.5f;
-	}
-
-	SWHelper::SWDrawShape(aVerts, 4, anImage, theColor, theDrawMode, theClipRect, theSurface, theBytePitch, thePixelFormat, blend,false);
 }
 
 void MemoryImage::BltMatrix(Image* theImage, float x, float y, const SexyMatrix3 &theMatrix, const Rect& theClipRect, const Color& theColor, int theDrawMode, const Rect &theSrcRect, bool blend)
@@ -1233,7 +1100,44 @@ void MemoryImage::BltMatrix(Image* theImage, float x, float y, const SexyMatrix3
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
 }
 
-void MemoryImage::BltTrianglesTexHelper(Image *theTexture, const TriVertex theVertices[][3], int theNumTriangles, const Rect &theClipRect, const Color &theColor, int theDrawMode, void *theSurface, int theBytePitch, int thePixelFormat, float tx, float ty, bool blend)
+void MemoryImage::FillScanLinesWithCoverage(Span* theSpans, int theSpanCount, const Color& theColor, int theDrawMode, const BYTE* theCoverage, int theCoverX, int theCoverY, int theCoverWidth, int theCoverHeight)
+{
+	(void)theDrawMode;(void)theCoverHeight;
+	uint32_t* theBits = GetBits();
+	uint32_t src = theColor.ToInt();
+	for (int i = 0; i < theSpanCount; ++i)
+	{
+		Span* aSpan = &theSpans[i];
+		int x = aSpan->mX - theCoverX;
+		int y = aSpan->mY - theCoverY;
+
+		uint32_t* aDestPixels = &theBits[aSpan->mY*mWidth + aSpan->mX];
+		const BYTE* aCoverBits = &theCoverage[y*theCoverWidth+x];
+		for (int w = 0; w < aSpan->mWidth; ++w)
+		{
+			int cover = *aCoverBits++ + 1;
+			int a = (cover * theColor.mAlpha) >> 8;
+			int oma;
+			uint32_t dest = *aDestPixels;
+							
+			if (a > 0)
+			{
+				int aDestAlpha = dest >> 24;
+				int aNewDestAlpha = aDestAlpha + ((255 - aDestAlpha) * a) / 255;
+				
+				a = 255 * a / aNewDestAlpha;
+				oma = 256 - a;
+				*(aDestPixels++) = (aNewDestAlpha << 24) |
+					((((dest & 0x0000FF) * oma + (src & 0x0000FF) * a) >> 8) & 0x0000FF) |
+					((((dest & 0x00FF00) * oma + (src & 0x00FF00) * a) >> 8) & 0x00FF00) |
+					((((dest & 0xFF0000) * oma + (src & 0xFF0000) * a) >> 8) & 0xFF0000);
+			}
+		}
+	}
+	BitsChanged();
+}
+
+void MemoryImage::BltTrianglesTex(Image *theTexture, const TriVertex theVertices[][3], int theNumTriangles, const Rect& theClipRect, const Color &theColor, int theDrawMode, float tx, float ty, bool blend)
 {
     theTexture->mDrawn = true;
     MemoryImage* aSrcMemoryImage = dynamic_cast<MemoryImage*>(theTexture);
@@ -1282,48 +1186,6 @@ void MemoryImage::BltTrianglesTexHelper(Image *theTexture, const TriVertex theVe
     }
 
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
-}
-
-void MemoryImage::FillScanLinesWithCoverage(Span* theSpans, int theSpanCount, const Color& theColor, int theDrawMode, const BYTE* theCoverage, int theCoverX, int theCoverY, int theCoverWidth, int theCoverHeight)
-{
-	(void)theDrawMode;(void)theCoverHeight;
-	uint32_t* theBits = GetBits();
-	uint32_t src = theColor.ToInt();
-	for (int i = 0; i < theSpanCount; ++i)
-	{
-		Span* aSpan = &theSpans[i];
-		int x = aSpan->mX - theCoverX;
-		int y = aSpan->mY - theCoverY;
-
-		uint32_t* aDestPixels = &theBits[aSpan->mY*mWidth + aSpan->mX];
-		const BYTE* aCoverBits = &theCoverage[y*theCoverWidth+x];
-		for (int w = 0; w < aSpan->mWidth; ++w)
-		{
-			int cover = *aCoverBits++ + 1;
-			int a = (cover * theColor.mAlpha) >> 8;
-			int oma;
-			uint32_t dest = *aDestPixels;
-							
-			if (a > 0)
-			{
-				int aDestAlpha = dest >> 24;
-				int aNewDestAlpha = aDestAlpha + ((255 - aDestAlpha) * a) / 255;
-				
-				a = 255 * a / aNewDestAlpha;
-				oma = 256 - a;
-				*(aDestPixels++) = (aNewDestAlpha << 24) |
-					((((dest & 0x0000FF) * oma + (src & 0x0000FF) * a) >> 8) & 0x0000FF) |
-					((((dest & 0x00FF00) * oma + (src & 0x00FF00) * a) >> 8) & 0x00FF00) |
-					((((dest & 0xFF0000) * oma + (src & 0xFF0000) * a) >> 8) & 0xFF0000);
-			}
-		}
-	}
-	BitsChanged();
-}
-
-void MemoryImage::BltTrianglesTex(Image *theTexture, const TriVertex theVertices[][3], int theNumTriangles, const Rect& theClipRect, const Color &theColor, int theDrawMode, float tx, float ty, bool blend)
-{
-    BltTrianglesTexHelper(theTexture, theVertices, theNumTriangles, theClipRect, theColor, theDrawMode, NULL, 0, 0, tx, ty, blend);
 }
 
 bool MemoryImage::Palletize()
