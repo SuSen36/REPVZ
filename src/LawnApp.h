@@ -298,6 +298,8 @@ public:
 	/*inline*/ bool					IsWhackAZombieLevel();
 	void							UpdatePlayTimeStats();
 	bool							CanPauseNow();
+	// 渲染器/纹理重建后的回调：清空并重建运行时缓存（如 ReanimatorCache）
+	void                            OnRendererReset();
 	/*inline*/ bool					IsPuzzleMode();
 	/*inline*/ bool					IsChallengeMode();
 	static /*inline*/ bool			IsEndlessIZombie(GameMode theGameMode);

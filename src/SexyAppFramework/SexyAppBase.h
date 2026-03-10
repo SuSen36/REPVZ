@@ -391,6 +391,7 @@ public:
 	virtual void			SwitchScreenMode(bool wantWindowed);
 	virtual void			SwitchScreenMode(bool wantWindowed,bool force = false);
 	virtual void			SetAlphaDisabled(bool isDisabled);
+	virtual void			OnRendererReset();
 	
 	virtual Dialog*			DoDialog(int theDialogId, bool isModal, const SexyString& theDialogHeader, const SexyString& theDialogLines, const SexyString& theDialogFooter, int theButtonMode);
 	virtual Dialog*			GetDialog(int theDialogId);

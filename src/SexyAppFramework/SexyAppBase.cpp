@@ -40,6 +40,7 @@
 #include "SexyAppFramework/sound/DummyMusicInterface.h"
 
 #include <filesystem>
+#include "../LawnApp.h"
 
 using namespace Sexy;
 
@@ -1378,6 +1379,10 @@ void SexyAppBase::SwitchScreenMode(bool wantWindowed, bool force)
 	mIsWindowed = wantWindowed;
 
 	MakeWindow();
+	ReInitImages();
+	OnRendererReset();
+	if (mWidgetManager)
+		mWidgetManager->MarkAllDirty();
 
 	// We need to do this check to allow IE to get focus instead of
 	//  stealing it away for ourselves
@@ -1398,6 +1403,10 @@ void SexyAppBase::SwitchScreenMode(bool wantWindowed, bool force)
 	}
 
 	mLastTime = SDL_GetTicks();
+}
+
+void SexyAppBase::OnRendererReset()
+{
 }
 
 void SexyAppBase::SwitchScreenMode(bool wantWindowed)

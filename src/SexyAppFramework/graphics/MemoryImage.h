@@ -16,6 +16,7 @@ public:
 	uint32_t*				mBits;
 	int						mBitsChangedCount;
     SDL_Texture*            mTexture;
+    SDL_Renderer*           mBoundRenderer;
 	void*					mD3DData;
 	DWORD					mD3DFlags;	// see D3DInterface.h for possible values
 

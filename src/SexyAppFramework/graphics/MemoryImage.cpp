@@ -8,7 +8,6 @@
 #include "Graphics.h"
 #include "NativeDisplay.h"
 #include "Quantize.h"
-#include "SWTri.h"
 #include "../../GameConstants.h"
 #include <cmath>
 
@@ -100,6 +99,7 @@ MemoryImage::~MemoryImage()
         SDL_DestroyTexture(mTexture);
         mTexture = NULL;
     }
+    mBoundRenderer = NULL;
 
 	delete [] mBits;
 	delete [] mColorIndices;
@@ -126,6 +126,7 @@ void MemoryImage::Init()
 	mWantPal = false;
 
     mTexture = NULL;
+    mBoundRenderer = NULL;
 
 	mApp->AddMemoryImage(this);
 }
@@ -138,9 +139,17 @@ void MemoryImage::BitsChanged()
 
 SDL_Texture* MemoryImage::GetTexture()
 {
+    if (mTexture != nullptr && mBoundRenderer != Sexy::gRenderer)
+    {
+        SDL_DestroyTexture(mTexture);
+        mTexture = nullptr;
+        mBoundRenderer = nullptr;
+        mBitsChanged = true; // force reupload
+    }
     if (mTexture == nullptr)
     {
         mTexture = SDL_CreateTexture(Sexy::gRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, mWidth, mHeight);
+        mBoundRenderer = Sexy::gRenderer;
         if (mBits)
         {
             SDL_UpdateTexture(mTexture, NULL, mBits, mWidth * 4);
@@ -315,6 +324,14 @@ void MemoryImage::ReInit()
 			
 	if (mPurgeBits)
 		PurgeBits();
+
+	// 渲染器重建后，旧纹理不再可用；销毁以便下次使用时在新渲染器上重建
+	if (mTexture != NULL)
+	{
+		SDL_DestroyTexture(mTexture);
+		mTexture = NULL;
+	}
+	mBitsChanged = true;
 }
 
 void MemoryImage::DeleteNativeData()

@@ -207,6 +207,15 @@ LawnApp::~LawnApp()
 	*/
 }
 
+void LawnApp::OnRendererReset()
+{
+	if (mReanimatorCache)
+	{
+		mReanimatorCache->ReanimatorCacheDispose();
+		mReanimatorCache->ReanimatorCacheInitialize();
+	}
+}
+
 void LawnApp::Shutdown()
 {
 	if (!mLoadingThreadCompleted)

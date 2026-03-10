@@ -19,6 +19,35 @@ void SexyAppBase::MakeWindow()
 	{
 		// Avoid fullscreen desktop scaling; toggle true fullscreen only when requested
 		SDL_SetWindowFullscreen((SDL_Window*)mWindow, (!mIsWindowed ? SDL_WINDOW_FULLSCREEN : 0));
+
+        // 为了兼容某些驱动在切换模式时渲染目标失效的问题，重建 Renderer
+        if (gRenderer)
+        {
+            SDL_DestroyRenderer(gRenderer);
+            gRenderer = nullptr;
+        }
+        gRenderer = SDL_CreateRenderer((SDL_Window*)mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+        if (!gRenderer) {
+            gRenderer = SDL_CreateRenderer((SDL_Window*)mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+        }
+        if (!gRenderer) {
+            gRenderer = SDL_CreateRenderer((SDL_Window*)mWindow, -1, SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE);
+        }
+        if (!gRenderer) {
+            gRenderer = SDL_CreateRenderer((SDL_Window*)mWindow, -1, 0);
+        }
+        mContext = (void*)gRenderer;
+        SDL_RenderSetLogicalSize(gRenderer, mWidth, mHeight);
+
+        gPremultipliedBlendMode = SDL_ComposeCustomBlendMode(
+            SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD
+        );
+
+        gAdditiveBlendMode = SDL_ComposeCustomBlendMode(
+            SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD
+        );
 	}
 	else
 	{
@@ -70,6 +99,7 @@ void SexyAppBase::MakeWindow()
         }
         mContext = (void*)gRenderer;
         SDL_RenderSetLogicalSize(gRenderer, mWidth, mHeight);
+        SDL_RenderSetViewport(gRenderer, NULL);
 
         gPremultipliedBlendMode = SDL_ComposeCustomBlendMode(
             SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
@@ -110,5 +140,5 @@ void SexyAppBase::MakeWindow()
         anImage->Create(mWidth, mHeight);
         mWidgetManager->mImage = anImage;
     }
-	mWidgetManager->MarkAllDirty();
+	if (mWidgetManager) mWidgetManager->MarkAllDirty();
 }
