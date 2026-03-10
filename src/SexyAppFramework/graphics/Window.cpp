@@ -8,6 +8,8 @@
 using namespace Sexy;
 
 SDL_Renderer* Sexy::gRenderer = nullptr;
+SDL_BlendMode Sexy::gPremultipliedBlendMode = SDL_BLENDMODE_BLEND;
+SDL_BlendMode Sexy::gAdditiveBlendMode = SDL_BLENDMODE_ADD;
 
 extern SDL_Surface* LoadWindowIcon(const char* iconPath);
 
@@ -68,6 +70,16 @@ void SexyAppBase::MakeWindow()
         }
         mContext = (void*)gRenderer;
         SDL_RenderSetLogicalSize(gRenderer, mWidth, mHeight);
+
+        gPremultipliedBlendMode = SDL_ComposeCustomBlendMode(
+            SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD
+        );
+
+        gAdditiveBlendMode = SDL_ComposeCustomBlendMode(
+            SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD
+        );
 	}
 
 	bool isActive = mActive;

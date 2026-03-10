@@ -1,5 +1,6 @@
 #include "MemoryImage.h"
 #include <SDL.h>
+#include <vector>
 
 #include "../misc/CritSect.h"
 #include "../misc/SexyMatrix.h"
@@ -8,13 +9,11 @@
 #include "NativeDisplay.h"
 #include "Quantize.h"
 #include "SWTri.h"
-
+#include "../../GameConstants.h"
 #include <cmath>
 
-using namespace Sexy;
-
-// Disable macro redefinition warning
-#pragma warning(disable:4005)
+namespace Sexy
+{
 
 MemoryImage::MemoryImage()
 {	
@@ -35,9 +34,6 @@ MemoryImage::MemoryImage(const MemoryImage& theMemoryImage) :
 	mBits = NULL;
 	mColorTable = NULL;
 	mColorIndices = NULL;
-	mNativeAlphaData = NULL;
-	mRLAlphaData = NULL;
-	mRLAdditiveData = NULL;
 	mHasTrans = theMemoryImage.mHasTrans;
 	mHasAlpha = theMemoryImage.mHasAlpha;
 	mBitsChanged = false;
@@ -64,9 +60,8 @@ MemoryImage::MemoryImage(const MemoryImage& theMemoryImage) :
 
 	if (theMemoryImage.mBits != NULL)
 	{
-		mBits = new uint32_t[mWidth*mHeight + 1];
-		mBits[mWidth*mHeight] = MEMORYCHECK_ID;
-		memcpy(mBits, theMemoryImage.mBits, (mWidth*mHeight + 1)*sizeof(uint32_t));
+		mBits = new uint32_t[mWidth*mHeight];
+		memcpy(mBits, theMemoryImage.mBits, (mWidth*mHeight)*sizeof(uint32_t));
 	}
 	else
 		mBits = NULL;
@@ -94,38 +89,6 @@ MemoryImage::MemoryImage(const MemoryImage& theMemoryImage) :
 	else
 		mColorIndices = NULL;
 
-	if (theMemoryImage.mNativeAlphaData != NULL)
-	{
-		if (theMemoryImage.mColorTable == NULL)
-		{
-			mNativeAlphaData = new uint32_t[mWidth*mHeight];
-			memcpy(mNativeAlphaData, theMemoryImage.mNativeAlphaData, mWidth*mHeight*sizeof(uint32_t));
-		}
-		else
-		{
-			mNativeAlphaData = new uint32_t[256];
-			memcpy(mNativeAlphaData, theMemoryImage.mNativeAlphaData, 256*sizeof(uint32_t));
-		}
-	}
-	else
-		mNativeAlphaData = NULL;
-
-	if (theMemoryImage.mRLAlphaData != NULL)
-	{
-		mRLAlphaData = new uchar[mWidth*mHeight];
-		memcpy(mRLAlphaData, theMemoryImage.mRLAlphaData, mWidth*mHeight);
-	}
-	else
-		mRLAlphaData = NULL;
-
-	if (theMemoryImage.mRLAdditiveData != NULL)
-	{
-		mRLAdditiveData = new uchar[mWidth*mHeight];
-		memcpy(mRLAdditiveData, theMemoryImage.mRLAdditiveData, mWidth*mHeight);
-	}
-	else
-		mRLAdditiveData = NULL;	
-
 	mApp->AddMemoryImage(this);
 }
 
@@ -139,9 +102,6 @@ MemoryImage::~MemoryImage()
     }
 
 	delete [] mBits;
-	delete [] mNativeAlphaData;	
-	delete [] mRLAlphaData;
-	delete [] mRLAdditiveData;
 	delete [] mColorIndices;
 	delete [] mColorTable;
 }
@@ -152,9 +112,6 @@ void MemoryImage::Init()
 	mColorTable = NULL;
 	mColorIndices = NULL;
 
-	mNativeAlphaData = NULL;
-	mRLAlphaData = NULL;
-	mRLAdditiveData = NULL;
 	mHasTrans = false;
 	mHasAlpha = false;	
 	mBitsChanged = false;
@@ -177,21 +134,6 @@ void MemoryImage::BitsChanged()
 {
 	mBitsChanged = true;
 	mBitsChangedCount++;
-
-	delete [] mNativeAlphaData;
-	mNativeAlphaData = NULL;
-
-	delete [] mRLAlphaData;
-	mRLAlphaData = NULL;
-
-	delete [] mRLAdditiveData;
-	mRLAdditiveData = NULL;
-
-	// Verify secret value at end to protect against overwrite
-	if (mBits != NULL)
-	{
-		TOD_ASSERT(mBits[mWidth*mHeight] == MEMORYCHECK_ID);
-	}
 }
 
 SDL_Texture* MemoryImage::GetTexture()
@@ -238,7 +180,7 @@ void MemoryImage::DrawLine(double theStartX, double theStartY, double theEndX, d
     SDL_SetRenderTarget(Sexy::gRenderer, GetTexture());
 
     SDL_SetRenderDrawColor(Sexy::gRenderer, theColor.mRed, theColor.mGreen, theColor.mBlue, theColor.mAlpha);
-    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, theDrawMode == 0 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_ADD);
+    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, theDrawMode == 0 ? Sexy::gPremultipliedBlendMode : Sexy::gAdditiveBlendMode);
     SDL_RenderDrawLineF(Sexy::gRenderer, (float)theStartX, (float)theStartY, (float)theEndX, (float)theEndY);
 
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
@@ -313,290 +255,6 @@ void MemoryImage::SetVolatile(bool isVolatile)
 	mIsVolatile = isVolatile;
 }
 
-void* MemoryImage::GetNativeAlphaData(NativeDisplay *theDisplay)
-{
-	if (mNativeAlphaData != NULL)
-		return mNativeAlphaData;
-
-	CommitBits();
-
-	const int rRightShift = 16 + (8-theDisplay->mRedBits);
-	const int gRightShift = 8 + (8-theDisplay->mGreenBits);
-	const int bRightShift = 0 + (8-theDisplay->mBlueBits);
-
-	const int rLeftShift = theDisplay->mRedShift;
-	const int gLeftShift = theDisplay->mGreenShift;
-	const int bLeftShift = theDisplay->mBlueShift;
-
-	const int rMask = theDisplay->mRedMask;
-	const int gMask = theDisplay->mGreenMask;
-	const int bMask = theDisplay->mBlueMask;
-
-	if (mColorTable == NULL)
-	{
-		uint32_t* aSrcPtr = GetBits();
-
-		uint32_t* anAlphaData = new uint32_t[mWidth*mHeight];	
-
-		uint32_t* aDestPtr = anAlphaData;
-		int aSize = mWidth*mHeight;
-		for (int i = 0; i < aSize; i++)
-		{
-			uint32_t val = *(aSrcPtr++);
-
-			int anAlpha = val >> 24;			
-
-			uint32_t r = ((val & 0xFF0000) * (anAlpha+1)) >> 8;
-			uint32_t g = ((val & 0x00FF00) * (anAlpha+1)) >> 8;
-			uint32_t b = ((val & 0x0000FF) * (anAlpha+1)) >> 8;
-
-			*(aDestPtr++) =
-				(((r >> rRightShift) << rLeftShift) & rMask) |
-				(((g >> gRightShift) << gLeftShift) & gMask) |
-				(((b >> bRightShift) << bLeftShift) & bMask) |
-				(anAlpha << 24);
-		}
-		
-		mNativeAlphaData = anAlphaData;	
-	}
-	else
-	{
-		uint32_t* aSrcPtr = mColorTable;		
-
-		uint32_t* anAlphaData = new uint32_t[256];
-		
-		for (int i = 0; i < 256; i++)
-		{
-			uint32_t val = *(aSrcPtr++);
-
-			int anAlpha = val >> 24;
-
-			uint32_t r = ((val & 0xFF0000) * (anAlpha+1)) >> 8;
-			uint32_t g = ((val & 0x00FF00) * (anAlpha+1)) >> 8;
-			uint32_t b = ((val & 0x0000FF) * (anAlpha+1)) >> 8;
-
-			anAlphaData[i] =
-				(((r >> rRightShift) << rLeftShift) & rMask) |
-				(((g >> gRightShift) << gLeftShift) & gMask) |
-				(((b >> bRightShift) << bLeftShift) & bMask) |
-				(anAlpha << 24);
-		}
-		
-		
-		mNativeAlphaData = anAlphaData;	
-	}
-
-	return mNativeAlphaData;
-}
-
-
-uchar* MemoryImage::GetRLAlphaData()
-{
-	CommitBits();
-
-	if (mRLAlphaData == NULL)
-	{
-		mRLAlphaData = new uchar[mWidth*mHeight];
-
-		if (mColorTable == NULL)
-		{
-			uint32_t* aSrcPtr;
-			if (mNativeAlphaData != NULL)
-				aSrcPtr = (uint32_t*) mNativeAlphaData;
-			else
-				aSrcPtr = GetBits();
-
-			GenerateRLAlphaData(aSrcPtr, NULL, mWidth, mHeight);
-		}
-		else
-		{
-			uchar* aSrcPtr = mColorIndices;
-			uint32_t* aColorTable = mColorTable;
-
-			GenerateRLAlphaData(aSrcPtr, aColorTable, mWidth, mHeight);
-		}
-	}
-
-	return mRLAlphaData;
-}
-
-void MemoryImage::GenerateRLAlphaData(void* aSrcPtr, uint32_t* aColorTable, int theWidth, int theHeight)
-{		
-	if (theWidth==1)
-	{
-		memset(mRLAlphaData,1,theHeight);
-	}
-	else
-	{
-		for (int aRow = 0; aRow < theHeight; aRow++)			
-		{
-			int aRCount = 1;
-			int aRLCount = 1;
-
-			int anAVal;
-			if (aColorTable == NULL)
-				anAVal = ((uint32_t*)aSrcPtr)[aRow * theWidth] >> 24;
-			else
-				anAVal = aColorTable[((uchar*)aSrcPtr)[aRow * theWidth]] >> 24;
-
-			int aLastAClass = (anAVal == 0) ? 0 : (anAVal == 255) ? 1 : 2;
-
-			while (aRCount < theWidth)
-			{				
-				if (aColorTable == NULL)
-					anAVal = ((uint32_t*)aSrcPtr)[aRow * theWidth + aRCount] >> 24;
-				else
-					anAVal = aColorTable[((uchar*)aSrcPtr)[aRow * theWidth + aRCount]] >> 24;
-
-				int aThisAClass = (anAVal == 0) ? 0 : (anAVal == 255) ? 1 : 2;
-
-				if ((aThisAClass != aLastAClass) || (aRCount == theWidth))
-				{
-					if (aThisAClass == aLastAClass)
-						aRLCount++;
-
-					for (int i = aRLCount; i > 0; i--)
-					{
-						if (i >= 255)
-							*(mRLAlphaData + aRow * theWidth + aRCount++) = 255;
-						else
-							*(mRLAlphaData + aRow * theWidth + aRCount++) = i;					
-					}
-
-					if ((aRCount == theWidth) && (aThisAClass != aLastAClass))
-						*(mRLAlphaData + aRow * theWidth + aRCount++) = 1;
-
-					aLastAClass = aThisAClass;
-					aRLCount = 1;
-				}
-				else
-				{
-					aRLCount++;
-				}
-			}
-		}
-	}
-}
-
-uchar* MemoryImage::GetRLAdditiveData(NativeDisplay *theNative)
-{
-	if (mRLAdditiveData == NULL)
-	{
-		if (mColorTable == NULL)
-		{
-			uint32_t* aBits = (uint32_t*) GetNativeAlphaData(theNative);
-
-			mRLAdditiveData = new uchar[mWidth*mHeight];
-
-			uchar* aWPtr = mRLAdditiveData;
-			uint32_t* aRPtr = aBits;
-
-			if (mWidth==1)
-			{
-				memset(aWPtr,1,mHeight);
-			}
-			else
-			{
-				for (int aRow = 0; aRow < mHeight; aRow++)			
-				{
-					int aRCount = 1;
-					int aRLCount = 1;
-					
-					int aLastAClass = (((*aRPtr++) & 0xFFFFFF) != 0) ? 1 : 0;
-
-					while (aRCount < mWidth)
-					{
-						aRCount++;				
-
-						int aThisAClass = (((*aRPtr++) & 0xFFFFFF) != 0) ? 1 : 0;				
-
-						if ((aThisAClass != aLastAClass) || (aRCount == mWidth))
-						{
-							if (aThisAClass == aLastAClass)
-								aRLCount++;
-
-							for (int i = aRLCount; i > 0; i--)
-							{
-								if (i >= 255)
-									*aWPtr++ = 255;
-								else
-									*aWPtr++ = i;
-							}					
-
-							if ((aRCount == mWidth) && (aThisAClass != aLastAClass))
-								*aWPtr++ = 1;
-
-							aLastAClass = aThisAClass;
-							aRLCount = 1;
-						}
-						else
-						{
-							aRLCount++;
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			uint32_t* aNativeColorTable = (uint32_t*) GetNativeAlphaData(theNative);
-
-			mRLAdditiveData = new uchar[mWidth*mHeight];
-
-			uchar* aWPtr = mRLAdditiveData;
-			uchar* aRPtr = mColorIndices;
-
-			if (mWidth==1)
-			{
-				memset(aWPtr,1,mHeight);
-			}
-			else
-			{
-				for (int aRow = 0; aRow < mHeight; aRow++)			
-				{
-					int aRCount = 1;
-					int aRLCount = 1;
-					
-					int aLastAClass = (((aNativeColorTable[*aRPtr++]) & 0xFFFFFF) != 0) ? 1 : 0;
-
-					while (aRCount < mWidth)
-					{
-						aRCount++;				
-
-						int aThisAClass = (((aNativeColorTable[*aRPtr++]) & 0xFFFFFF) != 0) ? 1 : 0;				
-
-						if ((aThisAClass != aLastAClass) || (aRCount == mWidth))
-						{
-							if (aThisAClass == aLastAClass)
-								aRLCount++;
-
-							for (int i = aRLCount; i > 0; i--)
-							{
-								if (i >= 255)
-									*aWPtr++ = 255;
-								else
-									*aWPtr++ = i;
-							}					
-
-							if ((aRCount == mWidth) && (aThisAClass != aLastAClass))
-								*aWPtr++ = 1;
-
-							aLastAClass = aThisAClass;
-							aRLCount = 1;
-						}
-						else
-						{
-							aRLCount++;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return mRLAdditiveData;
-}
-
 void MemoryImage::PurgeBits()
 {
 	mPurgeBits = true;
@@ -636,15 +294,6 @@ void MemoryImage::DeleteSWBuffers()
 {
 	if ((mBits == NULL) && (mColorIndices == NULL))
 		GetBits();
-	
-	delete [] mNativeAlphaData;
-	mNativeAlphaData = NULL;
-
-	delete [] mRLAdditiveData;
-	mRLAdditiveData = NULL;
-
-	delete [] mRLAlphaData;
-	mRLAlphaData = NULL;
 }
 
 void MemoryImage::Delete3DBuffers()
@@ -672,12 +321,6 @@ void MemoryImage::DeleteNativeData()
 {
 	if ((mBits == NULL) && (mColorIndices == NULL))
 		GetBits(); // We need to keep the bits around
-	
-	delete [] mNativeAlphaData;
-	mNativeAlphaData = NULL;
-
-	delete [] mRLAdditiveData;
-	mRLAdditiveData = NULL;	
 }
 
 void MemoryImage::SetBits(uint32_t* theBits, int theWidth, int theHeight, bool commitBits)
@@ -693,12 +336,11 @@ void MemoryImage::SetBits(uint32_t* theBits, int theWidth, int theHeight, bool c
 		if (theWidth != mWidth || theHeight != mHeight)
 		{
 			delete [] mBits;
-			mBits = new uint32_t[theWidth*theHeight + 1];
+			mBits = new uint32_t[theWidth*theHeight];
 			mWidth = theWidth;
 			mHeight = theHeight;
 		}
 		memcpy(mBits, theBits, mWidth*mHeight*sizeof(uint32_t));
-		mBits[mWidth*mHeight] = MEMORYCHECK_ID;
 
 		BitsChanged();
 		if (commitBits)
@@ -727,8 +369,7 @@ uint32_t* MemoryImage::GetBits()
 	{
 		int aSize = mWidth*mHeight;
 
-		mBits = new uint32_t[aSize+1];		
-		mBits[aSize] = MEMORYCHECK_ID;		
+		mBits = new uint32_t[aSize];		
 
 		if (mColorTable != NULL)
 		{
@@ -740,45 +381,6 @@ uint32_t* MemoryImage::GetBits()
 
 			delete [] mColorTable;
 			mColorTable = NULL;
-
-			delete [] mNativeAlphaData;
-			mNativeAlphaData = NULL;
-		}
-		else if (mNativeAlphaData != NULL)
-			{
-			NativeDisplay* aDisplay = nullptr;
-
-			if (aDisplay != nullptr)
-			{
-				const int rMask = aDisplay->mRedMask;
-				const int gMask = aDisplay->mGreenMask;
-				const int bMask = aDisplay->mBlueMask;
-
-				const int rLeftShift = aDisplay->mRedShift + (aDisplay->mRedBits);
-				const int gLeftShift = aDisplay->mGreenShift + (aDisplay->mGreenBits);
-				const int bLeftShift = aDisplay->mBlueShift + (aDisplay->mBlueBits);			
-
-				uint32_t* aDestPtr = mBits;
-				uint32_t* aSrcPtr = mNativeAlphaData;
-
-				int aSize = mWidth*mHeight;
-				for (int i = 0; i < aSize; i++)
-				{
-					uint32_t val = *(aSrcPtr++);
-
-					int anAlpha = val >> 24;			
-
-					uint32_t r = (((((val & rMask) << 8) / (anAlpha+1)) & rMask) << 8) >> rLeftShift;
-					uint32_t g = (((((val & gMask) << 8) / (anAlpha+1)) & gMask) << 8) >> gLeftShift;
-					uint32_t b = (((((val & bMask) << 8) / (anAlpha+1)) & bMask) << 8) >> bLeftShift;
-
-					*(aDestPtr++) = (r << 16) | (g << 8) | (b) | (anAlpha << 24);
-				}
-			}
-			else
-			{
-				memset(mBits, 0, aSize*sizeof(uint32_t));
-			}
 		}
 		else if (mD3DData == NULL || mApp == NULL)
 		{
@@ -801,7 +403,7 @@ void MemoryImage::FillRect(const Rect& theRect, const Color& theColor, int theDr
 
     SDL_FRect rect = { (float)theRect.mX, (float)theRect.mY, (float)theRect.mWidth, (float)theRect.mHeight };
     SDL_SetRenderDrawColor(Sexy::gRenderer, theColor.mRed, theColor.mGreen, theColor.mBlue, theColor.mAlpha);
-    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, theDrawMode == 0 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_ADD);
+    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, theDrawMode == 0 ? Sexy::gPremultipliedBlendMode : Sexy::gAdditiveBlendMode);
     SDL_RenderFillRectF(Sexy::gRenderer, &rect);
 
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
@@ -814,7 +416,7 @@ void MemoryImage::DrawRect(const Rect& theRect, const Color& theColor, int theDr
 
     SDL_FRect rect = { (float)theRect.mX, (float)theRect.mY, (float)theRect.mWidth, (float)theRect.mHeight };
     SDL_SetRenderDrawColor(Sexy::gRenderer, theColor.mRed, theColor.mGreen, theColor.mBlue, theColor.mAlpha);
-    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, theDrawMode == 0 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_ADD);
+    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, theDrawMode == 0 ? Sexy::gPremultipliedBlendMode : Sexy::gAdditiveBlendMode);
     SDL_RenderDrawRectF(Sexy::gRenderer, &rect);
 
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
@@ -871,7 +473,8 @@ void MemoryImage::Blt(Image* theImage, int theX, int theY, const Rect& theSrcRec
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     SDL_RenderCopyF(Sexy::gRenderer, aSrcTexture, &srcRect, &destRect);
 
@@ -897,7 +500,8 @@ void MemoryImage::BltF(Image* theImage, float theX, float theY, const Rect& theS
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
     {
@@ -929,7 +533,8 @@ void MemoryImage::BltRotated(Image* theImage, float theX, float theY, const Rect
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
     {
@@ -937,7 +542,8 @@ void MemoryImage::BltRotated(Image* theImage, float theX, float theY, const Rect
         SDL_RenderSetClipRect(Sexy::gRenderer, &clipRect);
     }
 
-    SDL_RenderCopyExF(Sexy::gRenderer, aSrcTexture, &srcRect, &destRect, theRot * 180.0 / 3.14159265358979323846, &center, SDL_FLIP_NONE);
+    static const double aRadToDeg = 180.0 / PI;
+    SDL_RenderCopyExF(Sexy::gRenderer, aSrcTexture, &srcRect, &destRect, theRot * aRadToDeg, &center, SDL_FLIP_NONE);
 
     SDL_RenderSetClipRect(Sexy::gRenderer, NULL);
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
@@ -960,7 +566,8 @@ void MemoryImage::BltMirror(Image* theImage, int theX, int theY, const Rect& the
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     SDL_RenderCopyExF(Sexy::gRenderer, aSrcTexture, &srcRect, &destRect, 0, NULL, SDL_FLIP_HORIZONTAL);
 
@@ -984,10 +591,12 @@ void MemoryImage::StretchBltMirror(Image* theImage, const Rect& theDestRect, con
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
-    {        SDL_Rect clipRect = { theClipRect.mX, theClipRect.mY, theClipRect.mWidth, theClipRect.mHeight };
+    {
+        SDL_Rect clipRect = { theClipRect.mX, theClipRect.mY, theClipRect.mWidth, theClipRect.mHeight };
         SDL_RenderSetClipRect(Sexy::gRenderer, &clipRect);
     }
 
@@ -1012,7 +621,8 @@ void MemoryImage::SlowStretchBlt(Image* theImage, const Rect& theDestRect, const
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     SDL_RenderCopyF(Sexy::gRenderer, aSrcTexture, &srcRect, &destRect);
 
@@ -1036,7 +646,8 @@ void MemoryImage::StretchBlt(Image* theImage, const Rect& theDestRect, const Rec
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
     {        SDL_Rect clipRect = { theClipRect.mX, theClipRect.mY, theClipRect.mWidth, theClipRect.mHeight };
@@ -1061,7 +672,8 @@ void MemoryImage::BltMatrix(Image* theImage, float x, float y, const SexyMatrix3
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
     {
@@ -1091,50 +703,64 @@ void MemoryImage::BltMatrix(Image* theImage, float x, float y, const SexyMatrix3
         verts[i].position.y = v.y + y;
         verts[i].tex_coord.x = pu[i];
         verts[i].tex_coord.y = pv[i];
-        verts[i].color.r = 255; verts[i].color.g = 255; verts[i].color.b = 255; verts[i].color.a = 255;
+        verts[i].color.r = theColor.mRed;
+        verts[i].color.g = theColor.mGreen;
+        verts[i].color.b = theColor.mBlue;
+        verts[i].color.a = theColor.mAlpha;
     }
 
     int indices[6] = { 0, 1, 2, 1, 2, 3 };
     SDL_RenderGeometry(Sexy::gRenderer, aSrcTexture, verts, 4, indices, 6);
 
+    if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
+    {
+        SDL_RenderSetClipRect(Sexy::gRenderer, NULL);
+    }
     SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
 }
 
-void MemoryImage::FillScanLinesWithCoverage(Span* theSpans, int theSpanCount, const Color& theColor, int theDrawMode, const BYTE* theCoverage, int theCoverX, int theCoverY, int theCoverWidth, int theCoverHeight)
+bool MemoryImage::PolyFill3D(const Point theVertices[], int theNumVertices, const Rect *theClipRect, const Color &theColor, int theDrawMode, int tx, int ty)
 {
-	(void)theDrawMode;(void)theCoverHeight;
-	uint32_t* theBits = GetBits();
-	uint32_t src = theColor.ToInt();
-	for (int i = 0; i < theSpanCount; ++i)
-	{
-		Span* aSpan = &theSpans[i];
-		int x = aSpan->mX - theCoverX;
-		int y = aSpan->mY - theCoverY;
+    if (theNumVertices < 3) return true;
 
-		uint32_t* aDestPixels = &theBits[aSpan->mY*mWidth + aSpan->mX];
-		const BYTE* aCoverBits = &theCoverage[y*theCoverWidth+x];
-		for (int w = 0; w < aSpan->mWidth; ++w)
-		{
-			int cover = *aCoverBits++ + 1;
-			int a = (cover * theColor.mAlpha) >> 8;
-			int oma;
-			uint32_t dest = *aDestPixels;
-							
-			if (a > 0)
-			{
-				int aDestAlpha = dest >> 24;
-				int aNewDestAlpha = aDestAlpha + ((255 - aDestAlpha) * a) / 255;
-				
-				a = 255 * a / aNewDestAlpha;
-				oma = 256 - a;
-				*(aDestPixels++) = (aNewDestAlpha << 24) |
-					((((dest & 0x0000FF) * oma + (src & 0x0000FF) * a) >> 8) & 0x0000FF) |
-					((((dest & 0x00FF00) * oma + (src & 0x00FF00) * a) >> 8) & 0x00FF00) |
-					((((dest & 0xFF0000) * oma + (src & 0xFF0000) * a) >> 8) & 0xFF0000);
-			}
-		}
-	}
-	BitsChanged();
+    SDL_Texture* oldTarget = SDL_GetRenderTarget(Sexy::gRenderer);
+    SDL_SetRenderTarget(Sexy::gRenderer, GetTexture());
+
+    if (theClipRect)
+    {
+        SDL_Rect aClipRect = { theClipRect->mX, theClipRect->mY, theClipRect->mWidth, theClipRect->mHeight };
+        SDL_RenderSetClipRect(Sexy::gRenderer, &aClipRect);
+    }
+
+    std::vector<SDL_Vertex> aVertices(theNumVertices);
+    for (int i = 0; i < theNumVertices; ++i)
+    {
+        aVertices[i].position.x = (float)theVertices[i].mX + tx;
+        aVertices[i].position.y = (float)theVertices[i].mY + ty;
+        aVertices[i].color.r = theColor.mRed;
+        aVertices[i].color.g = theColor.mGreen;
+        aVertices[i].color.b = theColor.mBlue;
+        aVertices[i].color.a = theColor.mAlpha;
+        aVertices[i].tex_coord.x = 0;
+        aVertices[i].tex_coord.y = 0;
+    }
+
+    int aNumTriangles = theNumVertices - 2;
+    std::vector<int> aIndices(aNumTriangles * 3);
+    for (int i = 0; i < aNumTriangles; ++i)
+    {
+        aIndices[i * 3 + 0] = 0;
+        aIndices[i * 3 + 1] = i + 1;
+        aIndices[i * 3 + 2] = i + 2;
+    }
+
+    SDL_SetRenderDrawBlendMode(Sexy::gRenderer, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_RenderGeometry(Sexy::gRenderer, NULL, aVertices.data(), (int)aVertices.size(), aIndices.data(), (int)aIndices.size());
+
+    SDL_RenderSetClipRect(Sexy::gRenderer, NULL);
+    SDL_SetRenderTarget(Sexy::gRenderer, oldTarget);
+
+    return true;
 }
 
 void MemoryImage::BltTrianglesTex(Image *theTexture, const TriVertex theVertices[][3], int theNumTriangles, const Rect& theClipRect, const Color &theColor, int theDrawMode, float tx, float ty, bool blend)
@@ -1151,7 +777,8 @@ void MemoryImage::BltTrianglesTex(Image *theTexture, const TriVertex theVertices
 
     SDL_SetTextureColorMod(aSrcTexture, theColor.mRed, theColor.mGreen, theColor.mBlue);
     SDL_SetTextureAlphaMod(aSrcTexture, theColor.mAlpha);
-    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(aSrcTexture, (theDrawMode == Graphics::DRAWMODE_ADDITIVE) ? Sexy::gAdditiveBlendMode : Sexy::gPremultipliedBlendMode);
+    SDL_SetTextureScaleMode(aSrcTexture, SDL_ScaleModeLinear);
 
     if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
     {
@@ -1219,10 +846,9 @@ bool MemoryImage::Palletize()
 	delete [] mBits;
 	mBits = nullptr;
 
-	delete [] mNativeAlphaData;
-	mNativeAlphaData = nullptr;
-
 	mWantPal = true;
 
 	return true;
 }
+
+} // namespace Sexy

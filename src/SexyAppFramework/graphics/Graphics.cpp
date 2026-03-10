@@ -10,7 +10,6 @@
 using namespace Sexy;
 
 Image GraphicsState::mStaticImage;
-const Point* Graphics::mPFPoints;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -216,331 +215,15 @@ void Graphics::DrawRect(const Rect& theRect)
 	DrawRect(theRect.mX, theRect.mY, theRect.mWidth, theRect.mHeight);
 }
 
-int Graphics::PFCompareInd(const void* u, const void* v) 
-{
-	return mPFPoints[*((int*) u)].mY <= mPFPoints[*((int*) v)].mY ? -1 : 1;
-}
-
-int Graphics::PFCompareActive(const void* u, const void* v)
-{
-	return ((Edge*) u)->mX <= ((Edge*) v)->mX ? -1 : 1;
-}
-
-void Graphics::PFDelete(int i) // remove edge i from active list
-{
-    int j;
-
-    for (j=0; j<mPFNumActiveEdges && mPFActiveEdgeList[j].i!=i; j++);    
-	if (j>=mPFNumActiveEdges) return;	/* edge not in active list; happens at aMinY*/
-    
-	mPFNumActiveEdges--;
-    memcpy(&mPFActiveEdgeList[j], &mPFActiveEdgeList[j+1], (mPFNumActiveEdges-j)*sizeof mPFActiveEdgeList[0]);
-}
-
-void Graphics::PFInsert(int i, int y) // append edge i to end of active list
-{
-    int j;
-    double dx;
-    const Point *p, *q;
-
-    j = i<mPFNumVertices-1 ? i+1 : 0;
-    if (mPFPoints[i].mY < mPFPoints[j].mY) 
-	{
-		p = &mPFPoints[i]; 
-		q = &mPFPoints[j];
-	}
-    else		   
-	{
-		p = &mPFPoints[j]; 
-		q = &mPFPoints[i];
-	}
-    /* initialize x position at intersection of edge with scanline y */
-    mPFActiveEdgeList[mPFNumActiveEdges].mDX = dx = (q->mX - p->mX)/(double) (q->mY - p->mY);
-    mPFActiveEdgeList[mPFNumActiveEdges].mX = dx*(y+0.5 - p->mY - mTransY) + p->mX + mTransX;
-    mPFActiveEdgeList[mPFNumActiveEdges].i = i;
-	mPFActiveEdgeList[mPFNumActiveEdges].b = p->mY - 1.0/dx * p->mX;
-    mPFNumActiveEdges++;
-}
-
 void Graphics::PolyFill(const Point *theVertexList, int theNumVertices, bool convex)
 {
-	if (convex && mDestImage->PolyFill3D(theVertexList,theNumVertices,&mClipRect,mColor,mDrawMode,mTransX,mTransY))
-		return;
-
-	Span aSpans[MAX_TEMP_SPANS];
-	int aSpanPos = 0;
-
-    int k, y0, y1, y, i, j, xl, xr;
-    int *ind;		/* list of vertex indices, sorted by mPFPoints[ind[j]].y */		
-
-	int aMinX = mClipRect.mX;
-	int aMaxX = mClipRect.mX + mClipRect.mWidth - 1;
-	int aMinY = mClipRect.mY;
-	int aMaxY = mClipRect.mY + mClipRect.mHeight - 1;
-
-    mPFNumVertices = theNumVertices;
-    mPFPoints = theVertexList;
-    
-	if (mPFNumVertices<=0) return;
-
-    ind = new int[mPFNumVertices];
-    mPFActiveEdgeList = new Edge[mPFNumVertices];
-
-    /* create y-sorted array of indices ind[k] into vertex list */
-    for (k=0; k<mPFNumVertices; k++)
-		ind[k] = k;
-    qsort(ind, mPFNumVertices, sizeof ind[0], PFCompareInd);	/* sort ind by mPFPoints[ind[k]].y */
-
-    mPFNumActiveEdges = 0;				/* start with empty active list */
-    k = 0;				/* ind[k] is next vertex to process */
-    y0 = std::max(aMinY, (int)ceil(mPFPoints[ind[0]].mY-0.5 + mTransY));		/* ymin of polygon */
-    y1 = std::min(aMaxY, (int)floor(mPFPoints[ind[mPFNumVertices-1]].mY-0.5 + mTransY));	/* ymax of polygon */
-
-    for (y=y0; y<=y1; y++) 
-	{
-		// step through scanlines 
-		// scanline y is at y+.5 in continuous coordinates 
-
-		// check vertices between previous scanline and current one, if any 
-		for (; (k < mPFNumVertices) && (mPFPoints[ind[k]].mY + mTransY <= y + 0.5); k++) 
-		{
-			// to simplify, if mPFPoints.mY=y+.5, pretend it's above 
-			// invariant: y-.5 < mPFPoints[i].mY <= y+.5 
-			i = ind[k];				
-			// insert or delete edges before and after vertex i (i-1 to i,
-			// and i to i+1) from active list if they cross scanline y			 
-
-			j = i>0 ? i-1 : mPFNumVertices-1;	// vertex previous to i 
-			if (mPFPoints[j].mY + mTransY <= y-0.5)	// old edge, remove from active list 
-				PFDelete(j);
-			else if (mPFPoints[j].mY + mTransY > y+0.5)	// new edge, add to active list 
-				PFInsert(j, y);
-
-			j = i<mPFNumVertices-1 ? i+1 : 0;	// vertex next after i 
-			if (mPFPoints[j].mY + mTransY <= y-0.5)	// old edge, remove from active list 
-				PFDelete(i);
-			else if (mPFPoints[j].mY + mTransY > y+0.5)	// new edge, add to active list 
-				PFInsert(i, y);
-		}
-
-		// sort active edge list by active[j].mX 
-		qsort(mPFActiveEdgeList, mPFNumActiveEdges, sizeof mPFActiveEdgeList[0], PFCompareActive);
-
-		// draw horizontal segments for scanline y 
-		for (j = 0; j < mPFNumActiveEdges; j += 2) 
-		{	// draw horizontal segments 
-			// span 'tween j & j+1 is inside, span tween j+1 & j+2 is outside 
-			xl = (int) ceil(mPFActiveEdgeList[j].mX-0.5);		// left end of span 
-			if (xl<aMinX) 
-				xl = aMinX;
-			xr = (int) floor(mPFActiveEdgeList[j+1].mX-0.5);	// right end of span 
-			if (xr>aMaxX) 
-				xr = aMaxX;
-			
-			if ((xl <= xr) && (aSpanPos < MAX_TEMP_SPANS))
-			{
-				Span* aSpan = &aSpans[aSpanPos++];
-				aSpan->mY = y;
-				aSpan->mX = xl;
-				aSpan->mWidth = xr - xl + 1;
-			}			
-			
-			mPFActiveEdgeList[j].mX += mPFActiveEdgeList[j].mDX;	// increment edge coords 
-			mPFActiveEdgeList[j+1].mX += mPFActiveEdgeList[j+1].mDX;
-		}
-	}
-
-	mDestImage->FillScanLines(aSpans, aSpanPos, mColor, mDrawMode);
-
-	delete ind;
-	delete mPFActiveEdgeList;
+	mDestImage->PolyFill3D(theVertexList, theNumVertices, &mClipRect, mColor, mDrawMode, mTransX, mTransY);
 }
 
 void Graphics::PolyFillAA(const Point *theVertexList, int theNumVertices, bool convex)
 {
-	if (convex && mDestImage->PolyFill3D(theVertexList,theNumVertices,&mClipRect,mColor,mDrawMode,mTransX,mTransY))
-		return;
-
-	int i;
-
-	Span aSpans[MAX_TEMP_SPANS];
-	int aSpanPos = 0;
-
-	static BYTE aCoverageBuffer[256*256];
-	int aCoverWidth = 256, aCoverHeight = 256; 
-	int aCoverLeft, aCoverRight, aCoverTop, aCoverBottom;
-
-	for (i = 0; i < theNumVertices; ++i)
-	{
-		const Point* aPt = &theVertexList[i];
-		if (i == 0)
-		{
-			aCoverLeft = aCoverRight = aPt->mX;
-			aCoverTop = aCoverBottom = aPt->mY;
-		}
-		else
-		{
-			aCoverLeft = std::min(aCoverLeft, aPt->mX);
-			aCoverRight = std::max(aCoverRight, aPt->mX);
-			aCoverTop = std::min(aCoverTop, aPt->mY);
-			aCoverBottom = std::max(aCoverBottom, aPt->mY);
-		}
-	}
-	BYTE* coverPtr = aCoverageBuffer;
-	if ((aCoverRight-aCoverLeft+1) > aCoverWidth || (aCoverBottom-aCoverTop+1) > aCoverHeight)
-	{
-		aCoverWidth = aCoverRight-aCoverLeft+1;
-		aCoverHeight = aCoverBottom-aCoverTop+1;
-		coverPtr = new BYTE[aCoverWidth*aCoverHeight];
-	}
-	memset(coverPtr, 0, aCoverWidth*aCoverHeight);
-
-    int k, y0, y1, y, j, xl, xr;
-    int *ind;		/* list of vertex indices, sorted by mPFPoints[ind[j]].y */		
-
-	int aMinX = mClipRect.mX;
-	int aMaxX = mClipRect.mX + mClipRect.mWidth - 1;
-	int aMinY = mClipRect.mY;
-	int aMaxY = mClipRect.mY + mClipRect.mHeight - 1;
-
-    mPFNumVertices = theNumVertices;
-    mPFPoints = theVertexList;
-    
-	if (mPFNumVertices<=0) return;
-
-    ind = new int[mPFNumVertices];
-    mPFActiveEdgeList = new Edge[mPFNumVertices];
-
-    /* create y-sorted array of indices ind[k] into vertex list */
-    for (k=0; k<mPFNumVertices; k++)
-		ind[k] = k;
-    qsort(ind, mPFNumVertices, sizeof ind[0], PFCompareInd);	/* sort ind by mPFPoints[ind[k]].y */
-
-    mPFNumActiveEdges = 0;				/* start with empty active list */
-    k = 0;				/* ind[k] is next vertex to process */
-    y0 =  std::max(aMinY, (int)ceil(mPFPoints[ind[0]].mY-0.5 + mTransY));		/* ymin of polygon */
-    y1 =  std::min(aMaxY, (int)floor(mPFPoints[ind[mPFNumVertices-1]].mY-0.5 + mTransY));	/* ymax of polygon */
-
-    for (y=y0; y<=y1; y++) 
-	{
-		// step through scanlines 
-		// scanline y is at y+.5 in continuous coordinates 
-
-		// check vertices between previous scanline and current one, if any 
-		for (; (k < mPFNumVertices) && (mPFPoints[ind[k]].mY + mTransY <= y + 0.5); k++) 
-		{
-			// to simplify, if mPFPoints.mY=y+.5, pretend it's above 
-			// invariant: y-.5 < mPFPoints[i].mY <= y+.5 
-			i = ind[k];				
-			// insert or delete edges before and after vertex i (i-1 to i,
-			// and i to i+1) from active list if they cross scanline y			 
-
-			j = i>0 ? i-1 : mPFNumVertices-1;	// vertex previous to i 
-			if (mPFPoints[j].mY + mTransY <= y-0.5)	// old edge, remove from active list 
-				PFDelete(j);
-			else if (mPFPoints[j].mY + mTransY > y+0.5)	// new edge, add to active list 
-				PFInsert(j, y);
-
-			j = i<mPFNumVertices-1 ? i+1 : 0;	// vertex next after i 
-			if (mPFPoints[j].mY + mTransY <= y-0.5)	// old edge, remove from active list 
-				PFDelete(i);
-			else if (mPFPoints[j].mY + mTransY > y+0.5)	// new edge, add to active list 
-				PFInsert(i, y);
-		}
-
-		// sort active edge list by active[j].mX 
-		qsort(mPFActiveEdgeList, mPFNumActiveEdges, sizeof mPFActiveEdgeList[0], PFCompareActive);
-
-		// draw horizontal segments for scanline y 
-		for (j = 0; j < mPFNumActiveEdges; j += 2) 
-		{	// draw horizontal segments 
-			// span 'tween j & j+1 is inside, span tween j+1 & j+2 is outside 
-			xl = (int) ceil(mPFActiveEdgeList[j].mX-0.5);		// left end of span 
-			int lErr = int((fabs((mPFActiveEdgeList[j].mX-0.5) - xl)) * 255);
-			if (xl<aMinX)
-			{
-				xl = aMinX;
-				lErr = 255;
-			}
-			xr = (int) floor(mPFActiveEdgeList[j+1].mX-0.5);	// right end of span 
-			int rErr = int((fabs((mPFActiveEdgeList[j+1].mX-0.5) - xr)) * 255);
-			if (xr>aMaxX) 
-			{
-				xr = aMaxX;
-				rErr = 255;
-			}
-			
-			if ((xl <= xr) && (aSpanPos < MAX_TEMP_SPANS))
-			{
-				Span* aSpan = &aSpans[aSpanPos++];
-				aSpan->mY = y;
-				aSpan->mX = xl;
-				aSpan->mWidth = xr - xl + 1;
-
-				BYTE* coverRow = coverPtr + (y - aCoverTop) * aCoverWidth;
-				if (xr == xl)
-				{
-					coverRow[xl-aCoverLeft] = std::min(255, coverRow[xl-aCoverLeft] + ((lErr*rErr)>>8));
-				}
-				else
-				{
-					if (fabs(mPFActiveEdgeList[j].mDX) > 1.0f) // mostly horizontal on the left edge
-					{
-						double m = 1.0 / mPFActiveEdgeList[j].mDX, 
-								b = mPFActiveEdgeList[j].b, 
-								c = fabs(mPFActiveEdgeList[j].mDX);
-						do
-						{
-							double _y =	m * xl + b;
-							lErr = std::min(255, int(fabs((_y) - y - .5) * 255));
-							coverRow[xl-aCoverLeft] = std::min(255, coverRow[xl-aCoverLeft] + lErr);
-							xl++;
-							c -= 1.0;
-						} while (xl <= xr && c > 0);
-					}
-					else
-					{
-						coverRow[xl-aCoverLeft] = std::min(255, coverRow[xl-aCoverLeft] + lErr);
-						xl++;
-					}
-
-					if (fabs(mPFActiveEdgeList[j+1].mDX) > 1.0f) // mostly horizontal on the right edge
-					{
-						double m = 1.0 / mPFActiveEdgeList[j+1].mDX, 
-								b = mPFActiveEdgeList[j+1].b, 
-								c = fabs(mPFActiveEdgeList[j+1].mDX);
-						do
-						{
-							double _y =	m * xr + b;
-							rErr = std::min(255, int(fabs((_y) - y - .5) * 255));
-							coverRow[xr-aCoverLeft] = std::min(255, coverRow[xr-aCoverLeft] + rErr);
-							xr--;
-							c -= 1.0;
-						} while (xr >= xl && c > 0);
-					}
-					else
-					{
-						coverRow[xr-aCoverLeft] = std::min(255, coverRow[xr-aCoverLeft] + rErr);
-						xr--;
-					}
-
-					if (xl <= xr)
-						memset(&coverRow[xl-aCoverLeft], 255, xr-xl+1);
-				}
-			}			
-			
-			mPFActiveEdgeList[j].mX += mPFActiveEdgeList[j].mDX;	// increment edge coords 
-			mPFActiveEdgeList[j+1].mX += mPFActiveEdgeList[j+1].mDX;
-		}
-	}
-
-	mDestImage->FillScanLinesWithCoverage(aSpans, aSpanPos, mColor, mDrawMode, coverPtr, aCoverLeft, aCoverTop, aCoverWidth, aCoverHeight);
-	
-	if (coverPtr != aCoverageBuffer) delete[] coverPtr;
-	delete[] ind;
-	delete[] mPFActiveEdgeList;
+	mDestImage->PolyFill3D(theVertexList, theNumVertices, &mClipRect, mColor, mDrawMode, mTransX, mTransY);
 }
-
 
 bool Graphics::DrawLineClipHelper(double* theStartX, double* theStartY, double* theEndX, double* theEndY)
 {
@@ -755,11 +438,21 @@ void Graphics::DrawImage(Image* theImage, const Rect& theDestRect, const Rect& t
 
 void Graphics::DrawImageF(Image* theImage, float theX, float theY)
 {
-	theX += mTransX;
-	theY += mTransY;	
-
+	float x = theX + mTransX;
+	float y = theY + mTransY;
 	Rect aSrcRect(0, 0, theImage->mWidth, theImage->mHeight);
-	mDestImage->BltF(theImage, theX, theY, aSrcRect, mClipRect, mColorizeImages ? mColor : Color::White, mDrawMode);
+	SexyMatrix3 aTransform;
+	aTransform.m00 = 1.0f;
+	aTransform.m10 = 0.0f;
+	aTransform.m20 = 0.0f;
+	aTransform.m01 = 0.0f;
+	aTransform.m11 = 1.0f;
+	aTransform.m21 = 0.0f;
+	aTransform.m02 = theImage->mWidth * 0.5f + x;
+	aTransform.m12 = theImage->mHeight * 0.5f + y;
+	aTransform.m22 = 1.0f;
+	const Color& aColor = mColorizeImages ? mColor : Color::White;
+	mDestImage->BltMatrix(theImage, -0.5f, -0.5f, aTransform, mClipRect, aColor, mDrawMode, aSrcRect, mLinearBlend);
 }
 
 void Graphics::DrawImageF(Image* theImage, float theX, float theY, const Rect& theSrcRect)
@@ -767,10 +460,20 @@ void Graphics::DrawImageF(Image* theImage, float theX, float theY, const Rect& t
 	TOD_ASSERT(theSrcRect.mX + theSrcRect.mWidth <= theImage->GetWidth());
 	TOD_ASSERT(theSrcRect.mY + theSrcRect.mHeight <= theImage->GetHeight());
 
-	theX += mTransX;
-	theY += mTransY;
-	
-	mDestImage->BltF(theImage, theX, theY, theSrcRect, mClipRect, mColorizeImages ? mColor : Color::White, mDrawMode);
+	float x = theX + mTransX;
+	float y = theY + mTransY;
+	SexyMatrix3 aTransform;
+	aTransform.m00 = 1.0f;
+	aTransform.m10 = 0.0f;
+	aTransform.m20 = 0.0f;
+	aTransform.m01 = 0.0f;
+	aTransform.m11 = 1.0f;
+	aTransform.m21 = 0.0f;
+	aTransform.m02 = theSrcRect.mWidth * 0.5f + x;
+	aTransform.m12 = theSrcRect.mHeight * 0.5f + y;
+	aTransform.m22 = 1.0f;
+	const Color& aColor = mColorizeImages ? mColor : Color::White;
+	mDestImage->BltMatrix(theImage, -0.5f, -0.5f, aTransform, mClipRect, aColor, mDrawMode, theSrcRect, mLinearBlend);
 }
 
 void Graphics::DrawImageRotated(Image* theImage, int theX, int theY, double theRot, const Rect *theSrcRect)

@@ -133,11 +133,10 @@ MemoryImage* FilterEffectCreateImage(Image* theImage, FilterEffect theFilterEffe
 	aImage->mWidth = theImage->mWidth;
 	aImage->mHeight = theImage->mHeight;
 	int aNumBits = theImage->mWidth * theImage->mHeight;
-	aImage->mBits = new uint32_t[aNumBits + 1];
+	aImage->mBits = new uint32_t[aNumBits];
 	aImage->mHasTrans = true;
 	aImage->mHasAlpha = true;
 	memset(aImage->mBits, 0, aNumBits * 4);
-	aImage->mBits[aNumBits] = Sexy::MEMORYCHECK_ID;
 
 	Graphics aMemoryGraphics(aImage);
 	aMemoryGraphics.DrawImage(theImage, 0, 0);

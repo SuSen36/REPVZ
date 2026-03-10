@@ -1,5 +1,5 @@
 #include "SexyMatrix.h"
-
+#include "GameConstants.h"
 #include <math.h>
 
 using namespace Sexy;
@@ -138,7 +138,8 @@ void SexyTransform2D::RotateRad(float rot)
 ///////////////////////////////////////////////////////////////////////////////
 void SexyTransform2D::RotateDeg(float rot)
 {
-	RotateRad(3.1415926535897932384626433832795028841971f * rot / 180.0f);
+	static const float aDegToRad = PI / 180.0f;
+	RotateRad(aDegToRad * rot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,7 +223,8 @@ void Transform::RotateRad(float rot)
 ///////////////////////////////////////////////////////////////////////////////
 void Transform::RotateDeg(float rot)
 {
-	Transform::RotateRad(3.1415926535897932384626433832795028841971f * rot / 180.0f);
+	static const float aDegToRad = PI / 180.0f;
+	Transform::RotateRad(aDegToRad * rot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -97,13 +97,12 @@ MemoryImage* ReanimatorCache::MakeBlankMemoryImage(int theWidth, int theHeight)
 	MemoryImage* aImage = new MemoryImage();
 
 	int aBitsCount = theWidth * theHeight;
-	aImage->mBits = new uint32_t[aBitsCount + 1];
+	aImage->mBits = new uint32_t[aBitsCount];
 	aImage->mWidth = theWidth;
 	aImage->mHeight = theHeight;
 	aImage->mHasTrans = true;
 	aImage->mHasAlpha = true;
 	memset(aImage->mBits, 0, aBitsCount * 4);
-	aImage->mBits[aBitsCount] = Sexy::MEMORYCHECK_ID;
 	return aImage;
 }
 

@@ -62,19 +62,9 @@ public:
 		DRAWMODE_ADDITIVE
 	};
 	
-	Edge*					mPFActiveEdgeList;
-	int						mPFNumActiveEdges;
-	static const Point*		mPFPoints;
-	int						mPFNumVertices;
-
 	GraphicsStateList		mStateStack;
 
 protected:	
-	static int				PFCompareInd(const void* u, const void* v);
-	static int				PFCompareActive(const void* u, const void* v);
-	void					PFDelete(int i); 
-	void					PFInsert(int i, int y);
-
 	void					DrawImageTransformHelper(Image* theImage, const Transform &theTransform, const Rect &theSrcRect, float x, float y, bool useFloat);
 
 public:

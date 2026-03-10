@@ -678,11 +678,6 @@ void TodDrawImageCelScaledF(Graphics* g, Image* theImageStrip, float thePosX, fl
 	int aCelWidth = theImageStrip->GetCelWidth();
 	int aCelHeight = theImageStrip->GetCelHeight();
 	Rect aSrcRect(aCelWidth * theCelCol, 0, aCelWidth, aCelHeight);
-	if (theScaleX == 1.0f && theScaleY == 1.0f)
-	{
-		g->DrawImageF(theImageStrip, thePosX, thePosY, aSrcRect);
-		return;
-	}
 
 	float aTransX = aCelWidth * 0.5f * theScaleX + thePosX + g->mTransX;
 	float aTransY = aCelHeight * 0.5f * theScaleY + thePosY + g->mTransY;
@@ -704,12 +699,6 @@ void TodDrawImageCelScaledF(Graphics* g, Image* theImageStrip, float thePosX, fl
 
 void TodDrawImageScaledF(Graphics* g, Image* theImage, float thePosX, float thePosY, float theScaleX, float theScaleY)
 {
-	if (theScaleX == 1.0f && theScaleY == 1.0f)
-	{
-		g->DrawImageF(theImage, thePosX, thePosY);
-		return;
-	}
-
 	Rect aSrcRect(0, 0, theImage->mWidth, theImage->mHeight);
 	float aTransX = theImage->mWidth * 0.5f * theScaleX + thePosX + g->mTransX;
 	float aTransY = theImage->mHeight * 0.5f * theScaleY + thePosY + g->mTransY;
@@ -731,12 +720,6 @@ void TodDrawImageScaledF(Graphics* g, Image* theImage, float thePosX, float theP
 
 void TodDrawImageCenterScaledF(Graphics* g, Image* theImage, float thePosX, float thePosY, float theScaleX, float theScaleY)
 {
-	if (theScaleX == 1.0f && theScaleY == 1.0f)
-	{
-		g->DrawImageF(theImage, thePosX, thePosY);
-		return;
-	}
-
 	Rect aSrcRect(0, 0, theImage->mWidth, theImage->mHeight);
 	float aTransX = theImage->mWidth * 0.5f + thePosX + g->mTransX;
 	float aTransY = theImage->mHeight * 0.5f + thePosY + g->mTransY;

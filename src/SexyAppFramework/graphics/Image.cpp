@@ -230,17 +230,6 @@ void Image::DrawRect(const Rect& theRect, const Color& theColor, int theDrawMode
 void Image::DrawLine(double, double, double, double, const Color&, int){}
 void Image::DrawLineAA(double, double, double, double, const Color&, int){}
 
-void Image::FillScanLines(Span* theSpans, int theSpanCount, const Color& theColor, int theDrawMode)
-{
-	for (int i = 0; i < theSpanCount; i++)
-	{
-		Span* aSpan = &theSpans[i];		
-		FillRect(Rect(aSpan->mX, aSpan->mY, aSpan->mWidth, 1), theColor, theDrawMode);		
-	}
-}
-
-
-void Image::FillScanLinesWithCoverage(Span*, int, const Color&, int, const BYTE*, int, int, int, int){}
 bool Image::PolyFill3D(const Point*, int, const Rect*, const Color&,int ,int, int)
 {
 	return false;

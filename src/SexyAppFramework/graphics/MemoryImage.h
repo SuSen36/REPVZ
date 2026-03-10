@@ -4,14 +4,8 @@
 #include "Image.h"
 #include <SDL.h>
 
-#define OPTIMIZE_SOFTWARE_DRAWING
-#ifdef OPTIMIZE_SOFTWARE_DRAWING
-#endif
-
 namespace Sexy
 {
-
-const uint32_t MEMORYCHECK_ID = 0x4BEEFADE;
 
 class NativeDisplay;
 class SexyAppBase;
@@ -34,11 +28,6 @@ public:
 	bool					mIsVolatile;
 	bool					mPurgeBits;
 	bool					mWantPal;
-	
-	uint32_t*				mNativeAlphaData;
-	uchar*					mRLAlphaData;
-	uchar*					mRLAdditiveData;	
-
 	bool					mBitsChanged;
 	SexyAppBase*			mApp;
 	
@@ -46,9 +35,6 @@ private:
 	void					Init();
 
 public:
-	virtual void*			GetNativeAlphaData(NativeDisplay *theNative);
-	virtual uchar*			GetRLAlphaData();
-	virtual uchar*			GetRLAdditiveData(NativeDisplay *theNative);
 	virtual void			PurgeBits();
 	virtual void			DeleteSWBuffers();
 	virtual void			Delete3DBuffers();	
@@ -67,12 +53,7 @@ public:
 	void					NormalDrawLine(double theStartX, double theStartY, double theEndX, double theEndY, const Color& theColor);
 	void					AdditiveDrawLine(double theStartX, double theStartY, double theEndX, double theEndY, const Color& theColor);
 
-	void					GenerateRLAlphaData(void* aSrcPtr, uint32_t* aColorTable, int theWidth, int theHeight);
-
 	void					SlowStretchBlt(Image* theImage, const Rect& theDestRect, const FRect& theSrcRect, const Color& theColor, int theDrawMode);
-
-	void					FillScanLinesWithCoverage(Span* theSpans, int theSpanCount, const Color& theColor, int theDrawMode, const BYTE* theCoverage, int theCoverX, int theCoverY, int theCoverWidth, int theCoverHeight);
-
 
 public:
 	MemoryImage();
@@ -104,6 +85,7 @@ public:
 	virtual void			SetVolatile(bool isVolatile);	
 
 	virtual bool			Palletize();
+	virtual bool			PolyFill3D(const Point theVertices[], int theNumVertices, const Rect *theClipRect, const Color &theColor, int theDrawMode, int tx, int ty);
 };
 
 }

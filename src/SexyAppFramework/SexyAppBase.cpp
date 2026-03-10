@@ -2721,22 +2721,6 @@ void SexyAppBase::RGBToHSL(const uint32_t* theSource, uint32_t* theDest, int the
 	}
 }
 
-void SexyAppBase::PrecacheAdditive(MemoryImage* theImage)
-{
-	theImage->GetRLAdditiveData(nullptr);
-}
-
-void SexyAppBase::PrecacheAlpha(MemoryImage* theImage)
-{
-	theImage->GetRLAlphaData();
-}
-
-void SexyAppBase::PrecacheNative(MemoryImage* theImage)
-{
-	theImage->GetNativeAlphaData(nullptr);
-}
-
-
 void SexyAppBase::PlaySample(int theSoundNum)
 {
 	if (!mSoundManager)

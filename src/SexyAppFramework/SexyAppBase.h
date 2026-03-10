@@ -2,6 +2,7 @@
 #define __SEXYAPPBASE_H__
 
 #include "Common.h"
+#include <SDL_blendmode.h>
 #include "SexyAppFramework/misc/Rect.h"
 #include "SexyAppFramework/graphics/Color.h"
 #include "SexyAppFramework/widget/ButtonListener.h"
@@ -23,6 +24,8 @@ namespace Sexy
 {
 
 extern SDL_Renderer* gRenderer;
+extern SDL_BlendMode gPremultipliedBlendMode;
+extern SDL_BlendMode gAdditiveBlendMode;
 
 class WidgetManager;
 class Image;
@@ -364,11 +367,8 @@ public:
 	virtual Image*			GetImage(const std::string& theFileName, bool commitBits = true);	
 	virtual SharedImageRef	SetSharedImage(const std::string& theFileName, const std::string& theVariant, Image* theImage, bool* isNew);
 	virtual SharedImageRef	GetSharedImage(const std::string& theFileName, const std::string& theVariant = "", bool* isNew = NULL);
-
 	void					CleanSharedImages();
-	void					PrecacheAdditive(MemoryImage* theImage);
-	void					PrecacheAlpha(MemoryImage* theImage);
-	void					PrecacheNative(MemoryImage* theImage);
+
 	void					SetCursorImage(int theCursorNum, Image* theImage);
 
 	Image*					CreateCrossfadeImage(Image* theImage1, const Rect& theRect1, Image* theImage2, const Rect& theRect2, double theFadeFactor);
